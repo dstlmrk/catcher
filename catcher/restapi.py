@@ -1,39 +1,31 @@
-# things.py
+#!/usr/bin/python
+# coding=utf-8
 
-# Let's get this party started
 import falcon
-from models import *
+import resources
 
+from catcher import models
 from catcher import errors
+from catcher import middleware
 
-# Falcon follows the REST architectural style, meaning (among
-# other things) that you think in terms of resources and state
-# transitions, which map to HTTP verbs.
-class ThingsResource(object):
-    def on_get(self, req, resp):
-        """Handles GET requests"""
-        resp.status = falcon.HTTP_200  # This is the default status
-        resp.body = ('\nTwo things awe me most, the starry sky '
-                     'above me and the moral law within me.\n'
-                     '\n'
-                     '    ~ Immanuel Kant\n\n')
+'''
+falcon.API instances are callable WSGI apps
 
-    def on_post(self, req, resp):
-        """Handles GET requests"""
-        resp.status = falcon.HTTP_200  # This is the default status
-        resp.body = ('\nTwo things awe me most, the starry sky '
-                     'above me and the moral law within me.\n'
-                     '\n'
-                     '    ~ Immanuel Kant\n\n')
+Each component’s process_request, process_resource, and process_response
+methods are executed hierarchically, as a stack, following the ordering of the list
+passed via the middleware kwarg of falcon.API.
+'''
+api = falcon.API(middleware=[
+    middleware.Authorization(),
+    middleware.RequireJSON(),
+    middleware.JSONTranslator(),
+])
 
-# falcon.API instances are callable WSGI apps
-app = falcon.API()
+# resources are represented by long-lived class instances
+api.add_route('/club/{id}', resources.Club(models.Club, ['shortcut', 'city', 'country']))
+api.add_route('/clubs', resources.Clubs())
 
-# Resources are represented by long-lived class instances
-things = ThingsResource()
-
-# things will handle all requests to the '/things' URL path
-app.add_route('/things', things)api.add_error_handler(Exception, errors.InternalServerError)
+api.add_error_handler(Exception, errors.InternalServerError)
 api.add_error_handler(TypeError, errors.BadRequest)
 api.add_error_handler(KeyError, errors.BadRequest)
 api.add_error_handler(models.MySQLModel.DoesNotExist, errors.NotFound)
