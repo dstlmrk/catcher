@@ -4,6 +4,7 @@
 import falcon
 from models import *
 
+from catcher import errors
 
 # Falcon follows the REST architectural style, meaning (among
 # other things) that you think in terms of resources and state
@@ -32,4 +33,7 @@ app = falcon.API()
 things = ThingsResource()
 
 # things will handle all requests to the '/things' URL path
-app.add_route('/things', things)
+app.add_route('/things', things)api.add_error_handler(Exception, errors.InternalServerError)
+api.add_error_handler(TypeError, errors.BadRequest)
+api.add_error_handler(KeyError, errors.BadRequest)
+api.add_error_handler(models.MySQLModel.DoesNotExist, errors.NotFound)
