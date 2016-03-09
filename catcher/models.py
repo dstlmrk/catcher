@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding=utf-8
+from iso3166 import countries
 
 import peewee as pw
 # import MySQLdb
@@ -9,6 +10,16 @@ db = pw.MySQLDatabase('catcher', user='', passwd='', host='localhost')
 DBNAME     = 'catcher'
 TABLE_CLUB = 'club'
 TABLE_USER = 'user'
+
+class CountryCode(pw.FixedCharField):
+    def db_value(self, value):
+        '''Check if field is country by ISO 3166-1 alpha-3'''
+        try:
+            countries.get(value)
+        except KeyError as ex:
+            raise KeyError("Country by ISO 3166-1 alpha-3 not found")
+        else:
+            return value
 
 class MySQLModel(pw.Model):
     """A base model that will use our MySQL database"""
