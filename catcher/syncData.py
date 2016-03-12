@@ -3,78 +3,149 @@
 
 import urllib2
 import sys
-from models import *
-# import MySQLdb
+import config
 
-# ID oddílu, Oddíl, ID hráče, Příjmení, Jméno
-CALD_CLUBS       = "http://archiv.cald.cz/caldMembersRecord/public/report/teams"
-CALD_CLUBS_COLS  = 5
+import models
 
-CALD_ROSTERS     = "http://archiv.cald.cz/caldMembersRecord/public/report/rosters"
-CALD_TOURNAMENTS = "http://archiv.cald.cz/caldMembersRecord/public/report/tournaments"
+class ImportFile(object):
+    def __init__(self, url, expectedCols, delimiter):
+        self.url       = url
+        self.delimiter = delimiter
+        self.html      = self._loadFile(self.url)
+        self.body      = self._getBody(self.html, expectedCols, delimiter)
 
-DBNAME     = 'catcher'
-TABLE_CLUB = 'club'
+    def _loadFile(self, url):
+        try:
+            response = urllib2.urlopen(self.url)
+            html = response.read()
+        except urllib2.URLError:
+            # TODO: doplnit vyjimku
+            sys.exit("Can't connect to %s", self.url)
+        except IOError:
+            # TODO: doplnit vyjimku
+            sys.exit("Can't open file from %s", self.url)
+        return html
 
-# # db = MySQLdb.connect(host='localhost', user='', passwd='', db='catcher')
+    def _cutHeader(self, html):
+        lines  = html.splitlines()
+        header = lines[0]
+        body   = lines[1:]
+        return (header, body)
 
-# # you must create a Cursor object. It will let
-# #  you execute all the queries you need
-# cur = db.cursor()
+    def _getBody(self, html, expectedCols, delimiter):
+        header, body = self._cutHeader(html)
+        fileCols = header.split(delimiter)
+        if fileCols != expectedCols:
+            # TODO: doplnit vyjimku
+            sys.exit("File has unexpected format")
+            # raise IOError("File has unexpected format")
+        return body
 
-# # Use all the SQL you like
-# cur.execute("SELECT * FROM YOUR_TABLE_NAME")
+class ImportClubsAndPlayers(ImportFile):
+    def __init__(self, *args):
+        super(ImportClubsAndPlayers, self).__init__(*args)
 
-# # print all the first cell of all the rows
-# for row in cur.fetchall():
-#     print row[0]
+    def _getTeam(self, line):
+        line = line.split(self.delimiter)
+        # TODO: dodelat naprostou kontrolu nad tim, ze pujde o unikatni hodnotu
+        # unique shortcut is ready for future edit
+        shortcut = (line[0] + "X" + line[1])[0:3].upper()
+        # (id club, club, unique shortcut)
+        return (line[0], line[1], shortcut)
 
-# db.close()
+    def _getPlayer(self, line):
+        line = line.split(self.delimiter)
+        # (id club, id player, firstname, lastname)
+        return (line[0], line[2], line[3], line[4])
 
-def loadFile(url):
-    try:
-        response = urllib2.urlopen(url)
-        html = response.read()
-    except URLError:
-        sys.exit("Check your internet connection")
-    except IOError:
-        sys.exit("Can't open file from %s", url)
-    return html.splitlines()
+    def _getRelation(self, line):
+        line = line.split(self.delimiter)
+        # (id club, id player)
+        return (line[0], line[2])
 
-def divideFile(lines):
-    return (lines[0], lines[1:])
 
-def checkNumberOfColumns(line, expectedNumber):
-    if  len(line.split('\t')) != expectedNumber:
-        sys.exit("File has unexpected format")
-    return True
+    def importClubs(self):
+        clubs = set()
+        for line in self.body:
+            clubs.add(self._getTeam(line))
+        
+        # if club doesn't exist, it will add them
+        newClubs = 0
+        for club in clubs:
+            try:
+                models.db.execute_sql(
+                    'INSERT INTO %s.%s (cald_id, name, shortcut) VALUES (%d, \'%s\', \'%s\');'
+                    % (models.DBNAME, models.TABLE_CLUB, int(club[0]), club[1], club[2])
+                    )
+            except models.pw.IntegrityError as e:
+                # IGNORE = duplicate rows will be not inserted
+                pass
+            else:
+                newClubs += 1
+        return newClubs
 
-def getTeam(line):
-    line = line.split('\t')
-    # unique shortcut is ready for future edit
-    shortcut = (line[0] + "X" + line[1])[0:3].upper()
-    # (id club, club, unique shortcut)
-    return (line[0], line[1], shortcut)
+    def importPlayers(self):
+        players = set()
+        for line in self.body:
+            players.add(self._getPlayer(line))
 
-def getPlayer(line):
-    line = line.split('\t')
-    # (id club, id player, firstname, lastname)
-    return (line[0], line[2], line[3], line[4])
+        newPlayers = 0
+        transfers  = 0
 
-# load cald clubs and their players
-caldPlayers = loadFile(CALD_CLUBS)
-firstLine, caldPlayers = divideFile(caldPlayers)
-checkNumberOfColumns(firstLine, CALD_CLUBS_COLS)
+        for player in players:
+            cald_club_id = int(player[0])
+            cald_id      = int(player[1])
+            lastname     = player[2]
+            firstname    = player[3]
 
-clubs = set()
-players = set()
+            try:
+                models.Player.insert(
+                    cald_club_id = cald_club_id,
+                    cald_id      = cald_id,
+                    lastname     = lastname,
+                    firstname    = firstname
+                    ).execute()
+            except models.pw.IntegrityError as ex:
+                qr = models.Player\
+                    .update(cald_club_id = cald_club_id)\
+                    .where(models.Player.cald_id==cald_id)\
+                    .execute()
+                transfers += int(qr)
+            else:
+                newPlayers += 1
 
-for line in caldPlayers:
-    clubs.add(getTeam(line))
-    players.add(getPlayer(line))
+            try:
+                player = models.Player.get(cald_id=cald_id)
+                club = models.Club.get(cald_id=cald_club_id)
+                models.ClubHasPlayer.insert(player=player, club=club).execute()
+            except models.MySQLModel.DoesNotExist as ex:
+                raise models.MySQLModel.DoesNotExist(ex)
+                continue
+            except models.pw.IntegrityError as ex:
+                # IGNORE = duplicate rows will be not inserted
+                pass
 
-# if club doesn't exist, it will add them
-for club in clubs:
-    db.execute_sql('INSERT IGNORE INTO %s.%s (cald_id,name,shortcut) VALUES (\'%s\', \'%s\', \'%s\');'
-        % (DBNAME, TABLE_CLUB, club[0], club[1], club[2])
-        )
+        return newPlayers, transfers
+
+    def importClubsAndPlayers(self):
+        newClubs               = self.importClubs()
+        newPlayers, transfers  = self.importPlayers()
+        print("Imported:\n"
+            + "- %d new clubs\n"   % (newClubs)
+            + "- %d new players\n" % (newPlayers)
+            + "- %d transfers"     % (transfers)
+            )
+
+print "1. Started"
+
+clubs = ImportClubsAndPlayers(
+    config.cald.clubs['url'],
+    config.cald.clubs['columns'],
+    config.cald.clubs['delimiter'],
+    )
+
+print "2. Loaded file"
+
+clubs.importClubsAndPlayers()
+
+print "3. Imported clubs and players"
