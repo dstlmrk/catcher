@@ -17,6 +17,7 @@ class ImportFile(object):
     def _loadFile(self, url):
         try:
             response = urllib2.urlopen(self.url)
+            print("File is downloaded")
             html = response.read()
         except urllib2.URLError:
             # TODO: doplnit vyjimku
@@ -55,88 +56,129 @@ class ImportClubsAndPlayers(ImportFile):
 
     def _getPlayer(self, line):
         line = line.split(self.delimiter)
-        # (id club, id player, firstname, lastname)
-        return (line[0], line[2], line[3], line[4])
+        # (id player, firstname, lastname)
+        return (line[2], line[3], line[4])
 
     def _getRelation(self, line):
         line = line.split(self.delimiter)
         # (id club, id player)
         return (line[0], line[2])
 
-
-    def importClubs(self):
+    def _importClubs(self):
+        '''If clubs don't exist, it will add them'''
         clubs = set()
         for line in self.body:
             clubs.add(self._getTeam(line))
-        
-        # if club doesn't exist, it will add them
+    
         newClubs = 0
         for club in clubs:
+            caldId   = int(club[0])
+            name     = club[1]
+            shortcut = club[2]
+
             try:
-                models.db.execute_sql(
-                    'INSERT INTO %s.%s (cald_id, name, shortcut) VALUES (%d, \'%s\', \'%s\');'
-                    % (models.DBNAME, models.TABLE_CLUB, int(club[0]), club[1], club[2])
-                    )
+                models.Club.insert(
+                    caldId   = caldId,
+                    name     = name,
+                    shortcut = shortcut
+                    ).execute()
             except models.pw.IntegrityError as e:
-                # IGNORE = duplicate rows will be not inserted
+                # duplicate rows will be not inserted
                 pass
             else:
                 newClubs += 1
         return newClubs
 
-    def importPlayers(self):
+    def _importPlayers(self):
+        '''If players don't exist, it will add them'''
         players = set()
         for line in self.body:
             players.add(self._getPlayer(line))
 
         newPlayers = 0
-        transfers  = 0
 
         for player in players:
-            cald_club_id = int(player[0])
-            cald_id      = int(player[1])
-            lastname     = player[2]
-            firstname    = player[3]
+            caldId    = int(player[0])
+            lastname  = player[1]
+            firstname = player[2]
 
             try:
                 models.Player.insert(
-                    cald_club_id = cald_club_id,
-                    cald_id      = cald_id,
-                    lastname     = lastname,
-                    firstname    = firstname
+                    caldId    = caldId,
+                    lastname  = lastname,
+                    firstname = firstname
                     ).execute()
             except models.pw.IntegrityError as ex:
-                qr = models.Player\
-                    .update(cald_club_id = cald_club_id)\
-                    .where(models.Player.cald_id==cald_id)\
-                    .execute()
-                transfers += int(qr)
+                # duplicate rows will be not inserted
+                pass
             else:
                 newPlayers += 1
 
+
+        return newPlayers
+
+    def _importRelations(self):
+        ''''''
+        relations = set()
+        for line in self.body:
+            relations.add(self._getRelation(line))
+
+        newRelations = 0
+
+        for relation in relations:
+            clubCaldId   = int(relation[0])
+            playerCaldId = int(relation[1])
+
             try:
-                player = models.Player.get(cald_id=cald_id)
-                club = models.Club.get(cald_id=cald_club_id)
-                models.ClubHasPlayer.insert(player=player, club=club).execute()
-            except models.MySQLModel.DoesNotExist as ex:
-                raise models.MySQLModel.DoesNotExist(ex)
+                club = models.Club.get(caldId=clubCaldId)
+                player = models.Player.get(caldId=playerCaldId)
+            except models.Club.DoesNotExist as ex:
+                print("Club %d (cald id) doesn't exist" % (clubCaldId))
                 continue
+            except models.Player.DoesNotExist as ex:
+                print("Player %d (cald id) doesn't exist" % (playerCaldId))
+                continue
+
+            try:
+                # create new relation
+                models.ClubHasPlayer.insert(
+                    club         = club,
+                    player       = player,
+                    caldRelation = False
+                    ).execute()
             except models.pw.IntegrityError as ex:
-                # IGNORE = duplicate rows will be not inserted
+                # if exists, ignore it
                 pass
 
-        return newPlayers, transfers
+            clubHasPlayer = models.ClubHasPlayer.get(club=club,player=player)
+            if not clubHasPlayer.caldRelation:
+                # somewhere exists old relation
+                models.ClubHasPlayer.update(
+                    caldRelation = False
+                ).where(
+                    player       = player,
+                    caldRelation = True
+                ).execute()
+                # set new relation
+                qr = models.ClubHasPlayer.update(
+                    caldRelation = True
+                ).where(
+                    club         = club,
+                    player       = player
+                ).execute()
+                newRelations += int(qr)
+
+        return newRelations
 
     def importClubsAndPlayers(self):
-        newClubs               = self.importClubs()
-        newPlayers, transfers  = self.importPlayers()
-        print("Imported:\n"
+        newClubs     = self._importClubs()
+        newPlayers   = self._importPlayers()
+        newRelations = self._importRelations()
+        print("Fmported:\n"
             + "- %d new clubs\n"   % (newClubs)
             + "- %d new players\n" % (newPlayers)
-            + "- %d transfers"     % (transfers)
+            + "- %d new relations" % (newRelations)
             )
-
-print "1. Started"
 
 clubs = ImportClubsAndPlayers(
     config.cald.clubs['url'],
@@ -144,8 +186,4 @@ clubs = ImportClubsAndPlayers(
     config.cald.clubs['delimiter'],
     )
 
-print "2. Loaded file"
-
 clubs.importClubsAndPlayers()
-
-print "3. Imported clubs and players"
