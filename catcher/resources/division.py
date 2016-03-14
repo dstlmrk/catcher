@@ -3,8 +3,8 @@
 
 from catcher.resource import Collection, Item
 
-class Club(Item):
+class Division(Item):
     pass
 
-class Clubs(Collection):
+class Divisions(Collection):
     pass
