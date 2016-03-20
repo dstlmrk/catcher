@@ -7,16 +7,10 @@ from playhouse.fields import ManyToManyField
 from playhouse.fields import DeferredThroughModel
 from playhouse.shortcuts import model_to_dict
 
-# Print all queries to stderr.
-import logging
-logger = logging.getLogger('peewee')
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler())
-
 # TODO: udaje nacitat z configu
 db = pw.MySQLDatabase('catcher', user='', passwd='', host='localhost')
 
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 class CountryCode(pw.FixedCharField):
     def db_value(self, value):
         '''Check if field is country by ISO 3166-1 alpha-3'''
@@ -26,7 +20,7 @@ class CountryCode(pw.FixedCharField):
             raise KeyError('Country by ISO 3166-1 alpha-3 not found')
         else:
             return value
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 class MySQLModel(pw.Model):
     """A base model that will use our MySQL database"""
 
@@ -38,11 +32,11 @@ class MySQLModel(pw.Model):
 
     class Meta:
         database = db
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 class User(MySQLModel):
     email    = pw.CharField()
     password = pw.CharField()
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 class Club(MySQLModel):
     # id       = pw.PrimaryKeyField()
     user     = pw.ForeignKeyField(User)
@@ -51,10 +45,10 @@ class Club(MySQLModel):
     shortcut = pw.FixedCharField(max_length=3)
     city     = pw.CharField()
     country  = CountryCode(max_length=3)
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 # Placeholder for the through model 
 DeferredClubHasPlayer = DeferredThroughModel()
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 class Player(MySQLModel):
     firstname = pw.CharField()
     lastname  = pw.CharField()
@@ -64,7 +58,7 @@ class Player(MySQLModel):
     caldId    = pw.IntegerField(db_column='cald_id')
     # club      = pw.ForeignKeyField(Club, related_name='received_messages')
     clubs     = ManyToManyField(Club, through_model=DeferredClubHasPlayer)
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 class ClubHasPlayer(MySQLModel):
     club         = pw.ForeignKeyField(Club)
     player       = pw.ForeignKeyField(Player)
@@ -74,19 +68,31 @@ class ClubHasPlayer(MySQLModel):
         primary_key = pw.CompositeKey('club', 'player') 
         db_table = 'club_has_player'
         # primary_key = False
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 DeferredClubHasPlayer.set_model(ClubHasPlayer)
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 class Division(MySQLModel):
     division = pw.CharField()
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 class Team(MySQLModel):
     # related_name='teams'
     club       = pw.ForeignKeyField(Club, db_column='club_id', related_name='teams')
     # related_name='divison'
     division   = pw.ForeignKeyField(Division, db_column='division_id')
     degree     = pw.FixedCharField(max_length=1)
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
+class Tournament(MySQLModel):
+    caldTournamentId = pw.IntegerField(db_column='cald_tournament_id')
+    city             = pw.CharField()
+    country          = pw.CharField()
+    division         = pw.ForeignKeyField(Division, db_column='division_id')
+    name             = pw.CharField()
+    dateStart        = pw.DateTimeField(db_column='date_start')
+    dateEnd          = pw.DateTimeField(db_column='date_end')
+    teams            = pw.IntegerField()
+    terminated       = pw.BooleanField()
+# -------------------------------------------------------------------------------------
+
 # TODO: only for deployment, in every single script I must added it
 # when you're ready to start querying, remember to connect
 db.connect()

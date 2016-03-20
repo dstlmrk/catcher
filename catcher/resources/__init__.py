@@ -8,3 +8,4 @@ from club import *
 from player import *
 from division import *
 from team import *
+from tournament import *
