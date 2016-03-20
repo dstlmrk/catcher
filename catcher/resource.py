@@ -14,7 +14,10 @@ class Item(object):
         itemDict = model_to_dict(item)
         if 'additionalList' in req.params:
             param = req.params['additionalList']
-            exec("additionalList = item.%s" % (param))
+            try:
+                exec("additionalList = item.%s" % (param))
+            except Exception, e:
+                raise Exception("Bad params in additionalList")
             subitems = []
             for subitem in additionalList:
                 print model_to_dict(subitem)

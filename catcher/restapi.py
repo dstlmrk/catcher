@@ -2,9 +2,9 @@
 # coding=utf-8
 
 import falcon
-import resources
+import resources as r
 
-from catcher import models
+from catcher import models as m
 from catcher import errors
 from catcher import middleware
 

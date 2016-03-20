@@ -70,7 +70,7 @@ class JSONTranslator(object):
         try:
             req.context['data'] = json.loads(body)
         except (ValueError, UnicodeDecodeError):
-            raise falcon.HTTPError(falcon.HTTP_753,
+            raise falcon.HTTPBadRequest(
                 'Malformed JSON',
                 'Could not decode the request body. The '
                 'JSON was incorrect or not encoded as '
