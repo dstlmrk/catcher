@@ -3,6 +3,7 @@
 
 from catcher.resource import Collection, Item
 from catcher import models as m
+from datetime import datetime
 
 class Tournament(Item):
     pass
@@ -11,6 +12,12 @@ class Tournaments(Collection):
     pass
 
 class CreateTournament(object):
+
+    def getTimestamp(self, timestamp):
+        try:
+            return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            return datetime.strptime(timestamp, "%Y-%m-%d")
 
     def checkTeams(self, teams, teamsCount, divisionId):
         seeding = set()
@@ -46,7 +53,7 @@ class CreateTournament(object):
         if len(fieldIds) != fieldsCount:
             raise ValueError("Some field is added more times than once")
 
-    def checkMatchId(self, id):
+    def checkAndReturnMatchId(self, id):
         if not isinstance(id, str):
             raise ValueError("Id of match must be string, but it's %s" % type(id))
         if not 0 < len(id) <= 3:
@@ -55,39 +62,62 @@ class CreateTournament(object):
             raise ValueError("Id of match must have alphanumeric (no numbers only) structure")
         return id
 
-    def checkMatchTimes(self, matches, datetimeFrom, dateTimeTo, fields):
-        pass
-
-    def checkMatches(self, matches, matchesCount, datetimeFrom, dateTimeTo, fields):
-        matchIds = set()
+    def checkMatchTimesAndFields(self, matches, datetimeFrom, datetimeTo, fields):
         fieldIds = set(field['id'] for field in fields)
-        print fieldIds
+        # set dict of games for each field
+        # d = dict((key, value) for (key, value) in iterable)
+        schedule = dict((field['id'], []) for field in fields)
+        # check, if all games in tournament term and times are correct
+        for match in matches:
+            timeFrom = self.getTimestamp(match['timeFrom'])
+            timeTo   = self.getTimestamp(match['timeTo'])
+            if timeFrom > timeTo:
+                raise ValueError(
+                    "Match %s has incorrect time (from is after to)" % match['matchId']
+                    )
+            if datetimeTo.date() > timeFrom.date() or timeTo.date() > datetimeTo.date():
+                raise ValueError(
+                    "Match %s has incorrect time (isn't in the tournament term)" % match['matchId']
+                    )
+            # on the field is added match
+            schedule[match['fieldId']].append((match['matchId'], timeFrom, timeTo))
+
+        # test print
+        print schedule
+
+        for matches in schedule.itervalues():
+            for match in matches:
+                print match[0], match[1], match[2]
+                # TODO: kontrola zapasu, zda se neprekryvaji casy
+
+    def checkMatches(self, matches, matchesCount, datetimeFrom, datetimeTo, fields):
+        matchIds = set()
         if len(matches) != matchesCount:
             raise ValueError("Number of matches does not match")
         if matchesCount == 0:
             raise ValueError("Tournament without matches is not allowed")
         for match in matches:
-            matchIds.add(self.checkMatchId(match['matchId']))
+            matchIds.add(self.checkAndReturnMatchId(match['matchId']))
         # check, if all matches are added only once
         if len(matchIds) != matchesCount:
             raise ValueError("Some match is added more times than once")
-
-        self.checkMatchTimes(matches, datetimeFrom, dateTimeTo, fields)
-
+        self.checkMatchTimesAndFields(matches, datetimeFrom, datetimeTo, fields)
 
     # method get is used if value can be null
     def on_post(self, req, resp):
         data = req.context['data']
 
         # base data
-        tournamentName = data['name']
-        city = data.get('city')
-        country = data.get('country')
+        tournamentName   = data['name']
+        city             = data.get('city')
+        country          = data.get('country')
         caldTournamentId = data.get('caldTournamentId')
 
-        # load time for control
-        datetimeFrom = data['datetimeFrom']
-        dateTimeTo = data['dateTimeTo']
+        # load term and check it
+        datetimeFrom = self.getTimestamp(data['datetimeFrom'])
+        datetimeTo   = self.getTimestamp(data['datetimeTo'])
+        if datetimeFrom.date() > datetimeTo.date():
+            raise ValueError("Tournament has incorrect term (from is after to)")
         
         # check, if division exists
         divisionId = data['divisionId']
@@ -109,7 +139,7 @@ class CreateTournament(object):
         # load matches
         matchesCount = data['matchesCount']
         matches      = data.get('matches')
-        self.checkMatches(matches, matchesCount, datetimeFrom, dateTimeTo, fields)
+        self.checkMatches(matches, matchesCount, datetimeFrom, datetimeTo, fields)
 
         # TODO: cela operace zapisovani do DB musi byt ATOMICKA
         req.context['result'] = tournamentName
