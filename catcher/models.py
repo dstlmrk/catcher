@@ -25,7 +25,7 @@ class MySQLModel(pw.Model):
     """A base model that will use our MySQL database"""
 
     def __str__(self):
-        # TODO: replace this private method
+    #     # TODO: replace this private method
         # return str(self._data)
         return str(model_to_dict(self))
         # return str(model_to_dict(self._data))
@@ -67,7 +67,9 @@ class ClubHasPlayer(MySQLModel):
     class Meta:
         primary_key = pw.CompositeKey('club', 'player') 
         db_table = 'club_has_player'
-        # primary_key = False
+        indexes = (
+            (('cald_relation', 'player'), True),
+        )
 # -------------------------------------------------------------------------------------
 DeferredClubHasPlayer.set_model(ClubHasPlayer)
 # -------------------------------------------------------------------------------------
@@ -84,13 +86,97 @@ class Team(MySQLModel):
 class Tournament(MySQLModel):
     caldTournamentId = pw.IntegerField(db_column='cald_tournament_id')
     city             = pw.CharField()
-    country          = pw.CharField()
+    country          = CountryCode()
     division         = pw.ForeignKeyField(Division, db_column='division_id')
     name             = pw.CharField()
-    dateStart        = pw.DateTimeField(db_column='date_start')
-    dateEnd          = pw.DateTimeField(db_column='date_end')
+    startDate        = pw.DateTimeField(db_column='start_date')
+    endDate          = pw.DateTimeField(db_column='end_date')
     teams            = pw.IntegerField()
+    active           = pw.BooleanField()
     terminated       = pw.BooleanField()
+# -------------------------------------------------------------------------------------
+class Field(MySQLModel):
+    id         = pw.IntegerField()
+    name       = pw.CharField()
+    tournament = pw.ForeignKeyField(Tournament)
+
+    class Meta:
+        indexes = (
+            (('id', 'tournament'), True),
+            (('name', 'tournament'), True),
+        )
+        # Nemuzu pouzivat, protoze bych jinak nemohl vytvaret nove zaznamy
+        # primary_key = pw.CompositeKey('id', 'tournament')
+# -------------------------------------------------------------------------------------
+class TeamAtTournament(MySQLModel):
+    seeding    = pw.IntegerField()
+    team       = pw.ForeignKeyField(Team)
+    tournament = pw.ForeignKeyField(Tournament)
+
+    class Meta:
+        db_table = 'team_at_tournament'
+        indexes = (
+            (('tournament', 'team'), True),
+        )
+        primary_key = pw.CompositeKey('team', 'tournament')
+# ------------------------------------------------------------------------------------- 
+class Identificator(MySQLModel):
+    identificator = pw.CharField(max_length=3)
+    tournament    = pw.ForeignKeyField(Tournament)
+
+    class Meta:
+        indexes = (
+            (('tournament', 'identificator'), True),
+        )
+        # Nemuzu pouzivat, protoze bych jinak nemohl vytvaret nove zaznamy
+        # primary_key = pw.CompositeKey('id', 'tournament')
+# ------------------------------------------------------------------------------------- 
+class Match(MySQLModel):
+    field               = pw.ForeignKeyField(Field)
+    description         = pw.CharField()
+    startTime           = pw.DateTimeField(db_column = 'start_time')
+    endTime             = pw.DateTimeField(db_column = 'end_time')
+    tournament          = pw.ForeignKeyField(Tournament)
+    terminated          = pw.BooleanField()
+    looserFinalStanding = pw.IntegerField(db_column = 'looser_final_standing')
+    winnerFinalStanding = pw.IntegerField(db_column = 'winner_final_standing')
+    identificator       = pw.ForeignKeyField(Identificator)
+    looserNextStep      = pw.ForeignKeyField(rel_model = Identificator,
+                                             db_column = 'looser_next_step',
+                                             related_name = 'looserIds') 
+    winnerNextStep      = pw.ForeignKeyField(rel_model = Identificator,
+                                             db_column = 'winner_next_step',
+                                             related_name = 'winnerIds')
+    # TODO: musi existovat akce, kde odstartuje turnaj a doplni tymy
+    homeSeed            = pw.IntegerField(db_column = 'home_seed')
+    awaySeed            = pw.IntegerField(db_column = 'away_seed')
+
+    flip                = pw.BooleanField()
+    scoreAway           = pw.IntegerField(db_column = 'score_away')
+    scoreHome           = pw.IntegerField(db_column = 'score_home')
+    spiritAway          = pw.IntegerField(db_column = 'spirit_away')
+    spiritHome          = pw.IntegerField(db_column = 'spirit_home')
+    awayTeam            = pw.ForeignKeyField(rel_model    = Team,
+                                             db_column    = 'away_team_id',
+                                             related_name = 'matchesAsHome')
+    homeTeam            = pw.ForeignKeyField(rel_model    = Team,
+                                             db_column    = 'home_team_id',
+                                             related_name = 'matchesAsAway')
+# -------------------------------------------------------------------------------------
+class Standing(MySQLModel):
+    standing   = pw.IntegerField()
+    team       = pw.ForeignKeyField(Team)
+    tournament = pw.ForeignKeyField(Tournament)
+
+    class Meta:
+        indexes = (
+            (('tournament', 'team', 'standing'), True),
+        )
+        primary_key = pw.CompositeKey('standing', 'team', 'tournament')
+# -------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
+
 # -------------------------------------------------------------------------------------
 
 # TODO: only for deployment, in every single script I must added it

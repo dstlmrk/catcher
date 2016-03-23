@@ -4,17 +4,23 @@
 from catcher.resource import Collection, Item
 from catcher import models as m
 from datetime import datetime
+import falcon
+from playhouse.shortcuts import model_to_dict
 
 class Tournament(Item):
     pass
+
+    @staticmethod
+    def getAsDict(model):
+        modelDict = model_to_dict(model)
+        modelDict['startDate'] = str(modelDict['startDate'])
+        modelDict['endDate']   = str(modelDict['endDate'])
+        return modelDict
 
 class Tournaments(Collection):
     pass
 
 class CreateTournament(object):
-
-    def isFinalPlacement(self, id):
-        return True if isinstance(id, int) else False
 
     def getTimestamp(self, timestamp):
         try:
@@ -22,11 +28,10 @@ class CreateTournament(object):
         except ValueError:
             return datetime.strptime(timestamp, "%Y-%m-%d")
 
-    def checkTeams(self, teams, teamsCount, divisionId):
+    def checkTeams(self, teams, divisionId):
         seeding = set()
         teamIds = set()
-        if len(teams) != teamsCount:
-            raise ValueError("Number of teams does not match")
+        teamsCount = len(teams)
         if teamsCount == 0:
             raise ValueError("Tournament without teams is not allowed")
         for team in teams:
@@ -44,10 +49,9 @@ class CreateTournament(object):
         if len(teamIds) != teamsCount:
             raise ValueError("Some team is added more times than once")
 
-    def checkFields(self, fields, fieldsCount):
+    def checkFields(self, fields):
         fieldIds = set()
-        if len(fields) != fieldsCount:
-            raise ValueError("Number of fields does not match")
+        fieldsCount = len(fields)
         if fieldsCount == 0:
             raise ValueError("Tournament without fields is not allowed")
         for field in fields:
@@ -59,18 +63,15 @@ class CreateTournament(object):
     def checkMatchId(self, id):
         if not isinstance(id, str):
             raise ValueError(
-                "Match id (%s) must be string (only final statement can be int)," \
-                " but it's %s" % (id, type(id))
+                "Match %s must be string, but it's %s" % (id, type(id))
                 )
         if not 0 < len(id) <= 3:
             raise ValueError(
-                "Match id (%s) must have structure from one to three characters" \
-                % id 
+                "Match %s must have structure from one to three characters" % id 
                 )
         if not any(c.isalpha() for c in id):
             raise ValueError(
-                "Match id (%s) must have alphanumeric (no numbers only) structure" \
-                % id
+                "Match %s must have alphanumeric structure" % id
                 )
 
     def checkMatchTimes(self, schedule):
@@ -82,89 +83,93 @@ class CreateTournament(object):
                     if otherMatch != match:
                         if otherMatch[1] <= match[1] <= otherMatch[2]:
                             raise ValueError(
-                                "Match %s is starting during match %s on the same field" \
+                                "Match %s is starting during"
+                                " match %s on the same field" \
                                 % (match[0], otherMatch[0])
                                 )
                         # check, if match isn't ending during other matches 
                         if otherMatch[1] <= match[2] <= otherMatch[2]:
                             raise ValueError(
-                                "Match %s is ending during match %s on the same field" \
+                                "Match %s is ending during"
+                                " match %s on the same field" \
                                 % (match[0], otherMatch[0])
                                 )
 
-    def checkTimesAndFields(self, matches, datetimeFrom, datetimeTo, fields):
+    def checkTimesAndFields(self, matches, startDate, endDate, fields):
         fieldIds = set(field['id'] for field in fields)
         # set dict of games for each field
         schedule = dict((field['id'], []) for field in fields)
         # check, if all games in tournament term and times are correct
         for match in matches:
-            timeFrom = self.getTimestamp(match['timeFrom'])
-            timeTo   = self.getTimestamp(match['timeTo'])
-            if timeFrom > timeTo:
+            startTime = self.getTimestamp(match['startTime'])
+            endTime   = self.getTimestamp(match['endTime'])
+            if startTime > endTime:
                 raise ValueError(
-                    "Match %s has incorrect time (from is after to)" % match['id']
+                    "Match %s has incorrect time"
+                    " (start is after end)" % match['identificator']
                     )
-            if datetimeTo.date() > timeFrom.date() or timeTo.date() > datetimeTo.date():
+            if startDate.date() > startTime.date() or endTime.date() > endDate.date():
                 raise ValueError(
-                    "Match %s has incorrect time (isn't in the tournament term)" \
-                    % match['id']
+                    "Match %s has incorrect time"
+                    " (isn't in the tournament term)" % match['identificator']
                     )
             # on the field is added match
-            schedule[match['fieldId']].append((match['id'], timeFrom, timeTo))
+            schedule[match['field']].append(
+                (match['identificator'], startTime, endTime)
+                )
         self.checkMatchTimes(schedule)
 
     def checkMatchIds(self, match):
-        # check match id
-        matchId = match.get('id')
         # matchId can be only alphanumeric (no int)
-        self.checkMatchId(matchId)
-        # check ids in play-off, it can be alphanumeric or int (final statement)
-        try:
-            winner = match['winner']
-            self.checkMatchId(winner)
-        except ValueError:
-            if not self.isFinalPlacement(winner):
-                raise ValueError("Match %s has incorrect winner" % matchId)
-        try:
-            looser = match['looser']
-            self.checkMatchId(looser)
-        except ValueError:
-            if not self.isFinalPlacement(looser):
-                raise ValueError("Match %s has incorrect looser" % matchId)
+        self.checkMatchId(match['identificator'])
+        # check ids in play-off, it can be alphanumeric
+        if match['winnerNextStep']:
+            self.checkMatchId(match['winnerNextStep'])
+        if match['looserNextStep']:
+            self.checkMatchId(match['looserNextStep'])
 
-    def checkMatches(self, matches, matchesCount, datetimeFrom, datetimeTo, fields):
+    def checkMatches(self, matches, startDate, endDate, fields):
         matchIds = set()
-        if len(matches) != matchesCount:
-            raise ValueError("Number of matches does not match")
+        matchesCount = len(matches)
         if matchesCount == 0:
             raise ValueError("Tournament without matches is not allowed")
         for match in matches:
             self.checkMatchIds(match)
-            matchIds.add(match['id'])
+            matchIds.add(match['identificator'])
+            # check, if exists way further
+            if not match.get('looserNextStep') and not match.get('looserFinalStanding'):
+                raise ValueError(
+                    "Match %s has no more way for looser" % match['identificator']
+                    )
+            if not match.get('winnerNextStep') and not match.get('winnerFinalStanding'):
+                raise ValueError(
+                    "Match %s has no more way for winner" % match['identificator']
+                    )
+
         # check, if all matches are added only once
         if len(matchIds) != matchesCount:
             raise ValueError("Some match is added more times than once")
-        self.checkTimesAndFields(matches, datetimeFrom, datetimeTo, fields)
+        self.checkTimesAndFields(matches, startDate, endDate, fields)
 
     def checkSeedings(self, matches, teamsCount):
         for match in matches:
-            seedingHome = match.get('seedingHome')
-            seedingAway = match.get('seedingAway')
+            homeSeed = match.get('homeSeed')
+            awaySeed = match.get('awaySeed')
             # check, if it's play-off game
-            if seedingHome is None and seedingAway is None:
+            if homeSeed is None and awaySeed is None:
                 continue
             # check, if seedings are out of range
-            if seedingHome is not None and not 1 <= seedingHome <= teamsCount:
+            if homeSeed is not None and not 1 <= homeSeed <= teamsCount:
                 raise ValueError(
-                    "Match %s has seeding home team out of range" % match['id']
+                    "Match %s has seeding home team out of range" % match['identificator']
                     )
-            if seedingAway is not None and not 1 <= seedingAway <= teamsCount:
+            if awaySeed is not None and not 1 <= awaySeed <= teamsCount:
                 raise ValueError(
-                    "Match %s has seeding away team out of range" % match['id']
+                    "Match %s has seeding away team out of range" % match['identificator']
                     )
             # check, if seeding are equal
-            if seedingHome == seedingAway:
-                raise ValueError("Match %s has two same teams" % match['id'])
+            if homeSeed == awaySeed:
+                raise ValueError("Match %s has two same teams" % match['identificator'])
 
     class Match(object):
         def __init__(self, id, winMatch=None, lostMatch=None, placement=None):
@@ -178,100 +183,227 @@ class CreateTournament(object):
         finalPlacements = list([x for x in range(1, len(teams) + 1)])
 
         for match in matches:
-            matchId = match['id']
-            winner  = match['winner']
-            looser  = match['looser']
+            matchId = match['identificator']
+            winnerFinalStanding  = match.get('winnerFinalStanding')
+            looserFinalStanding  = match.get('looserFinalStanding')
 
-            # if it's match with final statements, it will be saved
-            if self.isFinalPlacement(winner):
-                if not 1 <= winner <= len(matches):
-                    raise ValueError("Final statement %s is out of range" % winner)
+            # check final statements
+            if winnerFinalStanding:
+                if not 1 <= winnerFinalStanding <= len(matches):
+                    raise ValueError(
+                        "Final statement %s is out of range" \
+                        % winnerFinalStanding
+                        )
                 try:
-                    finalPlacements.remove(winner)
+                    finalPlacements.remove(winnerFinalStanding)
                 except ValueError:
-                    raise ValueError("Final statement %s is contained more than once" % winner)
-
-            if self.isFinalPlacement(looser):
-                if not 1 <= looser <= len(matches):
-                    raise ValueError("Final statement %s is out of range" % looser)
+                    raise ValueError(
+                        "Final statement %s is contained more than once" \
+                        % winnerFinalStanding
+                        )
+            if looserFinalStanding:
+                if not 1 <= looserFinalStanding <= len(matches):
+                    raise ValueError(
+                        "Final statement %s is out of range" \
+                        % looserFinalStanding
+                        )
                 try:
-                    finalPlacements.remove(looser)
+                    finalPlacements.remove(looserFinalStanding)
                 except ValueError:
-                    raise ValueError("Final statement %s is contained more than once" % looser)
+                    raise ValueError(
+                        "Final statement %s is contained more than once" \
+                        % looserFinalStanding
+                        )
 
             # check deadlock
-            if winner == matchId or looser == matchId:
+            if winnerFinalStanding == matchId or looserFinalStanding == matchId:
                 raise ValueError("Match %s has infinite loop for next process" % matchId)
 
         # final check, if all final statements are used
         if len(finalPlacements) != 0:
             raise ValueError("Final placements %s are not reachable" % finalPlacements)
 
-        # udelat strom playoff, kde nahore budou rodice
-        # s umistenim a pod nim se budou vetvit zapasy
+        # check, if all games have only two ways inwards
+        processes  = []
+        for match in matches:
+            if match['winnerNextStep']:
+                processes.append(match['winnerNextStep'])
+            if match['looserNextStep']:
+                processes.append(match['looserNextStep'])
 
-        # 1 --+ FIN +-- SE1
-        # 2 --/     \-- SE2
+        for match in matches:
+            # TODO: az budu kontrolovat i skupiny, musim je zde vyradit
+            matchId = match['identificator']
+            # if teams aren't seeded, way inwards must be here
+            if not match['homeSeed'] or not match['awaySeed']:
+                try:
+                    # twice removed because there have to be two ways  
+                    processes.remove(matchId)
+                    processes.remove(matchId)
+                except ValueError:
+                    raise ValueError("In match %s won't play two teams" % matchId)
 
-        # 3 --+ 3RD +-- SE1
-        # 4 --/     \-- SE2
+        # TODO: napsat funkce pro simulaci pruchodu turnajem, aby se zjistilo,
+        # ze nejaky tym nema sanci skoncit prvni (druhy apod.)
 
-        # {
-        # "fieldId": 1,
-        # "timeFrom": "2016-04-01T09:00:00",
-        # "timeTo": "2016-04-01T09:29:00",
-        # "seedingHome": 1,
-        # "seedingAway": 4,
-        # "winner": "FIN",
-        # "looser": "3RD",
-        # "matchId": "SE1"
-        # }
+        # TODO: popremyslet nad sofistikovanejsi kontrolou turnaje
+        # (1) --+ (FIN) +-- (SE1)
+        # (2) --/       \-- (SE2)
+
+        # (3) --+ (3RD) +-- (SE1)
+        # (4) --/       \-- (SE2)
+
+    @m.db.atomic()
+    def createTournament(self, data):
+        print "UKLADAM"
+
+        print data['endDate']
+        # Tournament
+        tournamentId = m.Tournament.insert(
+            caldTournamentId = data.get('caldTournamentId'),
+            city             = data.get('city'),
+            country          = data.get('country'),
+            division         = data['division'],
+            name             = data['name'],
+            startDate        = data['startDate'],
+            endDate          = data['endDate'],
+            teams            = data['teamsCount'],
+            active           = False,
+            terminated       = False
+            ).execute()
+
+        # Field
+        for field in data['fields']:
+            m.Field.insert(tournament = tournamentId, **field).execute()
+
+        # TeamAtTournament
+        for team in data['teams']:
+            m.TeamAtTournament.insert(
+                team       = team['id'],
+                seeding    = team['seeding'],
+                tournament = tournamentId
+                ).execute()
+
+        for match in data['matches']:
+            # Identificators
+            identificator, created = m.Identificator.get_or_create(
+                tournament    = tournamentId,
+                identificator = match['identificator']
+                )
+            winnerNextStep, created = m.Identificator.get_or_create(
+                tournament    = tournamentId,
+                identificator = match['identificator']
+                )
+            looserNextStep, created = m.Identificator.get_or_create(
+                tournament    = tournamentId,
+                identificator = match['identificator']
+                )
+
+            del match['identificator']
+            del match['winnerNextStep']
+            del match['looserNextStep']
+
+            # Match
+            m.Match.insert(
+                tournament = tournamentId,
+                identificator = identificator.id,
+                terminated = False,
+                looserNextStep = looserNextStep,
+                winnerNextStep = winnerNextStep,
+                **match
+                ).execute()
+
+        return tournamentId
 
     # method get is used if value can be null
     def on_post(self, req, resp):
 
         data = req.context['data']
 
-        # TODO: mel bych cele projet a zkontrolovat, zda sedi datove typy a nejake hodnoty nechybi,
-        # bez jakkekoliv dalsi logiky
-
-        # base data
-        tournamentName   = data['name']
-        city             = data.get('city')
-        country          = data.get('country')
-        caldTournamentId = data.get('caldTournamentId')
-
         # load term and check it
-        datetimeFrom = self.getTimestamp(data['datetimeFrom'])
-        datetimeTo   = self.getTimestamp(data['datetimeTo'])
-        if datetimeFrom.date() > datetimeTo.date():
+        startDate = self.getTimestamp(data['startDate'])
+        endDate   = self.getTimestamp(data['endDate'])
+        if startDate.date() > endDate.date():
             raise ValueError("Tournament has incorrect term (from is after to)")
         
         # check, if division exists
-        divisionId = data['divisionId']
+        divisionId = data['division']
         m.Division.get(m.Division.id == divisionId)
 
         # load and check teams
-        teamsCount = data['teamsCount']
-        teams      = data.get('teams')
-        self.checkTeams(teams, teamsCount, divisionId)
+        teams = data.get('teams')
+        self.checkTeams(teams, divisionId)
 
         # load and check fields
-        fieldsCount = data['fieldsCount']
-        fields      = data.get('fields')
-        self.checkFields(fields, fieldsCount)
+        fields = data.get('fields')
+        self.checkFields(fields)
         
         # load groups
         # TODO: nacist a zkontrolovat skupiny
 
         # load and check matches
-        matchesCount = data['matchesCount']
-        matches      = data.get('matches')
+        matches = data.get('matches')
         # TODO: nutne otestovat
-        self.checkSeedings(matches, teamsCount)
-        self.checkMatches(matches, matchesCount, datetimeFrom, datetimeTo, fields)
+        self.checkSeedings(matches, len(teams))
+        self.checkMatches(matches, startDate, endDate, fields)
         self.checkTournamentTree(matches, teams)
+ 
+        # atomic create tournament
+        tournamentId = self.createTournament(data)
 
-        # TODO: cela operace zapisovani do DB musi byt ATOMICKA
+        # for result body
+        createdTurnament = Tournament.getAsDict(m.Tournament.get(id=tournamentId))
 
-        req.context['result'] = tournamentName
+        resp.status = falcon.HTTP_201
+        req.context['result'] = createdTurnament
+
+class ActiveTournament(object):
+
+    @m.db.atomic()
+    def activeTournament(self, id):
+        tournament = m.Tournament.\
+            select(m.Tournament.teams, m.Tournament.active).\
+            where(m.Tournament.id == id).get()
+
+        if tournament.active:
+            raise ValueError("Tournament %s is already active" % id)
+
+        teams = m.TeamAtTournament.select().\
+            where(m.TeamAtTournament.tournament == id).dicts()
+
+        if len(teams) != tournament.teams:
+            raise Exception(
+                "Tournament has different number of teams"
+                " in contrast to TeamAtTournament" % matchId
+                )
+
+        # active Tournament
+        m.Tournament.update(active=True).where(m.Tournament.id==id).execute()
+
+        # Standing
+        for x in range(1, len(teams)+1):
+             m.Standing.insert(
+                tournament = id,
+                standing = x
+                ).execute()
+
+        # Matches
+        teamsAdSeeding = {}
+        for team in teams:
+            teamsAdSeeding[team['seeding']] = team['team']
+
+        matches = m.Match.select().\
+            where(
+                m.Match.tournament == 1 and \
+                (m.Match.homeSeed != None or m.Match.awaySeed != None) 
+                )
+
+        for match in matches:
+            m.Match.update(homeTeam = teamsAdSeeding[match.homeSeed]).\
+                where(m.Match.id == match.id).execute()
+
+    def on_post(self, req, resp, id):
+        self.activeTournament(id)
+        # result body
+        createdTurnament = Tournament.getAsDict(m.Tournament.get(id=id))
+        req.context['result'] = createdTurnament

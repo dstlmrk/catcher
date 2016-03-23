@@ -29,6 +29,7 @@ api = falcon.API(middleware=[
 ])
 
 # resources are represented by long-lived class instances
+# TODO: editable cols presunout nekam, kde je muzu upravovat zaroven i pro testy
 api.add_route('/club/{id}', r.Club(m.Club,['shortcut', 'city', 'country']))
 api.add_route('/clubs', r.Clubs(m.Club))
 
@@ -46,6 +47,7 @@ api.add_route('/teams', r.Teams(m.Team))
 api.add_route('/tournament/{id}', r.Tournament(m.Tournament, []))
 api.add_route('/tournaments', r.Tournaments(m.Tournament))
 api.add_route('/createTournament', r.CreateTournament())
+api.add_route('/activeTournament/{id}', r.ActiveTournament())
 
 # errors
 api.add_error_handler(Exception, errors.InternalServerError)
