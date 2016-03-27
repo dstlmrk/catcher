@@ -179,11 +179,5 @@ class Standing(MySQLModel):
         )
         primary_key = pw.CompositeKey('standing', 'team', 'tournament')
 # -------------------------------------------------------------------------------------
-
 # -------------------------------------------------------------------------------------
-
 # -------------------------------------------------------------------------------------
-
-# TODO: only for deployment, in every single script I must added it
-# when you're ready to start querying, remember to connect
-db.connect()
