@@ -2,7 +2,7 @@
 # coding=utf-8
 
 import falcon
-import simplejson as json
+import json
 import models
 import datetime
 from playhouse.shortcuts import model_to_dict
