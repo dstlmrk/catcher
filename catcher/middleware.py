@@ -4,6 +4,9 @@
 import falcon
 import simplejson as json
 import models
+import datetime
+from playhouse.shortcuts import model_to_dict
+from catcher import models
 
 class PeeweeConnection(object):
     def process_request(self, req, resp):
@@ -81,4 +84,13 @@ class JSONTranslator(object):
         # vysledky neukladam do req.context, protoze do body se muzou davat jeste jine veci
         if 'result' not in req.context:
             return
-        resp.body = json.dumps(req.context['result'])
+        resp.body = json.dumps(req.context['result'], default = self.converter)
+
+    def converter(self, obj):
+        if isinstance(obj, datetime.time) or isinstance(obj, datetime.date) or isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        if isinstance(obj, set):
+            return list(obj)
+        if isinstance(obj, models.MySQLModel):
+            return model_to_dict(obj)
+        return None

@@ -53,15 +53,16 @@ SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`club` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `user_id` INT NULL COMMENT 'Do budoucna by asi melo byt not null.',
-  `cald_id` VARCHAR(45) NULL,
+  `cald_id` INT NULL,
   `name` VARCHAR(45) NOT NULL,
-  `shortcut` VARCHAR(3) NOT NULL,
+  `shortcut` CHAR(3) NOT NULL,
   `city` VARCHAR(45) NULL,
-  `country` VARCHAR(3) NULL COMMENT 'ISO 3166-1 alpha-3\n',
+  `country` CHAR(3) NULL COMMENT 'ISO 3166-1 alpha-3\n',
   PRIMARY KEY (`id`),
   UNIQUE INDEX `shortcut_UNIQUE` (`shortcut` ASC),
   UNIQUE INDEX `name_UNIQUE` (`name` ASC),
   INDEX `fk_club_user1_idx` (`user_id` ASC),
+  UNIQUE INDEX `cald_id_UNIQUE` (`cald_id` ASC),
   CONSTRAINT `fk_club_user1`
     FOREIGN KEY (`user_id`)
     REFERENCES `catcher`.`user` (`id`)
@@ -78,13 +79,13 @@ DROP TABLE IF EXISTS `catcher`.`player` ;
 
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`player` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `firstname` VARCHAR(45) NOT NULL,
   `lastname` VARCHAR(45) NOT NULL,
   `nickname` VARCHAR(45) NULL,
-  `number` VARCHAR(45) NULL,
-  `cald_id` INT NULL,
+  `number` SMALLINT NULL,
   `ranking` FLOAT NULL,
+  `cald_id` INT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `cald_id_UNIQUE` (`cald_id` ASC))
 ENGINE = InnoDB;
@@ -143,9 +144,11 @@ SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`club_has_player` (
   `club_id` INT NOT NULL,
   `player_id` INT NOT NULL,
+  `cald_relation` TINYINT(1) NOT NULL DEFAULT FALSE,
   PRIMARY KEY (`club_id`, `player_id`),
   INDEX `fk_club_has_player_player1_idx` (`player_id` ASC),
   INDEX `fk_club_has_player_club1_idx` (`club_id` ASC),
+  UNIQUE INDEX `cald_relation_UNIQUE` (`cald_relation` ASC, `player_id` ASC),
   CONSTRAINT `fk_club_has_player_club1`
     FOREIGN KEY (`club_id`)
     REFERENCES `catcher`.`club` (`id`)
@@ -169,11 +172,13 @@ SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`tournament` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `division_id` INT NOT NULL,
-  `cald_tournament` TINYINT(1) NOT NULL,
+  `cald_tournament_id` INT NULL,
   `teams` INT NOT NULL,
+  `active` TINYINT(1) NOT NULL DEFAULT FALSE,
   `terminated` TINYINT(1) NOT NULL DEFAULT FALSE,
   `name` VARCHAR(45) NULL,
-  `start_on` DATETIME NULL,
+  `start_date` TIMESTAMP NULL,
+  `end_date` TIMESTAMP NULL,
   `city` VARCHAR(45) NULL,
   `country` VARCHAR(3) NULL,
   PRIMARY KEY (`id`),
@@ -196,10 +201,9 @@ SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`field` (
   `id` INT NOT NULL,
   `tournament_id` INT NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
+  `name` VARCHAR(45) NULL,
   PRIMARY KEY (`id`, `tournament_id`),
   INDEX `fk_field_tournament1_idx` (`tournament_id` ASC),
-  UNIQUE INDEX `name_UNIQUE` (`name` ASC, `tournament_id` ASC)  COMMENT ' /* comment truncated */ /*Na turnaji jsou ruzna hriste.*/',
   CONSTRAINT `fk_field_tournament1`
     FOREIGN KEY (`tournament_id`)
     REFERENCES `catcher`.`tournament` (`id`)
@@ -218,7 +222,7 @@ SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`team_at_tournament` (
   `tournament_id` INT NOT NULL,
   `team_id` INT NOT NULL,
-  `seeding` INT NULL,
+  `seeding` INT NOT NULL,
   PRIMARY KEY (`tournament_id`, `team_id`),
   INDEX `fk_tournament_has_team_team1_idx` (`team_id` ASC),
   INDEX `fk_tournament_has_team_tournament1_idx` (`tournament_id` ASC),
@@ -268,18 +272,18 @@ ENGINE = InnoDB;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `catcher`.`tournament_has_identificator`
+-- Table `catcher`.`identificator`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `catcher`.`tournament_has_identificator` ;
+DROP TABLE IF EXISTS `catcher`.`identificator` ;
 
 SHOW WARNINGS;
-CREATE TABLE IF NOT EXISTS `catcher`.`tournament_has_identificator` (
-  `identificator_id` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `catcher`.`identificator` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `tournament_id` INT NOT NULL,
   `identificator` VARCHAR(3) NOT NULL,
   INDEX `fk_table1_tournament1_idx` (`tournament_id` ASC),
-  PRIMARY KEY (`identificator_id`),
-  UNIQUE INDEX `identificator_UNIQUE` (`tournament_id` ASC, `identificator` ASC),
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `tournament_UNIQUE` (`tournament_id` ASC, `identificator` ASC),
   CONSTRAINT `fk_table1_tournament1`
     FOREIGN KEY (`tournament_id`)
     REFERENCES `catcher`.`tournament` (`id`)
@@ -299,44 +303,47 @@ DROP TABLE IF EXISTS `catcher`.`match` ;
 
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`match` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `tournament_id` INT NOT NULL,
   `identificator_id` INT NOT NULL,
-  `team_id_home` INT NULL,
-  `team_id_away` INT NULL,
+  `home_team_id` INT NULL,
+  `away_team_id` INT NULL,
   `field_id` INT NOT NULL,
-  `start_time` DATETIME NOT NULL,
+  `start_time` TIMESTAMP NULL,
+  `end_time` TIMESTAMP NULL,
   `terminated` TINYINT(1) NOT NULL DEFAULT FALSE,
   `score_home` TINYINT NULL,
   `score_away` TINYINT NULL,
   `spirit_away` TINYINT NULL,
   `spirit_home` TINYINT NULL,
   `description` VARCHAR(45) NULL,
-  `final_standing_winner` SMALLINT NULL,
-  `final_standing_looser` SMALLINT NULL,
+  `looser_final_standing` SMALLINT NULL,
+  `winner_final_standing` SMALLINT NULL,
   `flip` TINYINT(1) NULL COMMENT '0 - home, 1 - away',
-  `identificator_id_winner` INT NULL,
-  `identificator_id_looser` INT NULL,
+  `winner_next_step` INT NULL,
+  `looser_next_step` INT NULL,
+  `home_seed` SMALLINT NULL,
+  `away_seed` SMALLINT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_game_tournament1_idx` (`tournament_id` ASC),
-  INDEX `fk_match_team1_idx` (`team_id_home` ASC),
-  INDEX `fk_match_team2_idx` (`team_id_away` ASC),
+  INDEX `fk_match_team1_idx` (`home_team_id` ASC),
+  INDEX `fk_match_team2_idx` (`away_team_id` ASC),
   INDEX `fk_match_field1_idx` (`field_id` ASC),
   INDEX `fk_match_tournament_has_identificator1_idx` (`identificator_id` ASC),
-  INDEX `fk_match_tournament_has_identificator2_idx` (`identificator_id_winner` ASC),
-  INDEX `fk_match_tournament_has_identificator3_idx` (`identificator_id_looser` ASC),
+  INDEX `fk_match_tournament_has_identificator2_idx` (`winner_next_step` ASC),
+  INDEX `fk_match_tournament_has_identificator3_idx` (`looser_next_step` ASC),
   CONSTRAINT `fk_game_tournament1`
     FOREIGN KEY (`tournament_id`)
     REFERENCES `catcher`.`tournament` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_match_team1`
-    FOREIGN KEY (`team_id_home`)
+    FOREIGN KEY (`home_team_id`)
     REFERENCES `catcher`.`team` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_match_team2`
-    FOREIGN KEY (`team_id_away`)
+    FOREIGN KEY (`away_team_id`)
     REFERENCES `catcher`.`team` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
@@ -347,17 +354,17 @@ CREATE TABLE IF NOT EXISTS `catcher`.`match` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_match_tournament_has_identificator1`
     FOREIGN KEY (`identificator_id`)
-    REFERENCES `catcher`.`tournament_has_identificator` (`identificator_id`)
+    REFERENCES `catcher`.`identificator` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_match_tournament_has_identificator2`
-    FOREIGN KEY (`identificator_id_winner`)
-    REFERENCES `catcher`.`tournament_has_identificator` (`identificator_id`)
+    FOREIGN KEY (`winner_next_step`)
+    REFERENCES `catcher`.`identificator` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_match_tournament_has_identificator3`
-    FOREIGN KEY (`identificator_id_looser`)
-    REFERENCES `catcher`.`tournament_has_identificator` (`identificator_id`)
+    FOREIGN KEY (`looser_next_step`)
+    REFERENCES `catcher`.`identificator` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -512,7 +519,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`group` (
   INDEX `fk_group_tournament1_idx` (`tournament_id` ASC),
   CONSTRAINT `fk_group_tournament_has_identificator1`
     FOREIGN KEY (`identificator_id`)
-    REFERENCES `catcher`.`tournament_has_identificator` (`identificator_id`)
+    REFERENCES `catcher`.`identificator` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_group_tournament1`
@@ -562,7 +569,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`advancement` (
   `standing` SMALLINT NOT NULL,
   `group_id` VARCHAR(45) NOT NULL,
   `final_standing` SMALLINT NULL,
-  `identificator_id` INT NOT NULL,
+  `identificator_id` INT NULL,
   PRIMARY KEY (`standing`, `group_id`),
   INDEX `fk_advancement_group1_idx` (`group_id` ASC),
   INDEX `fk_advancement_tournament_has_identificator1_idx` (`identificator_id` ASC),
@@ -573,7 +580,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`advancement` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_advancement_tournament_has_identificator1`
     FOREIGN KEY (`identificator_id`)
-    REFERENCES `catcher`.`tournament_has_identificator` (`identificator_id`)
+    REFERENCES `catcher`.`identificator` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -588,11 +595,11 @@ DROP TABLE IF EXISTS `catcher`.`standing` ;
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`standing` (
   `tournament_id` INT NOT NULL,
-  `team_id` INT NOT NULL,
+  `team_id` INT NULL,
   `standing` SMALLINT NOT NULL,
   INDEX `fk_standings_tournament1_idx` (`tournament_id` ASC),
   INDEX `fk_standings_team1_idx` (`team_id` ASC),
-  PRIMARY KEY (`tournament_id`, `team_id`, `standing`),
+  PRIMARY KEY (`tournament_id`, `standing`),
   CONSTRAINT `fk_standings_tournament1`
     FOREIGN KEY (`tournament_id`)
     REFERENCES `catcher`.`tournament` (`id`)

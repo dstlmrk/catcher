@@ -30,24 +30,30 @@ api = falcon.API(middleware=[
 
 # resources are represented by long-lived class instances
 # TODO: editable cols presunout nekam, kde je muzu upravovat zaroven i pro testy
-api.add_route('/club/{id}', r.Club(m.Club,['shortcut', 'city', 'country']))
-api.add_route('/clubs', r.Clubs(m.Club))
+api.add_route('/api/club/{id}', r.Club(m.Club,['shortcut', 'city', 'country']))
 
-api.add_route('/player/{id}', r.Player(m.Player,
+api.add_route('/api/clubs', r.Clubs(m.Club))
+
+api.add_route('/api/player/{id}', r.Player(m.Player,
     ['firstname', 'lastname', 'nickname', 'number', 'ranking']))
-api.add_route('/players', r.Players(m.Player))
+api.add_route('/api/players', r.Players(m.Player))
 
-api.add_route('/division/{id}', r.Division(m.Division, ['division']))
-api.add_route('/divisions', r.Divisions(m.Division))
+api.add_route('/api/division/{id}', r.Division(m.Division, ['division']))
+api.add_route('/api/divisions', r.Divisions(m.Division))
 
-api.add_route('/team/{id}', r.Team(m.Team, ['divisionId', 'degree']))
-api.add_route('/teams', r.Teams(m.Team))
+api.add_route('/api/team/{id}', r.Team(m.Team, ['divisionId', 'degree']))
+api.add_route('/api/teams', r.Teams(m.Team))
 
-# TODO: dodelat
-api.add_route('/tournament/{id}', r.Tournament(m.Tournament, []))
-api.add_route('/tournaments', r.Tournaments(m.Tournament))
-api.add_route('/createTournament', r.CreateTournament())
-api.add_route('/activeTournament/{id}', r.ActiveTournament())
+# TODO: pomalu bych mel nekam psat, co ktera metoda udela.. dokumentace!
+api.add_route('/api/tournament/{id}', r.Tournament(m.Tournament, []))
+api.add_route('/api/tournaments', r.Tournaments(m.Tournament))
+api.add_route('/api/tournaments/create', r.CreateTournament())
+api.add_route('/api/tournament/{id}/active', r.ActiveTournament())
+
+api.add_route('/api/tournament/{id}/standings', r.Standings())
+
+api.add_route('/api/match/{id}', r.Match(m.Match,[]))
+api.add_route('/api/matches', r.Matches(m.Match))
 
 # errors
 api.add_error_handler(Exception, errors.InternalServerError)

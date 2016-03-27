@@ -10,15 +10,30 @@ from playhouse.shortcuts import model_to_dict
 class Tournament(Item):
     pass
 
-    @staticmethod
-    def getAsDict(model):
-        modelDict = model_to_dict(model)
-        modelDict['startDate'] = str(modelDict['startDate'])
-        modelDict['endDate']   = str(modelDict['endDate'])
-        return modelDict
-
 class Tournaments(Collection):
     pass
+
+
+class Standings(object):
+
+    def on_get(self, req, resp, id):
+        
+        tournament = m.Tournament.select(m.Tournament.active).where(m.Tournament.id==id).get()
+        if not tournament.active:
+            raise ValueError("Tournament isn't yet started")
+
+        qr = m.Standing.select().where(m.Standing.tournament==id)
+        items = []
+        for standing in qr:
+            items.append({
+                "standing": standing.standing,
+                "team": standing.team if standing.team_id else None
+                })
+        collection = {
+            'count' : len(items),
+            'items' : items
+        }
+        req.context['result'] = collection
 
 class CreateTournament(object):
 
@@ -352,7 +367,7 @@ class CreateTournament(object):
         tournamentId = self.createTournament(data)
 
         # for result body
-        createdTurnament = Tournament.getAsDict(m.Tournament.get(id=tournamentId))
+        createdTurnament = m.Tournament.get(id=tournamentId)
 
         resp.status = falcon.HTTP_201
         req.context['result'] = createdTurnament
@@ -402,8 +417,8 @@ class ActiveTournament(object):
             m.Match.update(homeTeam = teamsAdSeeding[match.homeSeed]).\
                 where(m.Match.id == match.id).execute()
 
-    def on_post(self, req, resp, id):
+    def on_put(self, req, resp, id):
         self.activeTournament(id)
         # result body
-        createdTurnament = Tournament.getAsDict(m.Tournament.get(id=id))
+        createdTurnament = m.Tournament.get(id=id)
         req.context['result'] = createdTurnament
