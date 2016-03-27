@@ -6,9 +6,14 @@ from iso3166 import countries
 from playhouse.fields import ManyToManyField
 from playhouse.fields import DeferredThroughModel
 from playhouse.shortcuts import model_to_dict
+import config
 
-# TODO: udaje nacitat z configu
-db = pw.MySQLDatabase('catcher', user='', passwd='', host='localhost')
+db = pw.MySQLDatabase(
+    config.db.login['db'],
+    user   = config.db.login['user'],
+    passwd = config.db.login['passwd'],
+    host   = config.db.login['host']
+    )
 
 # -------------------------------------------------------------------------------------
 class CountryCode(pw.FixedCharField):
