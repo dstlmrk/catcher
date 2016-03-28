@@ -9,6 +9,8 @@ start_time = time.time()
 
 import models as m
 
+m.db.connect()
+
 class ImportFile(object):
     def __init__(self, url, expectedCols, delimiter):
         self.url       = url
@@ -189,5 +191,8 @@ clubs = ImportClubsAndPlayers(
     )
 
 clubs.importClubsAndPlayers()
+
+if not m.db.is_closed():
+    m.db.close()
 
 print("= %s seconds" % (time.time() - start_time))

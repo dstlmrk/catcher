@@ -3,6 +3,8 @@
 
 import models
 
+models.db.connect()
+
 # create divisions --------------------------------
 divisions = [
     {"division": "open"},
@@ -65,5 +67,9 @@ try:
     models.Team.insert_many(teams).execute()
 except models.pw.IntegrityError as ex:
     pass
-    
-# create 10 teams ---------------------------------
+
+
+# -------------------------------------------------
+
+if not models.db.is_closed():
+    models.db.close()
