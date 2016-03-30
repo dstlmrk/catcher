@@ -12,14 +12,11 @@ build-essential
 libpcre3
 libpcre3-dev
 nginx
-libmysqlclient-dev
-percona-server-server-5.5
-
-uwsgi
-peewee
-falcon
-iso3166
-MySQL-python
+pip uwsgi
+pip peewee
+pip falcon
+pip iso3166
+pip MySQL-python
 ```
 
 ## Local deploy
