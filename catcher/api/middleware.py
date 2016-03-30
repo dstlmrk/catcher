@@ -6,7 +6,7 @@ import json
 import models
 import datetime
 from playhouse.shortcuts import model_to_dict
-from catcher import models
+# from catcher import models
 
 class PeeweeConnection(object):
     def process_request(self, req, resp):
@@ -84,7 +84,10 @@ class JSONTranslator(object):
         # vysledky neukladam do req.context, protoze do body se muzou davat jeste jine veci
         if 'result' not in req.context:
             return
+        # TODO: zjistit, co vsechno obaluje do dvojtych uvozovek
+        # print "RESULT BEFORE JSON DUMP = " + str(req.context['result'])
         resp.body = json.dumps(req.context['result'], default = self.converter)
+        # print "RESULT AFTER JSON DUMP = " + str(resp.body)
 
     def converter(self, obj):
         if isinstance(obj, datetime.time) or isinstance(obj, datetime.date) or isinstance(obj, datetime.datetime):

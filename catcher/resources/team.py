@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf-8
 
-from catcher.resource import Collection, Item
+from api.resource import Collection, Item
 
 class Team(Item):
     def on_get(self, req, resp, id):

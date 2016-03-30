@@ -2,11 +2,10 @@
 # coding=utf-8
 
 import falcon
+from api import errors
+from api import middleware
 import resources as r
-
-from catcher import models as m
-from catcher import errors
-from catcher import middleware
+import models as m
 
 # print all queries to stderr
 import logging
@@ -52,6 +51,8 @@ api.add_route('/api/tournament/{id}/active', r.ActiveTournament())
 
 api.add_route('/api/tournament/{id}/standings', r.Standings())
 
+api.add_route('/api/tournament/{id}/teams', r.TeamsAtTournament())
+
 api.add_route('/api/match/{id}', r.Match(m.Match,[]))
 api.add_route('/api/matches', r.Matches(m.Match))
 
@@ -60,5 +61,16 @@ api.add_error_handler(Exception, errors.InternalServerError)
 api.add_error_handler(TypeError, errors.BadRequest)
 api.add_error_handler(KeyError, errors.BadRequest)
 api.add_error_handler(ValueError, errors.BadRequest)
-api.add_error_handler(m.MySQLModel.DoesNotExist, errors.NotFound)
 api.add_error_handler(AttributeError, errors.BadRequest)
+api.add_error_handler(m.Club.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.User.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.Player.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.ClubHasPlayer.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.Division.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.Team.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.Tournament.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.Field.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.TeamAtTournament.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.Identificator.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.Match.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.Standing.DoesNotExist, errors.NotFound)

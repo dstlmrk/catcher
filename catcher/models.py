@@ -124,6 +124,11 @@ class TeamAtTournament(MySQLModel):
             (('tournament', 'team'), True),
         )
         primary_key = pw.CompositeKey('team', 'tournament')
+
+    # TODO: MAGICKE METODY
+    # TODO: zkusit se podivat, jak by se daly ziskavat jednotlive objekty a jake data k nim
+    # def __getitem__(self, obj):
+        # return "XXX"
 # ------------------------------------------------------------------------------------- 
 class Identificator(MySQLModel):
     identificator = pw.CharField(max_length=3)

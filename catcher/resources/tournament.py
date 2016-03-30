@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # coding=utf-8
 
-from catcher.resource import Collection, Item
-from catcher import models as m
+from api.resource import Collection, Item
+import models as m
 from datetime import datetime
 import falcon
 from playhouse.shortcuts import model_to_dict
@@ -29,6 +29,19 @@ class Standings(object):
                 "standing": standing.standing,
                 "team": standing.team if standing.team_id else None
                 })
+        collection = {
+            'count' : len(items),
+            'items' : items
+        }
+        req.context['result'] = collection
+
+class TeamsAtTournament(object):
+
+    def on_get(self, req, resp, id):
+        teams = m.TeamAtTournament.select().where(m.TeamAtTournament.tournament==id)
+        items = []
+        for team in teams:
+            items.append(team.team)
         collection = {
             'count' : len(items),
             'items' : items
@@ -76,7 +89,7 @@ class CreateTournament(object):
             raise ValueError("Some field is added more times than once")
 
     def checkMatchId(self, id):
-        if not isinstance(id, str):
+        if not isinstance(id, str) and not isinstance(id, unicode):
             raise ValueError(
                 "Match %s must be string, but it's %s" % (id, type(id))
                 )
