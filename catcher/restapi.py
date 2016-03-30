@@ -43,18 +43,28 @@ api.add_route('/api/divisions', r.Divisions(m.Division))
 api.add_route('/api/team/{id}', r.Team(m.Team, ['divisionId', 'degree']))
 api.add_route('/api/teams', r.Teams(m.Team))
 
-# TODO: pomalu bych mel nekam psat, co ktera metoda udela.. dokumentace!
-api.add_route('/api/tournament/{id}', r.Tournament(m.Tournament, []))
+# informace o konkretnim turnaji
+api.add_route('/api/tournament/{tournamentId}', r.Tournament(m.Tournament, []))
+# seznam vsech turnaju
 api.add_route('/api/tournaments', r.Tournaments(m.Tournament))
+# vytvori kompletni turnaj
 api.add_route('/api/tournaments/create', r.CreateTournament())
-api.add_route('/api/tournament/{id}/active', r.ActiveTournament())
-
-api.add_route('/api/tournament/{id}/standings', r.Standings())
-
-api.add_route('/api/tournament/{id}/teams', r.TeamsAtTournament())
-
+# ativuje turnaj
+api.add_route('/api/tournament/{tournamentId}/active', r.ActiveTournament())
+# u aktivnich nebo jiz skoncenych turnaju vrati poradi na turnaji
+api.add_route('/api/tournament/{tournamentId}/standings', r.Standings())
+# vrati seznam tymu na turnaji
+# TODO: asi bych mohl vracet vcetne soupisek
+api.add_route('/api/tournament/{tournamentId}/teams', r.TeamsAtTournament())
+# informace o zapase
 api.add_route('/api/match/{id}', r.Match(m.Match,[]))
+# ukonci zapas
+api.add_route('/api/match/{id}/terminate', r.TerminateMatch)
+# seznam vsech zapasu
 api.add_route('/api/matches', r.Matches(m.Match))
+
+# manipulace s hracem na turnaji
+api.add_route('/api/tournament/{tournamentId}/team/{teamId}/player/{playerId}', r.PlayerAtTournament())
 
 # errors
 api.add_error_handler(Exception, errors.InternalServerError)
@@ -74,3 +84,4 @@ api.add_error_handler(m.TeamAtTournament.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.Identificator.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.Match.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.Standing.DoesNotExist, errors.NotFound)
+api.add_error_handler(m.PlayerAtTournament.DoesNotExist, errors.NotFound)

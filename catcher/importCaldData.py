@@ -4,14 +4,10 @@
 import urllib2
 import sys, time
 import config
-
-start_time = time.time()
-
 import models as m
 
-m.db.connect()
-
 class ImportFile(object):
+
     def __init__(self, url, expectedCols, delimiter):
         self.url       = url
         self.delimiter = delimiter
@@ -46,9 +42,73 @@ class ImportFile(object):
             # raise IOError("File has unexpected format")
         return body
 
-class ImportClubsAndPlayers(ImportFile):
+class Rosters(ImportFile):
+
     def __init__(self, *args):
-        super(ImportClubsAndPlayers, self).__init__(*args)
+        super(Rosters, self).__init__(*args)
+
+    @m.db.atomic()
+    def _importRosters(self):
+        pass
+        # TODO: only for development
+        # with open('/home/marek/Dokumenty/bp/rosters') as f:
+        #     self.body = f.read()
+        # header, self.body = self._cutHeader(self.body)
+        # only for development
+
+    def importData(self):
+        pass
+
+class Tournaments(ImportFile):
+
+    def __init__(self, *args):
+        super(Tournaments, self).__init__(*args)
+
+    def _getTournament(self, line):
+        line = line.split(self.delimiter)
+        # (id tournament, name, place, date)
+        return (line[0], line[1], line[2], line[3])
+
+    @m.db.atomic()
+    def _importTournaments(self):
+        # # TODO: only for development
+        # with open('/home/marek/Dokumenty/bp/tournaments') as f:
+        #     self.body = f.read()
+        # header, self.body = self._cutHeader(self.body)
+        # # only for development
+        tournaments = set()
+        for line in self.body:
+            tournaments.add(self._getTournament(line))
+
+        newTournaments = 0
+        for tournament in tournaments:
+
+            data = {
+                'id'    : tournament[0],
+                'name'  : tournament[1],
+                'place' : tournament[2],
+                'date'  : tournament[3]
+            }
+
+            try:
+                m.CaldTournament.insert(**data).execute()
+            except m.pw.IntegrityError as e:
+                # duplicate rows will be not inserted
+                pass
+            else:
+                newTournaments += 1
+        return newTournaments
+
+    def importData(self):
+        newTournaments = self._importTournaments()
+        print("Imported:\n"
+            + "- %d new tournaments\n" % (newTournaments)
+            )
+
+class ClubsAndPlayers(ImportFile):
+
+    def __init__(self, *args):
+        super(ClubsAndPlayers, self).__init__(*args)
 
     def _getTeam(self, line):
         line = line.split(self.delimiter)
@@ -68,6 +128,7 @@ class ImportClubsAndPlayers(ImportFile):
         # (id club, id player)
         return (line[0], line[2])
 
+    @m.db.atomic()
     def _importClubs(self):
         '''If clubs don't exist, it will add them'''
         clubs = set()
@@ -93,6 +154,7 @@ class ImportClubsAndPlayers(ImportFile):
                 newClubs += 1
         return newClubs
 
+    @m.db.atomic()
     def _importPlayers(self):
         '''If players don't exist, it will add them'''
         players = set()
@@ -121,8 +183,8 @@ class ImportClubsAndPlayers(ImportFile):
 
         return newPlayers
 
+    @m.db.atomic()
     def _importRelations(self):
-        ''''''
         relations = set()
         for line in self.body:
             relations.add(self._getRelation(line))
@@ -174,7 +236,7 @@ class ImportClubsAndPlayers(ImportFile):
 
         return newRelations
 
-    def importClubsAndPlayers(self):
+    def importData(self):
         newClubs     = self._importClubs()
         newPlayers   = self._importPlayers()
         newRelations = self._importRelations()
@@ -184,15 +246,31 @@ class ImportClubsAndPlayers(ImportFile):
             + "- %d new relations" % (newRelations)
             )
 
-clubs = ImportClubsAndPlayers(
-    config.cald.clubs['url'],
-    config.cald.clubs['columns'],
-    config.cald.clubs['delimiter'],
-    )
 
-clubs.importClubsAndPlayers()
+if __name__ == "__main__":
 
-if not m.db.is_closed():
-    m.db.close()
+    start_time = time.time()
+    m.db.connect()
 
-print("= %s seconds" % (time.time() - start_time))
+    clubs = ClubsAndPlayers(
+        config.cald.clubs['url'],
+        config.cald.clubs['columns'],
+        config.cald.clubs['delimiter']
+        ).importData()
+
+    tournaments = Tournaments(
+        config.cald.tournaments['url'],
+        config.cald.tournaments['columns'],
+        config.cald.tournaments['delimiter']
+        ).importData()
+
+    rosters = Rosters(
+        config.cald.rosters['url'],
+        config.cald.rosters['columns'],
+        config.cald.rosters['delimiter']
+        ).importData()
+
+    if not m.db.is_closed():
+        m.db.close()
+
+    print("= %s seconds" % (time.time() - start_time))

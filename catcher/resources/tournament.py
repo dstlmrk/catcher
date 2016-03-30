@@ -16,13 +16,13 @@ class Tournaments(Collection):
 
 class Standings(object):
 
-    def on_get(self, req, resp, id):
+    def on_get(self, req, resp, tournamentId):
         
-        tournament = m.Tournament.select(m.Tournament.active).where(m.Tournament.id==id).get()
-        if not tournament.active:
-            raise ValueError("Tournament isn't yet started")
+        tournament = m.Tournament.select(m.Tournament.active, m.Tournament.terminated).where(m.Tournament.id==tournamentId).get()
+        if not tournament.active and not tournament.terminated:
+            raise ValueError("Tournament hasn't any standings")
 
-        qr = m.Standing.select().where(m.Standing.tournament==id)
+        qr = m.Standing.select().where(m.Standing.tournament==tournamentId)
         items = []
         for standing in qr:
             items.append({
@@ -37,8 +37,8 @@ class Standings(object):
 
 class TeamsAtTournament(object):
 
-    def on_get(self, req, resp, id):
-        teams = m.TeamAtTournament.select().where(m.TeamAtTournament.tournament==id)
+    def on_get(self, req, resp, tournamentId):
+        teams = m.TeamAtTournament.select().where(m.TeamAtTournament.tournament==tournamentId)
         items = []
         for team in teams:
             items.append(team.team)
@@ -288,14 +288,14 @@ class CreateTournament(object):
         print data['endDate']
         # Tournament
         tournamentId = m.Tournament.insert(
-            caldTournamentId = data.get('caldTournamentId'),
+            caldTournament   = data.get('caldTournament'),
             city             = data.get('city'),
             country          = data.get('country'),
             division         = data['division'],
             name             = data['name'],
             startDate        = data['startDate'],
             endDate          = data['endDate'],
-            teams            = data['teamsCount'],
+            teams            = len(data['teams']),
             active           = False,
             terminated       = False
             ).execute()
@@ -388,13 +388,13 @@ class CreateTournament(object):
 class ActiveTournament(object):
 
     @m.db.atomic()
-    def activeTournament(self, id):
+    def activeTournament(self, tournamentId):
         tournament = m.Tournament.\
             select(m.Tournament.teams, m.Tournament.active).\
-            where(m.Tournament.id == id).get()
+            where(m.Tournament.id == tournamentId).get()
 
         if tournament.active:
-            raise ValueError("Tournament %s is already active" % id)
+            raise ValueError("Tournament %s is already active" % tournamentId)
 
         teams = m.TeamAtTournament.select().\
             where(m.TeamAtTournament.tournament == id).dicts()
@@ -406,12 +406,12 @@ class ActiveTournament(object):
                 )
 
         # active Tournament
-        m.Tournament.update(active=True).where(m.Tournament.id==id).execute()
+        m.Tournament.update(active=True).where(m.Tournament.id==tournamentId).execute()
 
         # Standing
         for x in range(1, len(teams)+1):
              m.Standing.insert(
-                tournament = id,
+                tournament = tournamentId,
                 standing = x
                 ).execute()
 
@@ -430,8 +430,8 @@ class ActiveTournament(object):
             m.Match.update(homeTeam = teamsAdSeeding[match.homeSeed]).\
                 where(m.Match.id == match.id).execute()
 
-    def on_put(self, req, resp, id):
-        self.activeTournament(id)
+    def on_put(self, req, resp, tournamentId):
+        self.activeTournament(tournamentId)
         # result body
-        createdTurnament = m.Tournament.get(id=id)
+        createdTurnament = m.Tournament.get(id=tournamentId)
         req.context['result'] = createdTurnament

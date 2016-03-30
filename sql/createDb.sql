@@ -164,6 +164,22 @@ ENGINE = InnoDB;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
+-- Table `catcher`.`cald_tournament`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `catcher`.`cald_tournament` ;
+
+SHOW WARNINGS;
+CREATE TABLE IF NOT EXISTS `catcher`.`cald_tournament` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(45) NOT NULL,
+  `place` VARCHAR(45) NULL,
+  `date` TIMESTAMP NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
 -- Table `catcher`.`tournament`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `catcher`.`tournament` ;
@@ -172,7 +188,6 @@ SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`tournament` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `division_id` INT NOT NULL,
-  `cald_tournament_id` INT NULL,
   `teams` INT NOT NULL,
   `active` TINYINT(1) NOT NULL DEFAULT FALSE,
   `terminated` TINYINT(1) NOT NULL DEFAULT FALSE,
@@ -181,11 +196,18 @@ CREATE TABLE IF NOT EXISTS `catcher`.`tournament` (
   `end_date` TIMESTAMP NULL,
   `city` VARCHAR(45) NULL,
   `country` VARCHAR(3) NULL,
+  `cald_tournament_id` INT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_tournament_category1_idx` (`division_id` ASC),
+  INDEX `fk_tournament_cald_tournament1_idx` (`cald_tournament_id` ASC),
   CONSTRAINT `fk_tournament_category1`
     FOREIGN KEY (`division_id`)
     REFERENCES `catcher`.`division` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_tournament_cald_tournament1`
+    FOREIGN KEY (`cald_tournament_id`)
+    REFERENCES `catcher`.`cald_tournament` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -250,10 +272,10 @@ CREATE TABLE IF NOT EXISTS `catcher`.`player_at_tournament` (
   `tournament_id` INT NOT NULL,
   `team_id` INT NOT NULL,
   `player_id` INT NOT NULL,
-  `assists` VARCHAR(45) NOT NULL DEFAULT 0,
-  `scores` VARCHAR(45) NOT NULL DEFAULT 0,
-  `total` VARCHAR(45) NOT NULL DEFAULT 0,
-  `matches` VARCHAR(45) NOT NULL DEFAULT 0,
+  `assists` SMALLINT NOT NULL DEFAULT 0,
+  `scores` SMALLINT NOT NULL DEFAULT 0,
+  `total` SMALLINT NOT NULL DEFAULT 0,
+  `matches` SMALLINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`tournament_id`, `team_id`, `player_id`),
   INDEX `fk_tournament_has_team_has_player_player1_idx` (`player_id` ASC),
   INDEX `fk_tournament_has_team_has_player_tournament_has_team1_idx` (`tournament_id` ASC, `team_id` ASC),

@@ -5,7 +5,10 @@ import falcon
 import traceback
 
 def NotFound(ex, req, resp, params):
-	raise falcon.HTTPNotFound()
+	raise falcon.HTTPNotFound(
+		title       = "Not Found",
+		description = "Instance matching query does not exist"
+		)
 
 def BadRequest(ex, req, resp, params):
 	traceback.print_exc()

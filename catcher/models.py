@@ -87,9 +87,27 @@ class Team(MySQLModel):
     # related_name='divison'
     division   = pw.ForeignKeyField(Division, db_column='division_id')
     degree     = pw.FixedCharField(max_length=1)
+
+    # def __str__(self):
+    #     return str({
+    #         'id'      : self.id,
+    #         'clubId'  : self.club_id,
+    #         'division': model_to_dict(self.division),
+    #         'degree'  : self.degree,
+    #         'name'    : self.club.name + " " + self.degree
+    #         })
+# -------------------------------------------------------------------------------------
+class CaldTournament(MySQLModel):
+    id    = pw.PrimaryKeyField()
+    name  = pw.CharField()
+    place = pw.CharField()
+    date  = pw.DateTimeField()
+
+    class Meta:
+        db_table = 'cald_tournament'
 # -------------------------------------------------------------------------------------
 class Tournament(MySQLModel):
-    caldTournamentId = pw.IntegerField(db_column='cald_tournament_id')
+    caldTournament   = pw.ForeignKeyField(CaldTournament, db_column='cald_tournament_id')
     city             = pw.CharField()
     country          = CountryCode()
     division         = pw.ForeignKeyField(Division, db_column='division_id')
@@ -184,5 +202,18 @@ class Standing(MySQLModel):
         )
         primary_key = pw.CompositeKey('standing', 'team', 'tournament')
 # -------------------------------------------------------------------------------------
+class PlayerAtTournament(MySQLModel):
+    assists    = pw.IntegerField()
+    matches    = pw.IntegerField()
+    scores     = pw.IntegerField()
+    total      = pw.IntegerField()
+    player     = pw.ForeignKeyField(Player)
+    team       = pw.ForeignKeyField(Team)
+    tournament = pw.ForeignKeyField(Tournament)
+
+    class Meta:
+        db_table = 'player_at_tournament'
+        primary_key = False
+        # primary_key = CompositeKey('player', 'team', 'tournament')
 # -------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------
