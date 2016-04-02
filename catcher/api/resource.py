@@ -30,8 +30,8 @@ class Item(object):
     def on_put(self, req, resp, id):
         requestJson = req.context['data']
         params = { key : requestJson[key] for key in requestJson if key in self.editableCols}
-        qr = models.Club.update(**params).where(models.Club.id==id).execute()
-        req.context['result'] = models.Club.select().where(models.Club.id==id).dicts().get()
+        qr = self.model.update(**params).where(self.model.id==id).execute()
+        req.context['result'] = self.model.select().where(self.model.id==id).dicts().get()
         resp.status = falcon.HTTP_201 if qr else falcon.HTTP_304
 
     def on_delete(self, req, resp, id):
