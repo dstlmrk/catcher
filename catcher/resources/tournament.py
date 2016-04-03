@@ -3,9 +3,163 @@
 
 from api.resource import Collection, Item
 import models as m
-from datetime import datetime
-import falcon
-from playhouse.shortcuts import model_to_dict
+
+class TournamentQueries(object):
+
+    @staticmethod
+    def getMatchesFromDb(tournamentId, matchId = None):
+        findMatch = "" if matchId is None else ("AND match.id = %s" % matchId) 
+        q = ("SELECT match.id, identificator.identificator, field.id, field.name," +
+             " home_team_id, home_club.name, home_team.degree, away_team_id, away_club.name," +
+             " away_team.degree, match.start_time, match.end_time, match.terminated," +
+             " match.score_home, match.score_away, match.spirit_home, match.spirit_away," +
+             " match.description, match.looser_final_standing, match.winner_final_standing," +
+             " winner_next_step.identificator, winner_next_step.match_id, winner_next_step.group_id," +
+             " looser_next_step.identificator, looser_next_step.match_id, looser_next_step.group_id," +
+             " match.home_seed, match.away_seed FROM catcher.match" +
+             " JOIN identificator ON catcher.match.identificator_id = identificator.id" +
+             " JOIN field ON field.id = match.field_id AND field.tournament_id = match.tournament_id" +
+             " LEFT OUTER JOIN team AS home_team ON home_team.id = match.home_team_id" +
+             " LEFT OUTER JOIN team AS away_team ON away_team.id = match.away_team_id" +
+             " LEFT OUTER JOIN club AS home_club ON home_club.id = home_team.id" +
+             " LEFT OUTER JOIN club AS away_club ON away_club.id = away_team.id" +
+             " LEFT OUTER JOIN identificator AS winner_next_step ON winner_next_step.id = match.winner_next_step" +
+             " LEFT OUTER JOIN identificator AS looser_next_step ON looser_next_step.id = match.looser_next_step" +
+             " WHERE match.tournament_id = %s %s;" % (tournamentId, findMatch))
+        qr = m.db.execute_sql(q)
+        return qr
+
+    @staticmethod
+    def getPlayersFromDb(tournamentId, teamId = None):
+        findTeam = "" if teamId is None else ("AND team.id = %s" % teamId) 
+        q = ("SELECT team.degree, club.name, team.id, assists, scores, total, matches," +
+             " firstname, lastname, nickname, number, player_id" +
+             " FROM team_at_tournament INNER JOIN player_at_tournament" + 
+             " ON player_at_tournament.team_id = team_at_tournament.team_id" +
+             " AND player_at_tournament.tournament_id = team_at_tournament.tournament_id" +
+             " INNER JOIN player ON player.id = player_at_tournament.player_id" +
+             " INNER JOIN team ON team.id = team_at_tournament.team_id INNER JOIN club" +
+             " ON team.club_id = club.id WHERE team_at_tournament.tournament_id = %s %s" 
+             % (tournamentId, findTeam) +
+             " ORDER BY team.id, total, scores, assists;")
+        qr = m.db.execute_sql(q)
+        return qr
+
+    @staticmethod
+    def getMatches(tournamentId, matchId = None):
+        m.Tournament.get(id=tournamentId).id
+        qr = TournamentQueries.getMatchesFromDb(tournamentId, matchId)
+        matches = []
+        for row in qr:
+            looserNextStep = None
+            if row[20] is not None:
+                looserNextStep = {
+                    'identificator':row[20],
+                    'match_id':row[21],
+                    'group_id':row[22]
+                }
+            winnerNextStep = None
+            if row[23] is not None:
+                winnerNextStep = {
+                    'identificator':row[23],
+                    'match_id'     :row[24],
+                    'group_id'     :row[25]
+                }
+            matches.append({
+                'id'            : row[0],
+                'identificator' : row[1],
+                'field'         : {
+                    'id'        : row[2],
+                    'name'      : row[3]
+                    },
+                'homeTeam'      : {
+                    'id'        : row[4] if row[4] is not None else None,
+                    'name'      : (row[5] + " " + row[6]) if row[5] is not None else None,
+                    'score'     : row[13],
+                    'spirit'    : row[15],
+                    'seed'      : row[26]
+                    },
+                'awayTeam'      : {
+                    'id'        : row[7] if row[4] is not None else None,
+                    'name'      : (row[8] + " " + row[9]) if row[5] is not None else None,
+                    'score'     : row[14],
+                    'spirit'    : row[16],
+                    'seed'      : row[27]
+                    },
+                'time'          : {
+                    'start'     : row[10],
+                    'end'       : row[11]
+                    },
+                'terminated'    : row[12],
+                'description'   : row[17],
+                'looser'        : {
+                    'finalStanding': row[18],
+                    'nextStep'  : looserNextStep
+                    },
+                'winner'        : {
+                    'finalStanding': row[19],
+                    'nextStep'  : winnerNextStep
+                    }
+                })
+
+        result = {
+            'count'  : len(matches), 
+            'matches': matches
+        }
+        return result
+
+    @staticmethod
+    def getPlayersPerTeams(tournamentId, teamId = None):
+        m.Tournament.get(id = tournamentId).id
+        qr = TournamentQueries.getPlayersFromDb(tournamentId, teamId)
+        teams = list()
+        for row in qr:
+            teamName = (row[1] + " " + row[0])
+            teamId = row[2]
+            teams.append({'name':teamName, 'id':teamId, 'players':[]})
+        # temporary dict with the key being the id
+        teams = {v['id']:v for v in teams}
+        for row in qr:
+            teamId    = row[2]
+            teams[teamId]['players'].append({
+                'assists'  : row[3],
+                'scores'   : row[4],
+                'total'    : row[5],
+                'matches'  : row[6],
+                'firstname': row[7],
+                'lastname' : row[8],
+                'nickname' : row[9],
+                'number'   : row[10],
+                'id'       : row[11]
+                })
+        result = {
+            'count': len(teams),
+            'teams': teams.values()
+        }
+        return result
+
+    @staticmethod
+    def getPlayersPerTournament(tournamentId):
+        qr = TournamentQueries.getPlayersFromDb(tournamentId, None)
+        players = list()
+        for row in qr:
+            teamId    = row[2]
+            players.append({
+                'assists'  : row[3],
+                'scores'   : row[4],
+                'total'    : row[5],
+                'matches'  : row[6],
+                'firstname': row[7],
+                'lastname' : row[8],
+                'nickname' : row[9],
+                'number'   : row[10],
+                'id'       : row[11]
+                })
+        result = {
+            'count'  : len(players),
+            'players': players
+        }
+        return result
 
 class Tournament(Item):
     pass
@@ -13,16 +167,14 @@ class Tournament(Item):
 class Tournaments(Collection):
     pass
 
+class TournamentStandings(object):
 
-class Standings(object):
-
-    def on_get(self, req, resp, tournamentId):
-        
-        tournament = m.Tournament.select(m.Tournament.active, m.Tournament.terminated).where(m.Tournament.id==tournamentId).get()
+    def on_get(self, req, resp, id):
+        tournament = m.Tournament.select(m.Tournament.active, m.Tournament.terminated).where(m.Tournament.id==id).get()
         if not tournament.active and not tournament.terminated:
             raise ValueError("Tournament hasn't any standings")
 
-        qr = m.Standing.select().where(m.Standing.tournament==tournamentId)
+        qr = m.Standing.select().where(m.Standing.tournament==id)
         items = []
         for standing in qr:
             items.append({
@@ -35,10 +187,12 @@ class Standings(object):
         }
         req.context['result'] = collection
 
-class TeamsAtTournament(object):
+class TournamentTeams(object):
 
-    def on_get(self, req, resp, tournamentId):
-        teams = m.TeamAtTournament.select().where(m.TeamAtTournament.tournament==tournamentId)
+    def on_get(self, req, resp, id):
+        teams = m.TeamAtTournament.\
+            select(m.TeamAtTournament.team).\
+            where(m.TeamAtTournament.tournament==id)
         items = []
         for team in teams:
             items.append(team.team)
@@ -48,353 +202,54 @@ class TeamsAtTournament(object):
         }
         req.context['result'] = collection
 
-class CreateTournament(object):
+class TournamentMatches(object):
 
-    def getTimestamp(self, timestamp):
-        try:
-            return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S")
-        except ValueError:
-            return datetime.strptime(timestamp, "%Y-%m-%d")
+    def on_get(self, req, resp, id):
+        req.context['result'] = TournamentQueries.getMatches(
+            tournamentId = id
+            )
 
-    def checkTeams(self, teams, divisionId):
-        seeding = set()
-        teamIds = set()
-        teamsCount = len(teams)
-        if teamsCount == 0:
-            raise ValueError("Tournament without teams is not allowed")
-        for team in teams:
-            teamIds.add(team['id'])
-            seeding.add(team['seeding'])
-            # check, if team exists
-            dbTeam = m.Team.select().where(m.Team.id == team['id']).get()
-            # check, if team is in correct divison
-            if dbTeam.division_id != divisionId:
-                raise ValueError("Team %s is in incorrect division" % team['id'])
-        # check, if set of seeds does match the correct set of seeds
-        if seeding != set([x for x in range(1, teamsCount + 1)]):
-            raise ValueError("Seeding of teams does not match")
-        # check, if all teams are added only once
-        if len(teamIds) != teamsCount:
-            raise ValueError("Some team is added more times than once")
+class TournamentMatch(object):
 
-    def checkFields(self, fields):
-        fieldIds = set()
-        fieldsCount = len(fields)
-        if fieldsCount == 0:
-            raise ValueError("Tournament without fields is not allowed")
-        for field in fields:
-            fieldIds.add(field['id'])
-        # check, if all fields are added only once
-        if len(fieldIds) != fieldsCount:
-            raise ValueError("Some field is added more times than once")
+    def on_get(self, req, resp, id, matchId):
+        req.context['result'] = TournamentQueries.getMatches(
+            tournamentId = id,
+            matchId = matchId
+            )
 
-    def checkMatchId(self, id):
-        if not isinstance(id, str) and not isinstance(id, unicode):
-            raise ValueError(
-                "Match %s must be string, but it's %s" % (id, type(id))
-                )
-        if not 0 < len(id) <= 3:
-            raise ValueError(
-                "Match %s must have structure from one to three characters" % id 
-                )
-        if not any(c.isalpha() for c in id):
-            raise ValueError(
-                "Match %s must have alphanumeric structure" % id
-                )
+class TournamentTeamsAndPlayers(object):
 
-    def checkMatchTimes(self, schedule):
-        for matches in schedule.itervalues():
-            for match in matches:
-                # compare with other matches
-                for otherMatch in matches:
-                    # doesn't check itsefl
-                    if otherMatch != match:
-                        if otherMatch[1] <= match[1] <= otherMatch[2]:
-                            raise ValueError(
-                                "Match %s is starting during"
-                                " match %s on the same field" \
-                                % (match[0], otherMatch[0])
-                                )
-                        # check, if match isn't ending during other matches 
-                        if otherMatch[1] <= match[2] <= otherMatch[2]:
-                            raise ValueError(
-                                "Match %s is ending during"
-                                " match %s on the same field" \
-                                % (match[0], otherMatch[0])
-                                )
+    def on_get(self, req, resp, id):
+        req.context['result'] = TournamentQueries.getPlayersPerTeams(
+            tournamentId = id
+            )
 
-    def checkTimesAndFields(self, matches, startDate, endDate, fields):
-        fieldIds = set(field['id'] for field in fields)
-        # set dict of games for each field
-        schedule = dict((field['id'], []) for field in fields)
-        # check, if all games in tournament term and times are correct
-        for match in matches:
-            startTime = self.getTimestamp(match['startTime'])
-            endTime   = self.getTimestamp(match['endTime'])
-            if startTime > endTime:
-                raise ValueError(
-                    "Match %s has incorrect time"
-                    " (start is after end)" % match['identificator']
-                    )
-            if startDate.date() > startTime.date() or endTime.date() > endDate.date():
-                raise ValueError(
-                    "Match %s has incorrect time"
-                    " (isn't in the tournament term)" % match['identificator']
-                    )
-            # on the field is added match
-            schedule[match['field']].append(
-                (match['identificator'], startTime, endTime)
-                )
-        self.checkMatchTimes(schedule)
+class TournamentTeamAndPlayers(object):
 
-    def checkMatchIds(self, match):
-        # matchId can be only alphanumeric (no int)
-        self.checkMatchId(match['identificator'])
-        # check ids in play-off, it can be alphanumeric
-        if match['winnerNextStep']:
-            self.checkMatchId(match['winnerNextStep'])
-        if match['looserNextStep']:
-            self.checkMatchId(match['looserNextStep'])
+    def on_get(self, req, resp, id, teamId):
+        req.context['result'] = TournamentQueries.getPlayersPerTeams(
+            tournamentId = id,
+            teamId = teamId
+            )
 
-    def checkMatches(self, matches, startDate, endDate, fields):
-        matchIds = set()
-        matchesCount = len(matches)
-        if matchesCount == 0:
-            raise ValueError("Tournament without matches is not allowed")
-        for match in matches:
-            self.checkMatchIds(match)
-            matchIds.add(match['identificator'])
-            # check, if exists way further
-            if not match.get('looserNextStep') and not match.get('looserFinalStanding'):
-                raise ValueError(
-                    "Match %s has no more way for looser" % match['identificator']
-                    )
-            if not match.get('winnerNextStep') and not match.get('winnerFinalStanding'):
-                raise ValueError(
-                    "Match %s has no more way for winner" % match['identificator']
-                    )
+class TournamentPlayers(object):
 
-        # check, if all matches are added only once
-        if len(matchIds) != matchesCount:
-            raise ValueError("Some match is added more times than once")
-        self.checkTimesAndFields(matches, startDate, endDate, fields)
-
-    def checkSeedings(self, matches, teamsCount):
-        for match in matches:
-            homeSeed = match.get('homeSeed')
-            awaySeed = match.get('awaySeed')
-            # check, if it's play-off game
-            if homeSeed is None and awaySeed is None:
-                continue
-            # check, if seedings are out of range
-            if homeSeed is not None and not 1 <= homeSeed <= teamsCount:
-                raise ValueError(
-                    "Match %s has seeding home team out of range" % match['identificator']
-                    )
-            if awaySeed is not None and not 1 <= awaySeed <= teamsCount:
-                raise ValueError(
-                    "Match %s has seeding away team out of range" % match['identificator']
-                    )
-            # check, if seeding are equal
-            if homeSeed == awaySeed:
-                raise ValueError("Match %s has two same teams" % match['identificator'])
-
-    class Match(object):
-        def __init__(self, id, winMatch=None, lostMatch=None, placement=None):
-            self.id        = id
-            self.winMatch  = winMatch
-            self.lostMatch = lostMatch
-            self.placement = placement
-            self.freeSpots = 2
-
-    def checkTournamentTree(self, matches, teams):
-        finalPlacements = list([x for x in range(1, len(teams) + 1)])
-
-        for match in matches:
-            matchId = match['identificator']
-            winnerFinalStanding  = match.get('winnerFinalStanding')
-            looserFinalStanding  = match.get('looserFinalStanding')
-
-            # check final statements
-            if winnerFinalStanding:
-                if not 1 <= winnerFinalStanding <= len(matches):
-                    raise ValueError(
-                        "Final statement %s is out of range" \
-                        % winnerFinalStanding
-                        )
-                try:
-                    finalPlacements.remove(winnerFinalStanding)
-                except ValueError:
-                    raise ValueError(
-                        "Final statement %s is contained more than once" \
-                        % winnerFinalStanding
-                        )
-            if looserFinalStanding:
-                if not 1 <= looserFinalStanding <= len(matches):
-                    raise ValueError(
-                        "Final statement %s is out of range" \
-                        % looserFinalStanding
-                        )
-                try:
-                    finalPlacements.remove(looserFinalStanding)
-                except ValueError:
-                    raise ValueError(
-                        "Final statement %s is contained more than once" \
-                        % looserFinalStanding
-                        )
-
-            # check deadlock
-            if winnerFinalStanding == matchId or looserFinalStanding == matchId:
-                raise ValueError("Match %s has infinite loop for next process" % matchId)
-
-        # final check, if all final statements are used
-        if len(finalPlacements) != 0:
-            raise ValueError("Final placements %s are not reachable" % finalPlacements)
-
-        # check, if all games have only two ways inwards
-        processes  = []
-        for match in matches:
-            if match['winnerNextStep']:
-                processes.append(match['winnerNextStep'])
-            if match['looserNextStep']:
-                processes.append(match['looserNextStep'])
-
-        for match in matches:
-            # TODO: az budu kontrolovat i skupiny, musim je zde vyradit
-            matchId = match['identificator']
-            # if teams aren't seeded, way inwards must be here
-            if not match['homeSeed'] or not match['awaySeed']:
-                try:
-                    # twice removed because there have to be two ways  
-                    processes.remove(matchId)
-                    processes.remove(matchId)
-                except ValueError:
-                    raise ValueError("In match %s won't play two teams" % matchId)
-
-        # TODO: napsat funkce pro simulaci pruchodu turnajem, aby se zjistilo,
-        # ze nejaky tym nema sanci skoncit prvni (druhy apod.)
-
-        # TODO: popremyslet nad sofistikovanejsi kontrolou turnaje
-        # (1) --+ (FIN) +-- (SE1)
-        # (2) --/       \-- (SE2)
-
-        # (3) --+ (3RD) +-- (SE1)
-        # (4) --/       \-- (SE2)
-
-    @m.db.atomic()
-    def createTournament(self, data):
-        print "UKLADAM"
-
-        print data['endDate']
-        # Tournament
-        tournamentId = m.Tournament.insert(
-            caldTournament   = data.get('caldTournament'),
-            city             = data.get('city'),
-            country          = data.get('country'),
-            division         = data['division'],
-            name             = data['name'],
-            startDate        = data['startDate'],
-            endDate          = data['endDate'],
-            teams            = len(data['teams']),
-            active           = False,
-            terminated       = False
-            ).execute()
-
-        # Field
-        for field in data['fields']:
-            m.Field.insert(tournament = tournamentId, **field).execute()
-
-        # TeamAtTournament
-        for team in data['teams']:
-            m.TeamAtTournament.insert(
-                team       = team['id'],
-                seeding    = team['seeding'],
-                tournament = tournamentId
-                ).execute()
-
-        for match in data['matches']:
-            # Identificators
-            identificator, created = m.Identificator.get_or_create(
-                tournament    = tournamentId,
-                identificator = match['identificator']
-                )
-            winnerNextStep, created = m.Identificator.get_or_create(
-                tournament    = tournamentId,
-                identificator = match['identificator']
-                )
-            looserNextStep, created = m.Identificator.get_or_create(
-                tournament    = tournamentId,
-                identificator = match['identificator']
-                )
-
-            del match['identificator']
-            del match['winnerNextStep']
-            del match['looserNextStep']
-
-            # Match
-            m.Match.insert(
-                tournament = tournamentId,
-                identificator = identificator.id,
-                terminated = False,
-                looserNextStep = looserNextStep,
-                winnerNextStep = winnerNextStep,
-                **match
-                ).execute()
-
-        return tournamentId
-
-    # method get is used if value can be null
-    def on_post(self, req, resp):
-
-        data = req.context['data']
-
-        # load term and check it
-        startDate = self.getTimestamp(data['startDate'])
-        endDate   = self.getTimestamp(data['endDate'])
-        if startDate.date() > endDate.date():
-            raise ValueError("Tournament has incorrect term (from is after to)")
-        
-        # check, if division exists
-        divisionId = data['division']
-        m.Division.get(m.Division.id == divisionId)
-
-        # load and check teams
-        teams = data.get('teams')
-        self.checkTeams(teams, divisionId)
-
-        # load and check fields
-        fields = data.get('fields')
-        self.checkFields(fields)
-        
-        # load groups
-        # TODO: nacist a zkontrolovat skupiny
-
-        # load and check matches
-        matches = data.get('matches')
-        # TODO: nutne otestovat
-        self.checkSeedings(matches, len(teams))
-        self.checkMatches(matches, startDate, endDate, fields)
-        self.checkTournamentTree(matches, teams)
- 
-        # atomic create tournament
-        tournamentId = self.createTournament(data)
-
-        # for result body
-        createdTurnament = m.Tournament.get(id=tournamentId)
-
-        resp.status = falcon.HTTP_201
-        req.context['result'] = createdTurnament
+    # TODO: jako parametr zde muze byt limit
+    def on_get(self, req, resp, id):
+        req.context['result'] = TournamentQueries.getPlayersPerTournament(
+            tournamentId = id
+            )
 
 class ActiveTournament(object):
 
     @m.db.atomic()
-    def activeTournament(self, tournamentId):
+    def activeTournament(self, id):
         tournament = m.Tournament.\
             select(m.Tournament.teams, m.Tournament.active).\
-            where(m.Tournament.id == tournamentId).get()
+            where(m.Tournament.id == id).get()
 
         if tournament.active:
-            raise ValueError("Tournament %s is already active" % tournamentId)
+            raise ValueError("Tournament %s is already active" % id)
 
         teams = m.TeamAtTournament.select().\
             where(m.TeamAtTournament.tournament == id).dicts()
@@ -406,12 +261,12 @@ class ActiveTournament(object):
                 )
 
         # active Tournament
-        m.Tournament.update(active=True).where(m.Tournament.id==tournamentId).execute()
+        m.Tournament.update(active=True).where(m.Tournament.id==id).execute()
 
         # Standing
         for x in range(1, len(teams)+1):
              m.Standing.insert(
-                tournament = tournamentId,
+                tournament = id,
                 standing = x
                 ).execute()
 
@@ -427,11 +282,14 @@ class ActiveTournament(object):
                 )
 
         for match in matches:
-            m.Match.update(homeTeam = teamsAdSeeding[match.homeSeed]).\
+            m.Match.update(
+                homeTeam = teamsAdSeeding[match.homeSeed],
+                awayTeam = teamsAdSeeding[match.awaySeed]
+                ).\
                 where(m.Match.id == match.id).execute()
 
-    def on_put(self, req, resp, tournamentId):
-        self.activeTournament(tournamentId)
+    def on_put(self, req, resp, id):
+        self.activeTournament(id)
         # result body
-        createdTurnament = m.Tournament.get(id=tournamentId)
+        createdTurnament = m.Tournament.get(id=id)
         req.context['result'] = createdTurnament

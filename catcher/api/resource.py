@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # coding=utf-8
 
+import falcon
 from playhouse.shortcuts import model_to_dict
 
 class Item(object):
@@ -32,7 +33,7 @@ class Item(object):
         params = { key : requestJson[key] for key in requestJson if key in self.editableCols}
         qr = self.model.update(**params).where(self.model.id==id).execute()
         req.context['result'] = self.model.select().where(self.model.id==id).dicts().get()
-        resp.status = falcon.HTTP_201 if qr else falcon.HTTP_304
+        resp.status = falcon.HTTP_200 if qr else falcon.HTTP_304
 
     def on_delete(self, req, resp, id):
         self.model.delete().where(self.model.id==id).execute()

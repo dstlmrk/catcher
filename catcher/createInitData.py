@@ -3,10 +3,11 @@
 
 import models
 import requests
+import json
 
 models.db.connect()
 
-# create divisions --------------------------------
+# create divisions --------------------------------------------------------------------
 divisions = [
     {"division": "open"},
     {"division": "women"},
@@ -19,7 +20,7 @@ try:
 except models.pw.IntegrityError as ex:
     pass
 
-# create 10 teams ---------------------------------
+# create 10 teams --------------------------------------------------------------------
 teams = [
     {
     "club"     : 1,
@@ -163,8 +164,63 @@ tournament = '''{
     ]
 }'''
 
-
+# create torunament --------------------------------------------------------------------
 url = "http://localhost:8080/api/tournaments/create"
 headers = {'content-type': 'application/json'}
 r = requests.post(url, data=tournament, headers=headers)
-print("Tournament", r.status_code, r.reason)
+# print("Tournament", r.status_code, r.reason)
+tournamentId = str(json.loads(r.text)['id'])
+print "TOURNAMENT ID:", tournamentId
+# active tournament --------------------------------------------------------------------
+url = str("http://localhost:8080/api/tournament/" + tournamentId + "/active")
+payload = ""
+headers = {'content-type': "application/json"}
+response = requests.request("PUT", url, data=payload, headers=headers)
+# print(response.text)
+
+# add players on rosters----------------------------------------------------------------
+url = str("http://localhost:8080/api/tournament/" + tournamentId + "/rosters")
+headers = {'content-type': "application/json"}
+payload = "{\"playerId\":1,\"teamId\":1}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":2,\"teamId\":1}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":3,\"teamId\":1}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":4,\"teamId\":1}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":5,\"teamId\":1}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":6,\"teamId\":2}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":7,\"teamId\":2}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":8,\"teamId\":2}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":9,\"teamId\":2}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":10,\"teamId\":2}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":11,\"teamId\":3}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":12,\"teamId\":3}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":13,\"teamId\":3}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":14,\"teamId\":3}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":15,\"teamId\":3}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":16,\"teamId\":4}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":17,\"teamId\":4}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":18,\"teamId\":4}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":19,\"teamId\":4}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":20,\"teamId\":4}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"playerId\":21,\"teamId\":4}"
+response = requests.request("POST", url, data=payload, headers=headers)
+

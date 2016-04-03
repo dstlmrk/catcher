@@ -5,7 +5,7 @@ import peewee as pw
 from iso3166 import countries
 from playhouse.fields import ManyToManyField
 from playhouse.fields import DeferredThroughModel
-from playhouse.shortcuts import model_to_dict
+from playhouse.shortcuts import model_to_dict, dict_to_model
 import config
 
 db = pw.MySQLDatabase(
@@ -82,20 +82,14 @@ class Division(MySQLModel):
     division = pw.CharField()
 # -------------------------------------------------------------------------------------
 class Team(MySQLModel):
-    # related_name='teams'
     club       = pw.ForeignKeyField(Club, db_column='club_id', related_name='teams')
-    # related_name='divison'
     division   = pw.ForeignKeyField(Division, db_column='division_id')
     degree     = pw.FixedCharField(max_length=1)
+    # TODO: invent, how to remove dependency with db column
+    name       = pw.CharField(db_column='degree')
 
-    # def __str__(self):
-    #     return str({
-    #         'id'      : self.id,
-    #         'clubId'  : self.club_id,
-    #         'division': model_to_dict(self.division),
-    #         'degree'  : self.degree,
-    #         'name'    : self.club.name + " " + self.degree
-    #         })
+    def prepared(self):
+        self.name = self.club.name + " " + self.degree
 # -------------------------------------------------------------------------------------
 class CaldTournament(MySQLModel):
     id    = pw.PrimaryKeyField()
@@ -151,6 +145,7 @@ class TeamAtTournament(MySQLModel):
 class Identificator(MySQLModel):
     identificator = pw.CharField(max_length=3)
     tournament    = pw.ForeignKeyField(Tournament)
+    matchId       = pw.IntegerField(db_column='match_id')
 
     class Meta:
         indexes = (
@@ -203,10 +198,10 @@ class Standing(MySQLModel):
         primary_key = pw.CompositeKey('standing', 'team', 'tournament')
 # -------------------------------------------------------------------------------------
 class PlayerAtTournament(MySQLModel):
-    assists    = pw.IntegerField()
-    matches    = pw.IntegerField()
-    scores     = pw.IntegerField()
-    total      = pw.IntegerField()
+    assists    = pw.IntegerField(default=0)
+    matches    = pw.IntegerField(default=0)
+    scores     = pw.IntegerField(default=0)
+    total      = pw.IntegerField(default=0)
     player     = pw.ForeignKeyField(Player)
     team       = pw.ForeignKeyField(Team)
     tournament = pw.ForeignKeyField(Tournament)

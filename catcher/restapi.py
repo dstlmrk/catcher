@@ -30,8 +30,8 @@ api = falcon.API(middleware=[
 # resources are represented by long-lived class instances
 # TODO: editable cols presunout nekam, kde je muzu upravovat zaroven i pro testy
 api.add_route('/api/club/{id}', r.Club(m.Club,['shortcut', 'city', 'country']))
-
 api.add_route('/api/clubs', r.Clubs(m.Club))
+
 
 api.add_route('/api/player/{id}', r.Player(m.Player,
     ['firstname', 'lastname', 'nickname', 'number', 'ranking']))
@@ -43,28 +43,49 @@ api.add_route('/api/divisions', r.Divisions(m.Division))
 api.add_route('/api/team/{id}', r.Team(m.Team, ['divisionId', 'degree']))
 api.add_route('/api/teams', r.Teams(m.Team))
 
-# informace o konkretnim turnaji
-api.add_route('/api/tournament/{tournamentId}', r.Tournament(m.Tournament, []))
 # seznam vsech turnaju
 api.add_route('/api/tournaments', r.Tournaments(m.Tournament))
 # vytvori kompletni turnaj
 api.add_route('/api/tournaments/create', r.CreateTournament())
+# informace o konkretnim turnaji
+api.add_route('/api/tournament/{id}', r.Tournament(m.Tournament, []))
 # ativuje turnaj
-api.add_route('/api/tournament/{tournamentId}/active', r.ActiveTournament())
+api.add_route('/api/tournament/{id}/active', r.ActiveTournament())
 # u aktivnich nebo jiz skoncenych turnaju vrati poradi na turnaji
-api.add_route('/api/tournament/{tournamentId}/standings', r.Standings())
+api.add_route('/api/tournament/{id}/standings', r.TournamentStandings())
 # vrati seznam tymu na turnaji
-# TODO: asi bych mohl vracet vcetne soupisek
-api.add_route('/api/tournament/{tournamentId}/teams', r.TeamsAtTournament())
+api.add_route('/api/tournament/{id}/teams', r.TournamentTeams())
+# vrati seznam hracu v tymu
+api.add_route('/api/tournament/{id}/teams/players', r.TournamentTeamsAndPlayers())
+# vrati seznam hracu v tymu
+api.add_route('/api/tournament/{id}/team/{teamId}/players', r.TournamentTeamAndPlayers())
+# vrati seznam hracu na turnaji
+api.add_route('/api/tournament/{id}/players', r.TournamentPlayers())
+# vrati seznam zapasu na turnaji
+api.add_route('/api/tournament/{id}/matches', r.TournamentMatches())
+# vrati seznam zapasu na turnaji
+api.add_route('/api/tournament/{id}/match/{matchId}', r.TournamentMatch())
+# slouzi pro pridavani hracu do soupisky
+api.add_route('/api/tournament/{id}/rosters/', r.Rosters())
+
 # informace o zapase
 api.add_route('/api/match/{id}', r.Match(m.Match,[]))
-# ukonci zapas
+# ukonci zapas (TODO: spocitaji se celkove statistiky hracu)
 api.add_route('/api/match/{id}/terminate', r.TerminateMatch)
 # seznam vsech zapasu
 api.add_route('/api/matches', r.Matches(m.Match))
 
-# manipulace s hracem na turnaji
-api.add_route('/api/tournament/{tournamentId}/team/{teamId}/player/{playerId}', r.PlayerAtTournament())
+# TODO: zkusit dovymyslet ostatni api
+
+# vytvori v zapase novy bod, automaticky spocita aktualni skore - GET, POST
+api.add_route('/api/match/{id}/points', None) # parametrem muze byt asistujici a skorujici
+# upravi bod, PUT, DELETE (musi se vymyslet order)
+api.add_route('/api/match/{id}/point/{order}', None)
+
+# zadat spirit
+api.add_route('/api/match/{id}/spirit', None)
+
+# ukonci turnaj a zverejni celkove statistiky spiritu
 
 # errors
 api.add_error_handler(Exception, errors.InternalServerError)
