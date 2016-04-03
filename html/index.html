@@ -1,202 +1,387 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="Marek Dostal">
-    <!-- <link rel="icon" href="/favicon.ico"> -->
-    <title>Catcher API 2.0</title>
-    <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/sticky-footer-navbar.css" rel="stylesheet">
-  </head>
-
-  <body>
-    <div class="container">
-
-      <div class="page-header">
-        <h1>Catcher API 2.0</h1>
-        <p class="lead">Popis a dokumentace skórovacího systému pro soutěže v Ultimate Frisbee</p>
-      </div>
-
-      <div class="alert alert-dismissible alert-warning">
-        <h4>Upozornění!</h4>
-        <p>Nejedná se o stabilní verzi. Aplikace je ještě ve vývoji.</p>
-      </div>
-
-     <!--  <div class="panel panel-default">
-        <div class="panel-body">
-          <h4>Autentizace a autorizace</h4>
-          Zatím není implementováno.
-        </div>
-      </div>
-
-       <div class="panel panel-default">
-        <div class="panel-body">
-          <h4>Formáty komunikace</h4>
-          Jediným podporovaným formátem je <strong>JSON</strong>. V dané hlavičce úvádějte MIME type <code>application/json</code>.
-        </div>
-      </div>
-
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          <div class="row">
-            <div class="col-md-6"><h3 class="panel-title">/createTournament</h3></div>
-            <div class="col-md-6">
-              <div align="right">
-                <span class="label label-default">POST</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="well well-sm">
-            <span class="label label-default">POST</span>
-            <span class="label label-warning">ORGANIZER</span>
-            - Vytvoří nový turnaj.
-          </div>
-        </div>
-      </div>  
-
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          <div class="row">
-            <div class="col-md-6"><h3 class="panel-title">/club/{id}</h3></div>
-            <div class="col-md-6">
-              <div align="right">
-                <span class="label label-default">GET</span>
-                <span class="label label-default">PUT</span>
-                <span class="label label-default">DELETE</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="well well-sm">
-            <span class="label label-default">GET</span>
-            <span class="label label-success">PUBLIC</span>
-            - Získání informací o konkrétním oddílu.
-          </div>
-          <div class="well well-sm">
-            <span class="label label-default">PUT</span>
-            <span class="label label-danger">ADMIN</span>
-            - Úprava oddílu.
-          </div>
-          <div class="well well-sm">
-            <span class="label label-default">DELETE</span>
-            <span class="label label-danger">ADMIN</span>
-            - Smazání oddílu.
-          </div>
-        </div>
-      </div>
-
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          <div class="row">
-            <div class="col-md-6"><h3 class="panel-title">/clubs</h3></div>
-            <div class="col-md-6">
-              <div align="right">
-                <span class="label label-default">GET</span>
-                <span class="label label-default">POST</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="well well-sm">
-            <span class="label label-default">GET</span>
-            <span class="label label-success">PUBLIC</span>
-            - Získání kolekce všech oddílů.
-          </div>
-          <div class="well well-sm">
-            <span class="label label-default">POST</span>
-            <span class="label label-danger">ADMIN</span>
-            - Vytvoření nového oddílu.
-          </div>
-        </div>
-      </div>
-
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          <div class="row">
-            <div class="col-md-6"><h3 class="panel-title">/player/{id}</h3></div>
-            <div class="col-md-6">
-              <div align="right">
-                <span class="label label-default">GET</span>
-                <span class="label label-default">PUT</span>
-                <span class="label label-default">DELETE</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="well well-sm">
-            <span class="label label-default">GET</span>
-            <span class="label label-success">PUBLIC</span>
-            - Získání informací o konkrétním hráči.
-          </div>
-          <div class="well well-sm">
-            <span class="label label-default">PUT</span>
-            <span class="label label-danger">ADMIN</span>
-            - Úprava hráče.
-          </div>
-          <div class="well well-sm">
-            <span class="label label-default">DELETE</span>
-            <span class="label label-danger">ADMIN</span>
-            - Smazání hráče.
-          </div>
-        </div>
-      </div>
-
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          <div class="row">
-            <div class="col-md-6"><h3 class="panel-title">/players</h3></div>
-            <div class="col-md-6">
-              <div align="right">
-                <span class="label label-default">GET</span>
-                <span class="label label-default">POST</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="well well-sm">
-            <span class="label label-default">GET</span>
-            <span class="label label-success">PUBLIC</span>
-            - Získání kolekce všech hráčů.
-          </div>
-          <div class="well well-sm">
-            <span class="label label-default">POST</span>
-            <span class="label label-danger">ADMIN</span>
-            - Vytvoření nového hráče.
-          </div>
-        </div>
-      </div>
- -->
-      <!-- <h3>Three equal columns</h3>
-      <p>Get three equal-width columns <strong>starting at desktops and scaling to large desktops</strong>. On mobile devices, tablets and below, the columns will automatically stack.</p>
-      <div class="row">
-        <div class="col-md-4">.col-md-4</div>
-        <div class="col-md-4">.col-md-4</div>
-        <div class="col-md-4">.col-md-4</div>
-      </div> -->
-
-
-
-
-
-    </div> <!-- /container -->
-
-    <footer class="footer" css='{bottom: 0;}'>
+   <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+      <meta name="description" content="">
+      <meta name="author" content="Marek Dostal">
+      <!-- <link rel="icon" href="/favicon.ico"> -->
+      <title>Catcher API 2.0</title>
+      <!-- Bootstrap core CSS -->
+      <!-- <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
+      <link href="css/sticky-footer-navbar.css" rel="stylesheet">
+      <!-- <script src="bootstrap/js/bootstrap.min.js"</script> -->
+      <link href="css/bootstrap.min.css" rel="stylesheet">
+      <!-- <link href="css/sticky-footer-navbar.css" rel="stylesheet"> -->
+   </head>
+   <body>
       <div class="container">
-        <p class="text-muted">© 2016 Marek Dostál</p>
+         <div class="page-header">
+            <h1>Catcher API 2.0</h1>
+            <p class="lead">Popis a dokumentace skórovacího systému pro soutěže v Ultimate Frisbee</p>
+         </div>
+         <div class="alert alert-dismissible alert-warning">
+            <h4>Upozornění!</h4>
+            <p>Nejedná se o stabilní verzi. Aplikace je ještě ve vývoji.</p>
+         </div>
+         <div class="panel panel-default">
+            <div class="panel-body">
+               <h4>Autentizace a autorizace</h4>
+               ...
+            </div>
+         </div>
+         <div class="panel panel-default">
+            <div class="panel-body">
+               <h4>Formáty komunikace</h4>
+               Jediným podporovaným formátem je <strong>JSON</strong>.
+               V dané hlavičce úvádějte MIME type <code>application/json</code>.
+            </div>
+         </div>
+         <!-- ------------------ REQUESTS ------------------- -->
+         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+               
+               <div class="panel-heading" role="tab" id="headingOne">
+               <div class="row">
+                  <div class="col-md-6">
+                     <h3 class="panel-title">
+                     <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        <strong>/club/{id}</strong>
+                        </a>
+                     </h3>
+                  </div>
+                  <div class="col-md-6" align="right">
+                     <strong>Oddíl</strong>
+                  </div>
+               </div>
+               </div>
+               <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                  <div class="panel-body">
+               <div>
+                  <!-- <span class="label label-success">GET</span> -->
+                  <h4>GET - Informace o konkrétním oddílu</h4>
+                  <span class="label label-default">public</span>
+                  <span class="label label-default">organizer</span>
+                  <span class="label label-default">admin</span>
+                  <p>
+                  <h5>Požadavek</h5>
+                  <pre>
+GET /api/club/2 HTTP/1.1
+Host: catcher.zlutazimnice.cz
+Content-Type: application/json
+</pre>
+                  <h5>Odpověď</h5>
+                  <pre>
+{
+  "caldId": 8,
+  "name": "PeaceEgg",
+  "city": null,
+  "country": null,
+  "shortcut": "8XP",
+  "user": {},
+  "id": 2
+}
+</pre>
+               </div>
+               <br>
+               <div>
+                  <h4>PUT - Úprava oddílu</h4>
+                  <span class="label label-default">admin</span>
+                  <p>
+                  <p>Upravovat lze pouze sloupce <code>shortcut</code>, <code>city</code> a <code>country</code> (ISO 3166-1 alpha-3).</p>
+                  <h5>Požadavek</h5>
+                  <pre>
+PUT /api/club/2 HTTP/1.1
+Host: catcher.zlutazimnice.cz
+Content-Type: application/json
+</pre>
+                  <pre>
+{
+  "city": "Písek",
+  "country": "CZE",
+  "shortcut": "PEA"
+}
+</pre>
+                  <h5>Odpověď</h5>
+                  <pre>
+{
+    "caldId": 8,
+    "name": "PeaceEgg",
+    "city": "Písek",
+    "country": "CZE",
+    "shortcut": "PEA",
+    "user": null,
+    "id": 2
+}
+</pre>
+               </div>
+               <br>
+               <div>
+                  <h4>DELETE - Smazání oddílu</h4>
+                  <span class="label label-default">admin</span>
+                  <p>
+                  <p>Smaže vybraný oddíl z databáze.</p>
+               </div>
+            </div>
+               </div>
+            </div>
+            <div class="panel panel-default">
+
+               <div class="panel-heading" role="tab" id="headingTwo">
+               <div class="row">
+                  <div class="col-md-6">
+                     <h3 class="panel-title">
+                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                        <strong>/clubs</strong>
+                        </a>
+                     </h3>
+                  </div>
+                  <div class="col-md-6" align="right">
+                     <strong>Oddíly</strong>
+                  </div>
+               </div>
+               </div>
+               <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                  <div class="panel-body">
+               <div>
+                  <!-- <span class="label label-success">GET</span> -->
+                  <h4>GET - Seznam všech oddílů</h4>
+                  <span class="label label-default">public</span>
+                  <span class="label label-default">organizer</span>
+                  <span class="label label-default">admin</span>
+                  <p>
+               </div>
+               <br>
+               <div>
+                  <h4>POST - Vytvoření oddílu</h4>
+                  <span class="label label-default">admin</span>
+                  <p>
+               </div>
+               <br>
+            </div>   
+               </div>
+            </div>
+            <div class="panel panel-default">
+
+            <div class="panel-heading" role="tab" id="headingThree">
+               <div class="row">
+                  <div class="col-md-6">
+                     <h3 class="panel-title">
+                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        <strong>/player/{id}</strong>
+                        </a>
+                     </h3>
+                  </div>
+                  <div class="col-md-6" align="right">
+                     <strong>Hráč</strong>
+                  </div>
+               </div>
+            </div>
+
+
+         
+               <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                  <div class="panel-body">
+               <div>
+                  <!-- <span class="label label-success">GET</span> -->
+                  <h4>GET - Informace o konkrétním hráči</h4>
+                  <span class="label label-default">public</span>
+                  <span class="label label-default">organizer</span>
+                  <span class="label label-default">admin</span>
+                  <p>
+               </div>
+               <br>
+               <div>
+                  <h4>PUT - Úprava hráče</h4>
+                  <span class="label label-default">admin</span>
+                  <p>
+                  <p>Upravovat lze pouze sloupce <code>nickname</code>, <code>number</code> a <code>ranking</code> (ISO 3166-1 alpha-3).</p>
+               </div>
+               <br>
+               <div>
+                  <h4>DELETE - Smazání hráče</h4>
+                  <span class="label label-default">admin</span>
+                  <p>
+                  <p>Smaže vybraného hráče z databáze.</p>
+               </div>
+            </div>
+               </div>
+            </div>
+
+
+
+
+
+            <div class="panel panel-default">
+
+            <div class="panel-heading" role="tab" id="headingFour">
+               <div class="row">
+                  <div class="col-md-6">
+                     <h3 class="panel-title">
+                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                        <strong>/players</strong>
+                        </a>
+                     </h3>
+                  </div>
+                  <div class="col-md-6" align="right">
+                     <strong>Hráči</strong>
+                  </div>
+               </div>
+            </div>
+
+               <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                  <div class="panel-body">
+               <div>
+                  <!-- <span class="label label-success">GET</span> -->
+                  <h4>GET - Seznam všech hráčů</h4>
+                  <span class="label label-default">public</span>
+                  <span class="label label-default">organizer</span>
+                  <span class="label label-default">admin</span>
+                  <p>
+               </div>
+               <br>
+               <div>
+                  <h4>POST - Vytvoření hráče</h4>
+                  <span class="label label-default">admin</span>
+                  <p>
+               </div>
+               <br>
+            </div>
+               </div>
+            </div>
+
+
+
+            <div class="panel panel-default">
+
+            <div class="panel-heading" role="tab" id="headingFive">
+               <div class="row">
+                  <div class="col-md-6">
+                     <h3 class="panel-title">
+                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                        <strong>/tournament/{id}</strong>
+                        </a>
+                     </h3>
+                  </div>
+                  <div class="col-md-6" align="right">
+                     <strong>Turnaj</strong>
+                  </div>
+               </div>
+            </div>
+
+               <div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
+                  <div class="panel-body">
+               <div>
+                  <!-- <span class="label label-success">GET</span> -->
+                  <h4>GET - Informace o konkrétním turnaji</h4>
+                  <span class="label label-default">public</span>
+                  <span class="label label-default">organizer</span>
+                  <span class="label label-default">admin</span>
+                  <p>
+               </div>
+            </div>
+               </div>
+            </div>
+
+            <div class="panel panel-default">
+
+            <div class="panel-heading" role="tab" id="headingSix">
+               <div class="row">
+                  <div class="col-md-6">
+                     <h3 class="panel-title">
+                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                        <strong>/tournament/{id}/rosters/</strong>
+                        </a>
+                     </h3>
+                  </div>
+                  <div class="col-md-6" align="right">
+                     <strong>Úprava soupisek</strong>
+                  </div>
+               </div>
+            </div>
+
+               <div id="collapseSix" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSix">
+                  <div class="panel-body">
+                     POST
+                     <pre>POST /api/tournament/2/rosters HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+</pre><pre>
+{"playerId":1,"teamId":1}</pre>
+                  </div>
+               </div>
+            </div>
+
+
+            <div class="panel panel-default">
+
+            <div class="panel-heading" role="tab" id="headingSeven">
+               <div class="row">
+                  <div class="col-md-6">
+                     <h3 class="panel-title">
+                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSeven" aria-expanded="false" aria-controls="collapseSeven">
+                        <strong>/tournament/{id}/teams/players</strong>
+                        </a>
+                     </h3>
+                  </div>
+                  <div class="col-md-6" align="right">
+                     <strong>Soupisky týmů</strong>
+                  </div>
+               </div>
+            </div>
+
+               <div id="collapseSeven" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSeven">
+                  <div class="panel-body">
+                     ...
+                  </div>
+               </div>
+            </div>
+
+
+            <div class="panel panel-default">
+
+            <div class="panel-heading" role="tab" id="headingEight">
+               <div class="row">
+                  <div class="col-md-6">
+                     <h3 class="panel-title">
+                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseEight" aria-expanded="false" aria-controls="collapseEight">
+                        <strong>/tournament/{id}/players</strong>
+                        </a>
+                     </h3>
+                  </div>
+                  <div class="col-md-6" align="right">
+                     <strong>Hráči na turnaji</strong>
+                  </div>
+               </div>
+            </div>
+
+               <div id="collapseEight" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingEight">
+                  <div class="panel-body">
+                     ...
+                  </div>
+               </div>
+            </div>
+
+
+
+
+
+
+         </div>
+         <br><br><br><br><br><br><br><br>
+         <!-- HERE IS PLACE FOR NEXT -->
       </div>
-    </footer>
-  </body>
+      <!-- /container -->
+      <footer class="footer" css='{bottom: 0;}'>
+         <div class="container">
+            <p class="text-muted">Catcher 2.0 © 2016 Marek Dostál</p>
+         </div>
+      </footer>
+      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+      <!-- Include all compiled plugins (below), or include individual files as needed -->
+      <script src="js/bootstrap.min.js"></script>
+   </body>
 </html>
