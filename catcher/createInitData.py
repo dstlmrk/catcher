@@ -7,6 +7,10 @@ import json
 
 models.db.connect()
 
+local  = "http://localhost:8080"
+server = "http://catcher.zlutazimnice.cz"
+host   = server
+
 # create divisions --------------------------------------------------------------------
 divisions = [
     {"division": "open"},
@@ -165,21 +169,21 @@ tournament = '''{
 }'''
 
 # create torunament --------------------------------------------------------------------
-url = "http://localhost:8080/api/tournaments/create"
+url = host + str("/api/tournaments/create")
 headers = {'content-type': 'application/json'}
 r = requests.post(url, data=tournament, headers=headers)
 # print("Tournament", r.status_code, r.reason)
 tournamentId = str(json.loads(r.text)['id'])
 print "TOURNAMENT ID:", tournamentId
 # active tournament --------------------------------------------------------------------
-url = str("http://localhost:8080/api/tournament/" + tournamentId + "/active")
+url = host + str("/api/tournament/" + tournamentId + "/active")
 payload = ""
 headers = {'content-type': "application/json"}
 response = requests.request("PUT", url, data=payload, headers=headers)
 # print(response.text)
 
 # add players on rosters----------------------------------------------------------------
-url = str("http://localhost:8080/api/tournament/" + tournamentId + "/rosters")
+url = host + str("/api/tournament/" + tournamentId + "/rosters")
 headers = {'content-type': "application/json"}
 payload = "{\"playerId\":1,\"teamId\":1}"
 response = requests.request("POST", url, data=payload, headers=headers)
