@@ -29,173 +29,339 @@
          <div class="panel panel-default">
             <div class="panel-body">
                <h4>Autentizace a autorizace</h4>
-               ...
+               <p>Uživatel se přihlašuje ...</p>
+               <small>Pod titulkem každého požadavku je seznam všech rolí, které mají právo požadavek zavolat. Ne všechny role mají však u nekterých požadavků všechny jeho možnosti. U role s omezením je použito <span class="label label-info">modré</span> odlišení.</small>
             </div>
          </div>
          <div class="panel panel-default">
             <div class="panel-body">
                <h4>Formáty komunikace</h4>
-               Jediným podporovaným formátem je <strong>JSON</strong>.
-               V dané hlavičce úvádějte MIME type <code>application/json</code>.
+               <p>Jediným podporovaným formátem je <strong>JSON</strong>. V dané hlavičce úvádějte MIME type <code>application/json</code>.</p>
             </div>
          </div>
          <!-- ------------------ REQUESTS ------------------- -->
-         <!-- ----------------------------------------------- -->
          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <!-- ----------------------------------------------- -->
             <div class="panel panel-default">
-               
                <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a role="button" data-toggle="collapse" data-parent="#accordion" href="#club" aria-expanded="true" aria-controls="club">
-                        <strong>/club/{id}</strong>
-                        </a>
-                     </h3>
-                  </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Oddíl</strong>
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#users" aria-expanded="false" aria-controls="users">
+                           <strong><span class="label label-danger">UNFINISHED</span> /users</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Uživatelé</strong>
+                     </div>
                   </div>
                </div>
+               <div id="users" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <div>
+                        <h3>GET - Seznam všech uživatelů</h3>
+                        <span class="label label-default">public</span>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <h5>Parametry</h5>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>userId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID uživatele.</td>
+                              </tr>
+                              <tr>
+                                 <td><code>teamId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID týmu.</td>
+                              </tr>
+                              <tr>
+                                 <td><code>roleId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID role.</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <h3>POST - Vytvoření nového uživatele</h3>
+                        <span class="label label-info">public</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Kdokoliv může vytvořit nový účet s rolí <span class="label label-default">organizer</span>. Administrátor má navíc možnost vytvořit účet s rolí <span class="label label-default">club</span> (váže se na konkrétní oddíl).
+                           může vytvářet jak organi Požadavek je nejprve důkladně zkontrolován, zda je hratelný a neobsahuje chyby, a pak je uložen do databáze. Po vytvoření je nutné turnaj aktivovat, tzn. nastavit příznak <code>active</code> na hodnotu <code>true</code>.
+                        </p>
+                        <h5>Tělo požadavku</h5>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>nickname</code></td>
+                                 <td><code>string</code></td>
+                                 <td>Přezdívka uživatele.</td>
+                              </tr>
+                              <tr>
+                                 <td><code>email</code></td>
+                                 <td><code>string</code></td>
+                                 <td>Email uživatele</td>
+                              </tr>
+                              <tr>
+                                 <td><code>password</code></td>
+                                 <td><code>string</code></td>
+                                 <td>Heslo uživatele</td>
+                              </tr>
+                              <tr>
+                                 <td><code>roleId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID roleD).</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <h3>PUT - Úprava uživatele</h3>
+                        <span class="label label-info">team</span>
+                        <span class="label label-info">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Pouze administrátor může upravovat údaje všech uživatelů. Svůj účet mohou upravovat role <span class="label label-info">team</span> a <span class="label label-info">organizer</span>.</p>
+                        <h5>Tělo požadavku</h5>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>nickname</code></td>
+                                 <td><code>string</code></td>
+                                 <td>První hrací den turnaje (ve formátu YYYY-MM-DD).</td>
+                              </tr>
+                              <tr>
+                                 <td><code>email</code></td>
+                                 <td><code>string</code></td>
+                                 <td>Poslední hrací den turnaje (ve formátu YYYY-MM-DD).</td>
+                              </tr>
+                              <tr>
+                                 <td><code>password</code></td>
+                                 <td><code>string</code></td>
+                                 <td>První hrací den turnaje (ve formátu YYYY-MM-DD).</td>
+                              </tr>
+                              <tr>
+                                 <td><code>roleId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>První hrací den turnaje (ve formátu YYYY-MM-DD).</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a role="button" data-toggle="collapse" data-parent="#accordion" href="#club" aria-expanded="true" aria-controls="club">
+                           <strong>/club/{id}</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Oddíl</strong>
+                     </div>
+                  </div>
                </div>
                <div id="club" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-               <div>
-                  <h3>GET - Informace o konkrétním oddílu</h3>
-                  <span class="label label-default">public</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <h5>Požadavek</h5>
-                  <pre>
+                     <div>
+                        <h3>GET - Informace o konkrétním oddílu</h3>
+                        <span class="label label-default">public</span>
+                        <span class="label label-default">club</span>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <h5>Požadavek</h5>
+                        <pre>
 GET /api/club/2 HTTP/1.1
 Host: catcher.zlutazimnice.cz
 </pre>
-                  <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 200 OK</pre>
-                  <pre>
+                        <h5>Odpověď</h5>
+                        <pre>HTTP/1.1 200 OK</pre>
+                        <pre>
 {
-  "caldId": 8,
-  "name": "PeaceEgg",
-  "city": null,
-  "country": null,
-  "shortcut": "8XP",
-  "user": {},
-  "id": 2
+  "caldId": 15,
+  "name": "Žlutá Zimnice",
+  "city": "Prague",
+  "country": "CZE",
+  "shortcut": "ZZ",
+  "user": {
+    "lastLoginAt": null,
+    "nickname": null,
+    "id": 1,
+    "createdAt": null,
+    "email": "test@zlutazimnice.cz"
+  },
+  "id": 37
 }
 </pre>
-               </div>
-               <div>
-                  <h3>PUT - Úprava oddílu</h3>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Upravovat lze sloupce <code>shortcut</code>, <code>city</code> a <code>country</code> (ve formátu ISO 3166-1 alpha-3).</p>
-                  <h5>Požadavek</h5>
-                  <pre>
+                     </div>
+                     <div>
+                        <h3>PUT - Úprava oddílu</h3>
+                        <span class="label label-info">club</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Role <span class="label label-info">club</span> může upravovat pouze sloupce <code>shortcut</code>, <code>city</code> a <code>country</code> (ve formátu ISO 3166-1 alpha-3).</p>
+                        <h5>Požadavek</h5>
+                        <pre>
 PUT /api/club/2 HTTP/1.1
 Host: catcher.zlutazimnice.cz
 Content-Type: application/json
 </pre>
-                  <pre>
+                        <pre>
 {
   "city": "Písek",
   "country": "CZE",
   "shortcut": "PEA"
 }
 </pre>
-                  <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 200 OK</pre>
-                  <pre>
-{
-  "caldId": 8,
-  "name": "PeaceEgg",
-  "city": "Písek",
-  "country": "CZE",
-  "shortcut": "PEA",
-  "user": null,
-  "id": 2
-}
-</pre>
-               </div>
-               <div>
-                  <h3>DELETE - Smazání oddílu</h3>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Smaže vybraný oddíl z databáze.</p>
-                  <h5>Požadavek</h5>
-                  <pre>
+                        <h5>Odpověď</h5>
+                        <pre>HTTP/1.1 200 OK</pre>
+                     </div>
+                     <div>
+                        <h3>DELETE - Smazání oddílu</h3>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Smaže vybraný oddíl z databáze.</p>
+                        <h5>Požadavek</h5>
+                        <pre>
 DELETE /api/club/2 HTTP/1.1
 Host: catcher.zlutazimnice.cz
-</pre>      
-               <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 200 OK</pre>
-               </div>
-            </div>
+</pre>
+                        <h5>Odpověď</h5>
+                        <pre>HTTP/1.1 200 OK</pre>
+                     </div>
+                  </div>
                </div>
             </div>
             <!-- ----------------------------------------------- -->
             <div class="panel panel-default">
-
                <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#clubs" aria-expanded="true" aria-controls="clubs">
-                        <strong>/clubs</strong>
-                        </a>
-                     </h3>
-                  </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Oddíly</strong>
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#clubPlayers" aria-expanded="false" aria-controls="clubPlayers">
+                           <strong>/club/{id}/players</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Hráči oddílu</strong>
+                     </div>
                   </div>
                </div>
+               <div id="clubPlayers" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Seznam všech hráčů</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Získá kolekci všech hráčů v oddíle seřazených sestupně podle hodnoty atributu <code>ranking</code>.</p>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#clubTeams" aria-expanded="false" aria-controls="clubTeams">
+                           <strong>/club/{id}/teams</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Týmy oddílu</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="clubTeams" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Seznam všech týmů</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Získá kolekci všech týmů, které spadají pod konkrétní oddíl.</p>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#clubs" aria-expanded="true" aria-controls="clubs">
+                           <strong>/clubs</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Oddíly</strong>
+                     </div>
+                  </div>
                </div>
                <div id="clubs" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-               <div>
-                  <!-- <span class="label label-success">GET</span> -->
-                  <h3>GET - Seznam všech oddílů</h3>
-                  <span class="label label-default">public</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
+                     <!-- <span class="label label-success">GET</span> -->
+                     <h3>GET - Seznam všech oddílů</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
                      <h5>Požadavek</h5>
-                  <pre>
+                     <pre>
 GET /api/clubs HTTP/1.1
 Host: catcher.zlutazimnice.cz
 </pre>
-                  <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 200 OK</pre>
-                  <pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 200 OK</pre>
+                     <pre>
 {
   "count": 40,
-  "items": [
+  "clubs": [
     {
-      "caldId": 48,
-      "name": "Ježkovy voči",
-      "city": null,
-      "country": null,
-      "shortcut": "48X",
-      "user": null,
-      "id": 1
+      "caldId": 15,
+      "name": "Žlutá Zimnice",
+      "city": "Praha",
+      "country": "CZE",
+      "shortcut": "ZZ",
+      "user": {
+        "lastLoginAt": null,
+        "nickname": null,
+        "id": 1,
+        "createdAt": null,
+        "email": "test@zlutazimnice.cz"
+      },
+      "id": 37
     },
     ...
   ]
 }
 </pre>
-
-               </div>
-               <div>
-                  <h3>POST - Vytvoření oddílu</h3>
-                  <span class="label label-default">admin</span>
-                  <p>
+                     <h3>POST - Vytvoření oddílu</h3>
+                     <span class="label label-default">admin</span>
+                     <p>
                      <p>Vytvoří nový oddíl.</p>
                      <h5>Požadavek</h5>
-                  <pre>
+                     <pre>
 POST /api/clubs HTTP/1.1
 Host: catcher.zlutazimnice.cz
 Content-Type: application/json
-</pre><pre>
+</pre>
+                     <pre>
 {
   "caldId": null,
   "name": "Black Eagles",
@@ -204,9 +370,9 @@ Content-Type: application/json
   "shortcut": "BEG",
   "user": null
 }</pre>
-                  <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 201 Created</pre>
-                  <pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 201 Created</pre>
+                     <pre>
 {
   "caldId": null,
   "name": "Black Eagles",
@@ -217,263 +383,379 @@ Content-Type: application/json
   "id": 52
 }
 </pre>
-               </div>
-            </div>   
+                  </div>
                </div>
             </div>
             <!-- ----------------------------------------------- -->
             <div class="panel panel-default">
-
-            <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#player" aria-expanded="false" aria-controls="player">
-                        <strong>/player/{id}</strong>
-                        </a>
-                     </h3>
-                  </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Hráč</strong>
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#player" aria-expanded="false" aria-controls="player">
+                           <strong>/player/{id}</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Hráč</strong>
+                     </div>
                   </div>
                </div>
-            </div>
-
                <div id="player" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-               <div>
-                  <h3>GET - Informace o konkrétním hráči</h3>
-                  <span class="label label-default">public</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-<h5>Požadavek</h5>
-                  <pre>
-GET /api/player/770 HTTP/1.1
-Host: catcher.zlutazimnice.cz
-</pre>
-                  <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 200 OK</pre>
-                  <pre>
+                     <div>
+                        <h3>GET - Informace o konkrétním hráči</h3>
+                        <span class="label label-default">public</span>
+                        <span class="label label-default">club</span>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <h5>Požadavek</h5>
+                        <pre>
+GET /api/player/1 HTTP/1.1
+Host: catcher.zlutazimnice.cz</pre>
+                        <h5>Odpověď</h5>
+                        <pre>HTTP/1.1 200 OK</pre>
+                        <pre>
 {
   "ranking": null,
-  "firstname": "Jaroslav",
-  "caldId": 652,
-  "lastname": "Kmoch",
-  "number": null,
+  "clubId": 12,
+  "firstname": "Pavel",
+  "caldId": 976,
+  "lastname": "Matoušek",
   "nickname": null,
-  "id": 770
-}
-</pre>
-               </div>
-               <div>
-                  <h3>PUT - Úprava hráče</h3>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Upravovat lze pouze sloupce <code>nickname</code> a <code>number</code>.</p>
-               </div>
-               <div>
-                  <h3>DELETE - Smazání hráče</h3>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Smaže vybraného hráče z databáze.</p>
+  "id": 1,
+  "number": null
+}</pre>
+                     </div>
+                     <div>
+                        <h3>PUT - Úprava hráče</h3>
+                        <span class="label label-info">club</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Hráče může upravovat pouze účet s rolí <span class="label label-info">club</span>, kterému hráč náleží.</p>
+                     </div>
+                     <div>
+                        <h3>DELETE - Smazání hráče</h3>
+                        <span class="label label-info">club</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Hráče může smazat pouze účet s rolí <span class="label label-info">club</span>, kterému hráč náleží.</p>
+                     </div>
+                  </div>
                </div>
             </div>
-               </div>
-            </div>
-
             <!-- ----------------------------------------------- -->
             <div class="panel panel-default">
-
-            <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#players" aria-expanded="false" aria-controls="players">
-                        <strong>/players</strong>
-                        </a>
-                     </h3>
-                  </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Hráči</strong>
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#players" aria-expanded="false" aria-controls="players">
+                           <strong>/players</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Hráči</strong>
+                     </div>
                   </div>
                </div>
-            </div>
-
                <div id="players" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-               <div>
-                  <h3>GET - Seznam všech hráčů</h3>
-                  <span class="label label-default">public</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
+                     <h3>GET - Seznam všech hráčů</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
                      <h5>Požadavek</h5>
-                  <pre>
+                     <pre>
 GET /api/players HTTP/1.1
 Host: catcher.zlutazimnice.cz
 </pre>
-                  <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 200 OK</pre>
-                  <pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 200 OK</pre>
+                     <pre>
 {
-  "count": 1402,
-  "items": [
+  "count": 1283,
+  "players": [
     {
       "ranking": null,
-      "firstname": "Marek",
-      "caldId": 520,
-      "lastname": "Laboš",
-      "number": null,
+      "clubId": 12,
+      "firstname": "Pavel",
+      "caldId": 976,
+      "lastname": "Matoušek",
       "nickname": null,
-      "id": 1
+      "id": 1,
+      "number": null
     },
     ...
   ]
 }
 </pre>
-               </div>
-               <div>
-                  <h3>POST - Vytvoření hráče</h3>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Vytvoří nového hráče.</p>
-               </div>
-            </div>
+                     <h3>POST - Vytvoření hráče</h3>
+                     <span class="label label-info">club</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Hráč vytvořený rolí <span class="label label-info">club</span> převezme automaticky ID jeho klubu.</p>
+                  </div>
                </div>
             </div>
-
-
             <!-- ----------------------------------------------- -->
             <div class="panel panel-default">
-
-            <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournament" aria-expanded="false" aria-controls="tournament">
-                        <strong>/tournament/{id}</strong>
-                        </a>
-                     </h3>
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#divisions" aria-expanded="false" aria-controls="divisions">
+                           <strong>/divisions</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Divize</strong>
+                     </div>
                   </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Turnaj</strong>
+               </div>
+               <div id="divisions" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Kolekce všech divizí</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Vrátí kolekci všech divizí.</p>
                   </div>
                </div>
             </div>
-
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#team" aria-expanded="false" aria-controls="team">
+                           <strong>/team/{id}</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Tým</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="team" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Informace o konkrétním týmu</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <h3>PUT - Úprava týmu</h3>
+                     <span class="label label-info">club</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Účet s rolí <span class="label label-info">club</span> má právo editovat pouze týmy s jeho klubovým ID. Navíc editovatelné jsou pouze atributy <code>divisionId</code> a <code>degree</code>.</p>
+                     <h3>DELETE - Smazání týmu</h3>
+                     <span class="label label-info">club</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Účet s rolí <span class="label label-info">club</span> má právo mazat pouze týmy s jeho klubovým ID.</p>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#teams" aria-expanded="false" aria-controls="teams">
+                           <strong>/teams/</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Týmy</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="teams" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Kolekce všech týmů</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <h3>POST - Vytvoření nového týmu</h3>
+                     <span class="label label-info">club</span>
+                     <span class="label label-info">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Vytvářet nové týmy lze zpravidla pouze pod účtem s rolí <span class="label label-info">club</span>, který má právo vytvořit nový tým pod svým klubovým ID. Účet s rolí <span class="label label-info">organizer</span> může vytvářet týmy libovolně, avšak počet požadavků bude možná v budoucnosti omezen.</p>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournament" aria-expanded="false" aria-controls="tournament">
+                           <strong>/tournament/{id}</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Turnaj</strong>
+                     </div>
+                  </div>
+               </div>
                <div id="tournament" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-
-                  <h3>GET - Informace o konkrétním turnaji</h3>
-                  <span class="label label-default">public</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
+                     <h3>GET - Informace o konkrétním turnaji</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
                      <p>Získá základní informace o turnaji.</p>
-                     <h5>Parametry</h5>
-                        <table class="table table-sm">
-  <tbody>
-    <tr>
-      <td><code>standings</code></td>
-      <td><code>boolean</code></td>
-      <td>K výsledku přiřadí výsledné pořadí týmů.</td>
-    </tr>
-  </tbody>
-</table>
                      <h3>PUT - Úprava turnaje</h3>
                      <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Nejdůležitejší úpravou je změna příznaku <code>active</code> na <code>true</code>. Tím dojde k přiřazení týmů na jejich místa podle nasazení a turnaj se považuje za připravený.</p>
-            </div>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Nejdůležitejší úpravou je změna příznaku <code>active</code> nebo <code>terminated</code> (<span class="label label-danger">UNFINISHED</span>) na <code>true</code>. První změnou dojde k přiřazení týmů na jejich místa podle nasazení a turnaj se považuje za připravený. Druhý příznak turnaj ukončí a zveřejní hodnocení SOTG všem uživatelům.</p>
+                     <p>Dále jsou editovatelné atributy <code>name</code>, <code>startDate</code>, <code>endDate</code>, <code>city</code>, <code>country</code>, <code>caldTournametId</code>.</p>
+                  </div>
                </div>
             </div>
             <!-- ----------------------------------------------- -->
             <div class="panel panel-default">
-            <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentPlayers" aria-expanded="false" aria-controls="tournamentPlayers">
-                        <strong>/tournament/{id}/players</strong>
-                        </a>
-                     </h3>
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournament" aria-expanded="false" aria-controls="tournament">
+                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/standings</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Pořadí týmů na turnaji</strong>
+                     </div>
                   </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Hráči na turnaji</strong>
+               </div>
+               <div id="tournament" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Informace o konkrétním turnaji</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Získá základní informace o turnaji.</p>
+                     <h5>Parametry</h5>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>standings</code></td>
+                              <td><code>boolean</code></td>
+                              <td>K výsledku přiřadí výsledné pořadí týmů.</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h3>PUT - Úprava turnaje</h3>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Nejdůležitejší úpravou je změna příznaku <code>active</code> nebo <code>terminated</code> na <code>true</code>. První změnou dojde k přiřazení týmů na jejich místa podle nasazení a turnaj se považuje za připravený. Druhý příznak turnaj ukončí a zveřejní hodnocení SOTG všem uživatelům.</p>
                   </div>
                </div>
             </div>
-
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentPlayers" aria-expanded="false" aria-controls="tournamentPlayers">
+                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/players</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Hráči na turnaji</strong>
+                     </div>
+                  </div>
+               </div>
                <div id="tournamentPlayers" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     <div>
-                  <h3>GET - Seznam hráčů</h3>
-                  <span class="label label-default">public</span>
-                  <span class="label label-default">team</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Vrátí seznam hráčů, včetně jejich statistik. Volitelným parametrem je <code>teamId</code>, který zmenší výslednou množinu na hráče jednoho týmu.</p>
-
-               </div>
-               <div>
-                  <h3>POST - Přidání hráče k týmu</h3>
-                  <span class="label label-default">team</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Vytváří vazbu mezi týmem a hráčem. Lze tak individuálně přídávat hráče na soupisku.</p>
-                  <h5>Požadavek</h5>
-                  <pre>
+                     <h3>GET - Seznam hráčů</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">team</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Vrátí seznam hráčů, včetně jejich statistik. Volitelným parametrem je <code>teamId</code>, který zmenší výslednou množinu na hráče jednoho týmu.</p>
+                     <h3>POST - Přidání hráče k týmu</h3>
+                     <span class="label label-default">team</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Vytváří vazbu mezi týmem a hráčem. Lze tak individuálně přídávat hráče na soupisku.</p>
+                     <h5>Požadavek</h5>
+                     <pre>
 POST /api/tournament/1/players HTTP/1.1
 Host: catcher.zlutazimnice.cz
 Content-Type: application/json
-</pre><pre>
+</pre>
+                     <pre>
 {
   "playerId": 999,
   "teamId": 1
 }</pre>
-                  <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 201 Created</pre>
-                  <pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 201 Created</pre>
+                     <pre>
 {
   UNFINISHED
 }
 </pre>
-               </div>
-               <div>
-                  <h3>DELETE - Smazání hráče z týmu</h3>
-                  <span class="label label-default">team</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Lze smazat pouze takového hráče, jenž nemá žádný odehraný zápas.</p>
-                  <h5>Požadavek</h5>
-                  <pre>
+                     <h3>DELETE - Smazání hráče z týmu</h3>
+                     <span class="label label-default">team</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Lze smazat pouze takového hráče, jenž nemá žádný odehraný zápas.</p>
+                     <h5>Požadavek</h5>
+                     <pre>
 DELETE /api/tournament/1/players HTTP/1.1
 Host: catcher.zlutazimnice.cz
 Content-Type: application/json
-</pre><pre>
+</pre>
+                     <pre>
 {
   "playerId": 999,
   "teamId": 1
-}</pre>   
-               <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 200 OK</pre>
-               </div>
+}</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 200 OK</pre>
                   </div>
                </div>
             </div>
-               <!-- ----------------------------------------------- -->
-               <div class="panel panel-default">
-               <div class="panel-heading" role="tab" id="headingTen">
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
                   <div class="row">
                      <div class="col-md-6">
                         <h3 class="panel-title">
-                        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTen" aria-expanded="false" aria-controls="collapseTen">
-                           <strong>/tournament/{id}/teams</strong>
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentTeams" aria-expanded="false" aria-controls="tournamentTeams">
+                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/teams</strong>
                            </a>
                         </h3>
                      </div>
@@ -482,335 +764,669 @@ Content-Type: application/json
                      </div>
                   </div>
                </div>
-
-                  <div id="collapseTen" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTen">
-                     <div class="panel-body">
-                        <div>
-                     <h3>GET - Seznam týmů</h3>
-                     <span class="label label-default">public</span>
-                     <span class="label label-default">team</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <p>Vrátí seznam týmů, včetně jejich statistik.</p>
-
-                     <h5>Parametry</h5>
-                     <table class="table table-sm">
-     <tbody>
-       <tr>
-         <td><code>teamId</code></td>
-         <td><code>int</code></td>
-         <td>ID týmu, jenž zmenší výslednou množinu dat na data jednoho týmu.</td>
-       </tr>
-       <tr>
-         <td><code>players</code></td>
-         <td><code>boolean</code></td>
-         <td>Příznak, zda k odpovědi přiřadit seznam hráčů včetně jejich statistik.</td>
-       </tr>
-     </tbody>
-   </table></p>
-                  </div>
-                  <div>
-                     <h3>PUT - Změna účastníka turnaje</h3>
-                     <span class="label label-default">team</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <p>Jestliže turnaj nemá příznak <code>active</code>, lze stále přidávat nebo měnit kteréhokoliv účastníka turnaje.</p>
-                     <h5>Tělo požadavku</h5>
-                     <table class="table table-sm">
-     <tbody>
-       <tr>
-         <td><code>seeding</code></td>
-         <td><code>int</code></td>
-         <td>Pozice, na kterou bude nový tým dosazen.</td>
-       </tr>
-       <tr>
-         <td><code>teamId</code></td>
-         <td><code>int</code></td>
-         <td>ID nového týmu.</td>
-       </tr>
-     </tbody>
-   </table>
-
-                     <h5>Požadavek</h5>
-                     <pre>
+               <div id="tournamentTeams" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <div>
+                        <h3>GET - Seznam týmů</h3>
+                        <span class="label label-default">public</span>
+                        <span class="label label-default">team</span>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Vrátí seznam týmů, včetně jejich statistik.</p>
+                        <h5>Parametry</h5>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>teamId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID týmu, jenž zmenší výslednou množinu dat na data jednoho týmu.</td>
+                              </tr>
+                              <tr>
+                                 <td><code>players nepotrebuu!!!</code></td>
+                                 <td><code>boolean</code></td>
+                                 <td>Příznak, zda k odpovědi přiřadit seznam hráčů včetně jejich statistik.</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        </p>
+                     </div>
+                     <div>
+                        <h3>PUT - Změna účastníka turnaje</h3>
+                        <span class="label label-default">team</span>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Jestliže turnaj nemá příznak <code>active</code>, lze stále přidávat nebo měnit kteréhokoliv účastníka turnaje.</p>
+                        <h5>Tělo požadavku</h5>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>seeding</code></td>
+                                 <td><code>int</code></td>
+                                 <td>Pozice, na kterou bude nový tým dosazen.</td>
+                              </tr>
+                              <tr>
+                                 <td><code>teamId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID nového týmu.</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <h5>Požadavek</h5>
+                        <pre>
    PUT /api/tournament/1/teams HTTP/1.1
    Host: catcher.zlutazimnice.cz
    Content-Type: application/json
-   </pre><pre>
+   </pre>
+                        <pre>
    {
      "seeding": 2,   
      "teamId": 3
-   }</pre>   
-                  <h5>Odpověď</h5>
-                     <pre>HTTP/1.1 200 OK</pre>
-                  </div>
+   }</pre>
+                        <h5>Odpověď</h5>
+                        <pre>HTTP/1.1 200 OK</pre>
                      </div>
                   </div>
                </div>
-
+            </div>
             <!-- ----------------------------------------------- -->
             <div class="panel panel-default">
-            <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentMatches" aria-expanded="false" aria-controls="tournamentMatches">
-                        <strong>/tournament/{id}/matches</strong>
-                        </a>
-                     </h3>
-                  </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Zápasy na turnaji</strong>
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentMatches" aria-expanded="false" aria-controls="tournamentMatches">
+                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/matches</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Zápasy na turnaji</strong>
+                     </div>
                   </div>
                </div>
-            </div>
-
                <div id="tournamentMatches" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
                      <div>
-                  <h3>GET - Seznam zápasů</h3>
-                  <span class="label label-default">public</span>
-                  <span class="label label-default">team</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Vrátí seznam zápasů.</p>
-
-                  <h5>Parametry</h5>
-                  <table class="table table-sm">
-  <tbody>
-   <tr>
-      <td><code>matchId</code></td>
-      <td><code>int</code></td>
-      <td>ID zápasu, jenž zmenší výslednou množinu dat na data jednoho konkrétního zápasu.</td>
-    </tr>
-    <tr>
-      <td><code>fieldId</code></td>
-      <td><code>int</code></td>
-      <td>ID hřiště, jenž zmenší výslednou množinu dat na seznam zápasů z jednoho konkrétního hřiště.</td>
-    </tr>
-    <tr>
-      <td><code>points</code></td>
-      <td><code>boolean</code></td>
-      <td>Příznak, zda ke každému zápasu přiřadit seznam všech odehraných bodů.</td>
-    </tr>
-    <tr>
-      <td><code>date</code></td>
-      <td><code>datetime</code></td>
-      <td>Zápasys konkrétního dne (ve formátu YYYY-MM-DD).</td>
-    </tr>
-    <tr>
-      <td><code>active</code></td>
-      <td><code>boolean</code></td>
-      <td>Příznak, zda vrátit pouze právě odehrávaná utkání.</td>
-    </tr>
-    <tr>
-      <td><code>terminated</code></td>
-      <td><code>boolean</code></td>
-      <td>Příznak, zda vrátit pouze již odehraná utkání.</td>
-    </tr>
-  </tbody>
-</table></p>
-               </div>
-               <div>
-                  <h3>PUT - Změna zápasu</h3>
-                  <span class="label label-default">team</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Nejčastěji půjde o ukončení zápasu parametrem <code>terminate</code>. Dále pak parametry <code></code> <code>terminate</code> </p>
-               </div>
+                        <h3>GET - Seznam zápasů</h3>
+                        <span class="label label-default">public</span>
+                        <span class="label label-default">team</span>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Vrátí seznam zápasů.</p>
+                        <h5>Parametry</h5>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>matchId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID zápasu, jenž zmenší výslednou množinu dat na data jednoho konkrétního zápasu.</td>
+                              </tr>
+                              <tr>
+                                 <td><code>fieldId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID hřiště, jenž zmenší výslednou množinu dat na seznam zápasů z jednoho konkrétního hřiště.</td>
+                              </tr>
+                              <tr>
+                                 <td><code>points</code></td>
+                                 <td><code>boolean</code></td>
+                                 <td>Příznak, zda ke každému zápasu přiřadit seznam všech odehraných bodů. <strong>Tohle asi nebudu používat. Stačí /api/tournament/{id}/match/{id}/points</strong>.</td>
+                              </tr>
+                              <tr>
+                                 <td><code>date</code></td>
+                                 <td><code>datetime</code></td>
+                                 <td>Zápasy konkrétního dne (ve formátu YYYY-MM-DD).</td>
+                              </tr>
+                              <tr>
+                                 <td><code>active</code></td>
+                                 <td><code>boolean</code></td>
+                                 <td>Příznak, zda vrátit pouze právě odehrávaná utkání.</td>
+                              </tr>
+                              <tr>
+                                 <td><code>terminated</code></td>
+                                 <td><code>boolean</code></td>
+                                 <td>Příznak, zda vrátit pouze již odehraná utkání.</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        </p>
+                     </div>
+                     <div>
+                        <h3>PUT - Změna zápasu</h3>
+                        <span class="label label-default">team</span>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Nejčastěji půjde o ukončení zápasu parametrem <code>terminate</code>. Dále pak parametry <code></code> <code>terminate</code> </p>
+                     </div>
                   </div>
                </div>
             </div>
-
             <!-- ----------------------------------------------- -->
-
             <div class="panel panel-default">
-            <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentSpirit" aria-expanded="false" aria-controls="tournamentSpirit">
-                        <strong>/tournament/{id}/spirit</strong>
-                        </a>
-                     </h3>
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentGroups" aria-expanded="false" aria-controls="tournamentGroups">
+                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/groups</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Hráči oddílu</strong>
+                     </div>
                   </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Spirit of the Game</strong>
+               </div>
+               <div id="tournamentGroups" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <div>
+                        <h3>GET - Seznam všech turnajů</h3>
+                        <span class="label label-default">public</span>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <h3>POST - Vytvoření nového turnaje</h3>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Požadavek je nejprve důkladně zkontrolován, zda je hratelný a neobsahuje chyby, a pak je uložen do databáze. Po vytvoření je nutné turnaj aktivovat, tzn. nastavit příznak <code>active</code> na hodnotu <code>true</code>.</p>
+                     </div>
                   </div>
                </div>
             </div>
-
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentSpirit" aria-expanded="false" aria-controls="tournamentSpirit">
+                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/spirit</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Spirit of the Game</strong>
+                     </div>
+                  </div>
+               </div>
                <div id="tournamentSpirit" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     Bude vracet a ukladat spirit per match, per team.
+                     <h3>GET - Získá hodnocení SOTG</h3>
+                     <span class="label label-info">public</span>
+                     <span class="label label-info">team</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Díky dvěma parametrům lze získat kterékoliv hodnocení Spirit of the Game. Turnaj však musí mít příznak <code>terminated</code>. Bez něj jsou výsledky veřejné pouze pro roli <span class="label label-default">organizer</span>. Ke svým odevzdaným hodnocením má vždy přístup role <span class="label label-default">team</span>.</p>
+                     <h5>Parametry</h5>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>matchId</code></td>
+                              <td><code>int</code></td>
+                              <td>Zmenší výslednou množinu na údaje jednoho zápasu.</td>
+                           </tr>
+                           <tr>
+                              <td><code>teamId</code></td>
+                              <td><code>int</code></td>
+                              <td>Zmenší výslednou množinu na údaje jednoho zápasu.</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h3>POST - Udělí SOTG</h3>
+                     <span class="label label-default">team</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Hodnocení Spirit of the Game může <span class="label label-default">team</span> udělit jinému týmu pouze za předpokladu, že s ním odehrál zápas. Hodnocení všem zápasům může zadávat i <span class="label label-default">organizer</span>.</p>
+                     <h5>Tělo požadavku</h5>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>matchId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID týmu, jenž má být ohodnocen.</td>
+                           </tr>
+                           <tr>
+                              <td><code>teamId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID zápasu, kterého se hodnocení týká.</td>
+                           </tr>
+                           <tr>
+                              <td><code>comment</code></td>
+                              <td><code>string</code></td>
+                              <td>Hodnocení SOTG: komentář.</td>
+                           </tr>
+                           <tr>
+                              <td><code>rules</code></td>
+                              <td><code>int</code></td>
+                              <td>Hodnocení SOTG: znalost pravidel.</td>
+                           </tr>
+                           <tr>
+                              <td><code>fouls</code></td>
+                              <td><code>int</code></td>
+                              <td>Hodnocení SOTG: fauly a tělesný kontakt.</td>
+                           </tr>
+                           <tr>
+                              <td><code>fair</code></td>
+                              <td><code>int</code></td>
+                              <td>Hodnocení SOTG: férové smýšlení.</td>
+                           </tr>
+                           <tr>
+                              <td><code>positive</code></td>
+                              <td><code>int</code></td>
+                              <td>Hodnocení SOTG: pozitivní přístup.</td>
+                           </tr>
+                           <tr>
+                              <td><code>communication</code></td>
+                              <td><code>int</code></td>
+                              <td>Hodnocení SOTG: komunikace.</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h5>Požadavek</h5>
+                     <pre>
+POST /api/tournament/1/teams HTTP/1.1
+Host: catcher.zlutazimnice.cz
+Content-Type: application/json
+</pre>
+                     <pre>
+{
+  "matchId": 2,   
+  "teamId": 3,
+  "comment": "Game was very agresive, but fair",
+  "rules": 3
+  "fouls": 1
+  "fair": 4
+  "positive": 2
+  "communication": 2
+}</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 201 Created</pre>
+                     <pre>
+{
+  UNFINISHED
+}</pre>
+                     <h3>PUT - Upraví hodnocení SOTG</h3>
+                     <span class="label label-default">team</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Platí stejné podmínky jako u metody POST. Měnit hodnocení SOTG nelze po ukončení turnaje (příznak <code>terminated</code>).</p>
                   </div>
                </div>
             </div>
-
             <!-- ----------------------------------------------- -->
             <div class="panel panel-default">
-            <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentPoints" aria-expanded="false" aria-controls="tournamentPoints">
-                        <strong>/tournament/{id}/points</strong>
-                        </a>
-                     </h3>
-                  </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Body na turnaji</strong>
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentPoints" aria-expanded="false" aria-controls="tournamentPoints">
+                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/match/{id}/points</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Body v zápase</strong>
+                     </div>
                   </div>
                </div>
-            </div>
-
                <div id="tournamentPoints" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     Bude vracet a ukladat body per match.
+                     <h3>GET - Získá odehrané body v konkrétním zápase</h3>
+                     <span class="label label-info">public</span>
+                     <span class="label label-info">team</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Vrátí informace o zápase a kolekci všech již odehraných bodů.</p>
+                     <h3>POST - Vytvoří nový bod</h3>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>  Hodnocení Spirit of the Game může <span class="label label-default">team</span> udělit jinému týmu pouze za předpokladu, že s ním odehrál zápas. Hodnocení všem zápasům může zadávat i <span class="label label-default">organizer</span>.</p>
+                     <h5>Tělo požadavku</h5>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>assistPlayerId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID hráče, jenž nahrává na bod.</td>
+                           </tr>
+                           <tr>
+                              <td><code>scorePlayerId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID zápasu, jenž skóruje.</td>
+                           </tr>
+                           <tr>
+                              <td><code>homePoint</code></td>
+                              <td><code>boolean</code></td>
+                              <td>Příznak, zda bod dal domácí tým.</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h5>Požadavek</h5>
+                     <pre>
+POST /api/tournament/1/match/14/points HTTP/1.1
+Host: catcher.zlutazimnice.cz
+Content-Type: application/json
+</pre>
+                     <pre>
+{
+  "assistPlayerId": 478,   
+  "scorePlayerId": 319,
+  "homePoint": true
+}</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 201 Created</pre>
+                     <pre>
+{
+  "matchId": 478,   
+  "order": 319,
+  "homePoint": true
+  "assistPlayerId": 478,   
+  "scorePlayerId": 319,
+  "homeScore": 9,
+  "awayScore": 7
+}</pre>
+                     <h3>PUT - Upraví bod</h3>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Lze upravit skórujícího i nahrávajícího hráče v jakémkoliv bodě v zápase. Nelze však upravit skóre (tj. změna týmu, který dal bod), v tom případě je nutné daný bod i všechny následující vymazat a vytvořit je znovu.</p>
+                     <h5>Tělo požadavku</h5>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>order</code></td>
+                              <td><code>int</code></td>
+                              <td>Určení konkrétního bodu, který má být upraven, podle pořadí.</td>
+                           </tr>
+                           <tr>
+                              <td><code>assistPlayerId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID hráče, jenž nahrává na bod.</td>
+                           </tr>
+                           <tr>
+                              <td><code>scorePlayerId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID zápasu, jenž skóruje.</td>
+                           </tr>
+                           <tr>
+                              <td><code>homePoint</code></td>
+                              <td><code>boolean</code></td>
+                              <td>Příznak, zda bod dal domácí tým.</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h3>DELETE - Smaže poslední uložený bod</h3>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Smaže <strong>poslední</strong> uložený bod. Opakovaným voláním lze smazat všechny již dříve uložené body. Tento požadavek lze volat pouze na zápasy, které ještě nebyly ukončeny.</p>
+                     <h5>Požadavek</h5>
+                     <pre>
+DELETE /api/tournament/1/match/12/points HTTP/1.1
+Host: catcher.zlutazimnice.cz
+</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 200 OK</pre>
                   </div>
                </div>
             </div>
-
-
             <!-- ----------------------------------------------- -->
             <div class="panel panel-default">
-
-            <div class="panel-heading" role="tab">
-               <div class="row">
-                  <div class="col-md-6">
-                     <h3 class="panel-title">
-                     <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournaments" aria-expanded="false" aria-controls="tournaments">
-                        <strong>/tournaments</strong>
-                        </a>
-                     </h3>
-                  </div>
-                  <div class="col-md-6" align="right">
-                     <strong>Turnaje</strong>
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournaments" aria-expanded="false" aria-controls="tournaments">
+                           <strong>/tournaments</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Turnaje</strong>
+                     </div>
                   </div>
                </div>
-            </div>
-
                <div id="tournaments" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-               <div>
-                  <h3>GET - Seznam všech turnajů</h3>
-                  <span class="label label-default">public</span>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-                     <h5>Parametry</h5>
-
-                     <table class="table table-sm">
-  <tbody>
-    <tr>
-      <td><code>from</code></td>
-      <td><code>datetime</code></td>
-      <td>Turnaj se odehrává po tomto datumu (ve formátu YYYY-MM-DD).</td>
-    </tr>
-    <tr>
-      <td><code>to</code></td>
-      <td><code>datetime</code></td>
-      <td>Turnaj se odehrává před tímto datumem (ve formátu YYYY-MM-DD).</td>
-    </tr>
-    <tr>
-      <td><code>country</code></td>
-      <td><code>string</code></td>
-      <td>Země, ve které se turnaj odehrává (ve formátu ISO 3166-1 alpha-3).</td>
-    </tr>
-    <tr>
-      <td><code>divisionId</code></td>
-      <td><code>int</code></td>
-      <td>Identifikátor divize.</td>
-    </tr>
-    <tr>
-      <td><code>active</code></td>
-      <td><code>boolean</code></td>
-      <td>Příznak turnaje, zda je aktivní.</td>
-    </tr>
-    <tr>
-      <td><code>terminated</code></td>
-      <td><code>boolean</code></td>
-      <td>Příznak turnaje, zda je ukončený.</td>
-    </tr>
-    <tr>
-      <td><code>cald</code></td>
-      <td><code>boolean</code></td>
-      <td>Příznak, zda jde o turnaj ČALD.</td>
-    </tr>
-  </tbody>
-</table>
-
+                     <h3>GET - Kolekce všech turnajů</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Získá kolekci všech turnajů. Díky parametrům lze výslednou množinu změnšit.</p>
+                     <h5><span class="label label-danger">UNFINISHED</span>  Parametry</h5>
+                     <table class="table">
+                        <tbody>
+                           <tr>
+                              <td><code>from</code></td>
+                              <td><code>datetime</code></td>
+                              <td>nepovinný</td>
+                              <td>Turnaj se odehrává po tomto datumu (ve formátu YYYY-MM-DD).</td>
+                           </tr>
+                           <tr>
+                              <td><code>to</code></td>
+                              <td><code>datetime</code></td>
+                              <td>nepovinný</td>
+                              <td>Turnaj se odehrává před tímto datumem (ve formátu YYYY-MM-DD).</td>
+                           </tr>
+                           <tr>
+                              <td><code>country</code></td>
+                              <td><code>string</code></td>
+                              <td>nepovinný</td>
+                              <td>Země, ve které se turnaj odehrává (ve formátu ISO 3166-1 alpha-3).</td>
+                           </tr>
+                           <tr>
+                              <td><code>divisionId</code></td>
+                              <td><code>int</code></td>
+                              <td>nepovinný</td>
+                              <td>ID divize.</td>
+                           </tr>
+                           <tr>
+                              <td><code>active</code></td>
+                              <td><code>boolean</code></td>
+                              <td>nepovinný</td>
+                              <td>Příznak turnaje, zda je aktivní.</td>
+                           </tr>
+                           <tr>
+                              <td><code>terminated</code></td>
+                              <td><code>boolean</code></td>
+                              <td>nepovinný</td>
+                              <td>Příznak turnaje, zda je ukončený.</td>
+                           </tr>
+                           <tr>
+                              <td><code>cald</code></td>
+                              <td><code>boolean</code></td>
+                              <td>nepovinný</td>
+                              <td>Příznak, zda jde o turnaj ČALD.</td>
+                           </tr>
+                        </tbody>
+                     </table>
                      <h5>Požadavek</h5>
-                  <pre>
+                     <pre>
 GET /api/tournaments HTTP/1.1
 Host: catcher.zlutazimnice.cz
 </pre>
-                  <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 200 OK</pre>
-                  <pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 200 OK</pre>
+                     <pre>
 {
-  "count": 2,
+  "count": 5,
   "items": [
     {
-      UNFINISHED
+      "city": "Prague",
+      "endDate": "2016-04-01T00:00:00",
+      "name": "PFL 2016",
+      "division": {
+        "division": "open",
+        "id": 1
+      },
+      "country": "CZE",
+      "teams": 4,
+      "caldTournament": {},
+      "active": true,
+      "terminated": false,
+      "startDate": "2016-04-01T00:00:00",
+      "id": 1
     },
     ...
   ]
 }
 </pre>
-<div>
-                  <h3>POST - Vytvoření nového turnaje</h3>
-                  <span class="label label-default">organizer</span>
-                  <span class="label label-default">admin</span>
-                  <p>
-                  <p>Požadavek je nejprve důkladně zkontrolován, zda je hratelný a neobsahuje chyby, a pak je uložen do databáze. Po vytvoření je nutné turnaj aktivovat, tzn. nastavit příznak <code>active</code> na hodnotu <code>true</code>.</p>
-                  <h5>Tělo požadavku</h5>
-                  <table class="table table-sm">
-
-  <tbody>
-    <tr>
-      <td><code>startDate</code></td>
-      <td><code>datetime</code></td>
-      <td>První hrací den turnaje (ve formátu YYYY-MM-DD).</td>
-    </tr>
-    <tr>
-      <td><code>endDate</code></td>
-      <td><code>datetime</code></td>
-      <td>Poslední hrací den turnaje (ve formátu YYYY-MM-DD).</td>
-    </tr>
-  </tbody>
-</table>
-                  <h5>Požadavek</h5>
-                  <pre>
+                     <div>
+                        <h3>POST - Vytvoření nového turnaje</h3>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Požadavek je nejprve důkladně zkontrolován, zda je hratelný a neobsahuje chyby, a pak je uložen do databáze. Po vytvoření je nutné turnaj aktivovat, tzn. nastavit příznak <code>active</code> na hodnotu <code>true</code>.</p>
+                        <h5><span class="label label-danger">UNFINISHED</span> Tělo požadavku</h5>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>startDate</code></td>
+                                 <td><code>datetime</code></td>
+                                 <td>První hrací den turnaje (ve formátu YYYY-MM-DD).</td>
+                              </tr>
+                              <tr>
+                                 <td><code>endDate</code></td>
+                                 <td><code>datetime</code></td>
+                                 <td>Poslední hrací den turnaje (ve formátu YYYY-MM-DD).</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <h5><span class="label label-warning">UNSTABLE</span> Požadavek</h5>
+                        <pre>
 POST /api/tournaments/ HTTP/1.1
 Host: catcher.zlutazimnice.cz
 Content-Type: application/json
-</pre><pre>
+</pre>
+                        <pre>
 {
-  UNFINISHED
+  "name":"PFL 2016",
+  "city":"Prague",
+  "country":"CZE",
+  "startDate":"2016-04-01",
+  "endDate":"2016-04-01",
+  "division":1,
+  "caldTournament":false,
+  "teams":[
+    {
+      "id":1,
+      "seeding":1
+    },
+    {
+      "id":2,
+      "seeding":2
+    },
+    {
+      "id":3,
+      "seeding":3
+    },
+    {
+      "id":4,
+      "seeding":4
+    }
+  ],
+  "fieldsCount":1,
+  "fields":[
+    {
+      "id":1,
+      "name":"Main field"
+    }
+  ],
+  "groups":[
+
+  ],
+  "matches":[
+    {
+      "field":1,
+      "startTime":"2016-04-01T09:00:00",
+      "endTime":"2016-04-01T09:29:00",
+      "homeSeed":1,
+      "awaySeed":4,
+      "looserNextStep":"3RD",
+      "winnerNextStep":"FIN",
+      "looserFinalStanding":null,
+      "winnerFinalStanding":null,
+      "identificator":"SE1",
+      "description":null
+    },
+    {
+      "field":1,
+      "startTime":"2016-04-01T09:30:00",
+      "endTime":"2016-04-01T09:59:00",
+      "homeSeed":2,
+      "awaySeed":3,
+      "looserNextStep":"3RD",
+      "winnerNextStep":"FIN",
+      "looserFinalStanding":null,
+      "winnerFinalStanding":null,
+      "identificator":"SE2",
+      "description":null
+    },
+    {
+      "field":1,
+      "startTime":"2016-04-01T10:00:00",
+      "endTime":"2016-04-01T10:29:00",
+      "homeSeed":null,
+      "awaySeed":null,
+      "looserNextStep":null,
+      "winnerNextStep":null,
+      "looserFinalStanding":4,
+      "winnerFinalStanding":3,
+      "identificator":"3RD",
+      "description":null
+    },
+    {
+      "field":1,
+      "startTime":"2016-04-01T10:30:00",
+      "endTime":"2016-04-01T10:59:00",
+      "homeSeed":null,
+      "awaySeed":null,
+      "looserNextStep":null,
+      "winnerNextStep":null,
+      "looserFinalStanding":2,
+      "winnerFinalStanding":1,
+      "identificator":"FIN",
+      "description":"Finale"
+    }
+  ]
 }</pre>
-                  <h5>Odpověď</h5>
-                  <pre>HTTP/1.1 201 Created</pre>
-                  <pre>
+                        <h5>Odpověď</h5>
+                        <pre>HTTP/1.1 201 Created</pre>
+                        <pre>
 {
-  UNFINISHED
+  "city": "Prague",
+  "endDate": "2016-04-01T00:00:00",
+  "name": "PFL 2016",
+  "division": {
+    "division": "open",
+    "id": 1
+  },
+  "country": "CZE",
+  "teams": 4,
+  "caldTournament": {},
+  "active": false,
+  "terminated": false,
+  "startDate": "2016-04-01T00:00:00",
+  "id": 1
 }
 </pre>
-               </div>
+                     </div>
+                  </div>
                </div>
             </div>
-               </div>
-            </div>
-
-
-
-
-
-
+            <!-- ----------------------------------------------- -->
+            <!-- ^ HERE IS PLACE FOR NEXT ^ -->
          </div>
          <br><br><br><br><br><br><br><br>
          <!-- HERE IS PLACE FOR NEXT -->
