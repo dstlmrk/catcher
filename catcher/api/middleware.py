@@ -7,6 +7,7 @@ import models
 import datetime
 from playhouse.shortcuts import model_to_dict
 # from catcher import models
+import logging
 
 class PeeweeConnection(object):
     def process_request(self, req, resp):
@@ -96,4 +97,5 @@ class JSONTranslator(object):
             return list(obj)
         if isinstance(obj, models.MySQLModel):
             return model_to_dict(obj)
+        logging.warning("Converter doesn't know how convert data")
         return None

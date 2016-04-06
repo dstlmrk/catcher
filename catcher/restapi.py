@@ -6,12 +6,10 @@ from api import errors
 from api import middleware
 import resources as r
 import models as m
+import peewee as pw
 
-# print all queries to stderr
-import logging
-logger = logging.getLogger('peewee')
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler())
+import logger
+
 
 '''
 falcon.API instances are callable WSGI apps
@@ -93,10 +91,11 @@ api.add_error_handler(TypeError, errors.BadRequest)
 api.add_error_handler(KeyError, errors.BadRequest)
 api.add_error_handler(ValueError, errors.BadRequest)
 api.add_error_handler(AttributeError, errors.BadRequest)
+api.add_error_handler(pw.IntegrityError, errors.BadRequest)
 api.add_error_handler(m.Club.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.User.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.Player.DoesNotExist, errors.NotFound)
-api.add_error_handler(m.ClubHasPlayer.DoesNotExist, errors.NotFound)
+# api.add_error_handler(m.ClubHasPlayer.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.Division.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.Team.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.Tournament.DoesNotExist, errors.NotFound)
