@@ -5,7 +5,7 @@ import models as m
 from datetime import datetime
 import falcon
 
-class CreateTournament(object):
+class TournamentCreater(object):
 
     def getTimestamp(self, timestamp):
         try:
@@ -239,7 +239,7 @@ class CreateTournament(object):
         # (4) --/       \-- (SE2)
 
     @m.db.atomic()
-    def createTournament(self, data):
+    def saveTournament(self, data):
         print "UKLADAM"
 
         print data['endDate']
@@ -312,9 +312,8 @@ class CreateTournament(object):
 
         return tournamentId
 
-    # method get is used if value can be null
-    def on_post(self, req, resp):
-
+    # method get is used, where value can be null
+    def createTournament(self, req, resp):
         data = req.context['data']
 
         # load term and check it
@@ -346,10 +345,9 @@ class CreateTournament(object):
         self.checkTournamentTree(matches, teams)
  
         # atomic create tournament
-        tournamentId = self.createTournament(data)
+        tournamentId = self.saveTournament(data)
 
         # for result body
         createdTurnament = m.Tournament.get(id=tournamentId)
 
-        resp.status = falcon.HTTP_201
-        req.context['result'] = createdTurnament
+        return createdTurnament

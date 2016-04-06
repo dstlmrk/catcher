@@ -169,7 +169,7 @@ tournament = '''{
 }'''
 
 # create torunament --------------------------------------------------------------------
-url = host + str("/api/tournaments/create")
+url = host + str("/api/tournaments")
 headers = {'content-type': 'application/json'}
 r = requests.post(url, data=tournament, headers=headers)
 # print("Tournament", r.status_code, r.reason)

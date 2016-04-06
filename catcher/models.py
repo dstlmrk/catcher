@@ -30,17 +30,20 @@ class MySQLModel(pw.Model):
     """A base model that will use our MySQL database"""
 
     def __str__(self):
-    #     # TODO: replace this private method
-        # return str(self._data)
         return str(model_to_dict(self))
-        # return str(model_to_dict(self._data))
 
     class Meta:
         database = db
 # -------------------------------------------------------------------------------------
+class Division(MySQLModel):
+    division = pw.CharField()
+# -------------------------------------------------------------------------------------
 class User(MySQLModel):
-    email    = pw.CharField()
-    password = pw.CharField()
+    email       = pw.CharField()
+    password    = pw.CharField()
+    createdAt   = pw.DateTimeField(db_column='created_at')
+    lastLoginAt = pw.DateTimeField(db_column='last_login_at')
+    nickname    = pw.CharField()
 # -------------------------------------------------------------------------------------
 class Club(MySQLModel):
     # id       = pw.PrimaryKeyField()
@@ -52,7 +55,7 @@ class Club(MySQLModel):
     country  = CountryCode(max_length=3)
 # -------------------------------------------------------------------------------------
 # Placeholder for the through model 
-DeferredClubHasPlayer = DeferredThroughModel()
+# DeferredClubHasPlayer = DeferredThroughModel()
 # -------------------------------------------------------------------------------------
 class Player(MySQLModel):
     firstname = pw.CharField()
@@ -61,24 +64,25 @@ class Player(MySQLModel):
     number    = pw.IntegerField()
     ranking   = pw.FloatField()
     caldId    = pw.IntegerField(db_column='cald_id')
-    # club      = pw.ForeignKeyField(Club, related_name='received_messages')
-    clubs     = ManyToManyField(Club, through_model=DeferredClubHasPlayer)
+    club      = pw.ForeignKeyField(Club)
+    # clubs     = ManyToManyField(Club, through_model=DeferredClubHasPlayer)
 # -------------------------------------------------------------------------------------
-class ClubHasPlayer(MySQLModel):
-    club         = pw.ForeignKeyField(Club)
-    player       = pw.ForeignKeyField(Player)
-    caldRelation = pw.BooleanField(db_column='cald_relation')
+# class ClubHasPlayer(MySQLModel):
+#     club         = pw.ForeignKeyField(Club)
+#     player       = pw.ForeignKeyField(Player)
+#     caldRelation = pw.BooleanField(db_column='cald_relation')
 
-    class Meta:
-        primary_key = pw.CompositeKey('club', 'player') 
-        db_table = 'club_has_player'
-        indexes = (
-            (('cald_relation', 'player'), True),
-        )
+#     class Meta:
+#         primary_key = pw.CompositeKey('club', 'player') 
+#         db_table = 'club_has_player'
+#         indexes = (
+#             (('cald_relation', 'player'), True),
+#         )
 # -------------------------------------------------------------------------------------
-DeferredClubHasPlayer.set_model(ClubHasPlayer)
+# DeferredClubHasPlayer.set_model(ClubHasPlayer)
 # -------------------------------------------------------------------------------------
 class Division(MySQLModel):
+    id = pw.PrimaryKeyField()
     division = pw.CharField()
 # -------------------------------------------------------------------------------------
 class Team(MySQLModel):

@@ -120,13 +120,13 @@ class ClubsAndPlayers(ImportFile):
 
     def _getPlayer(self, line):
         line = line.split(self.delimiter)
-        # (id player, firstname, lastname)
-        return (line[2], line[3], line[4])
+        # (id club, id player, firstname, lastname)
+        return (line[0], line[2], line[3], line[4])
 
-    def _getRelation(self, line):
-        line = line.split(self.delimiter)
-        # (id club, id player)
-        return (line[0], line[2])
+    # def _getRelation(self, line):
+    #     line = line.split(self.delimiter)
+    #     # (id club, id player)
+    #     return (line[0], line[2])
 
     @m.db.atomic()
     def _importClubs(self):
@@ -164,86 +164,86 @@ class ClubsAndPlayers(ImportFile):
         newPlayers = 0
 
         for player in players:
-            caldId    = int(player[0])
-            lastname  = player[1]
-            firstname = player[2]
+            clubId = int(player[0])
+            caldId = int(player[1])
+            lastname  = player[2]
+            firstname = player[3]
 
             try:
                 m.Player.insert(
                     caldId    = caldId,
                     lastname  = lastname,
-                    firstname = firstname
+                    firstname = firstname,
+                    club      = clubId
                     ).execute()
             except m.pw.IntegrityError as ex:
                 # duplicate rows will be not inserted
                 pass
             else:
                 newPlayers += 1
-
-
         return newPlayers
 
-    @m.db.atomic()
-    def _importRelations(self):
-        relations = set()
-        for line in self.body:
-            relations.add(self._getRelation(line))
+    # @m.db.atomic()
+    # def _importRelations(self):
+    #     relations = set()
+    #     for line in self.body:
+    #         relations.add(self._getRelation(line))
 
-        newRelations = 0
+    #     newRelations = 0
 
-        for relation in relations:
-            clubCaldId   = int(relation[0])
-            playerCaldId = int(relation[1])
+    #     for relation in relations:
+    #         clubCaldId   = int(relation[0])
+    #         playerCaldId = int(relation[1])
 
-            try:
-                club = m.Club.get(caldId=clubCaldId)
-                player = m.Player.get(caldId=playerCaldId)
-            except m.Club.DoesNotExist as ex:
-                print("Club %d (cald id) doesn't exist" % (clubCaldId))
-                continue
-            except m.Player.DoesNotExist as ex:
-                print("Player %d (cald id) doesn't exist" % (playerCaldId))
-                continue
+    #         try:
+    #             club = m.Club.get(caldId=clubCaldId)
+    #             player = m.Player.get(caldId=playerCaldId)
+    #         except m.Club.DoesNotExist as ex:
+    #             print("Club %d (cald id) doesn't exist" % (clubCaldId))
+    #             continue
+    #         except m.Player.DoesNotExist as ex:
+    #             print("Player %d (cald id) doesn't exist" % (playerCaldId))
+    #             continue
 
-            try:
-                # create new relation
-                m.ClubHasPlayer.insert(
-                    club         = club,
-                    player       = player,
-                    caldRelation = False
-                    ).execute()
-            except m.pw.IntegrityError as ex:
-                # if exists, ignore it
-                pass
+    #         try:
+    #             # create new relation
+    #             m.ClubHasPlayer.insert(
+    #                 club         = club,
+    #                 player       = player,
+    #                 caldRelation = False
+    #                 ).execute()
+    #         except m.pw.IntegrityError as ex:
+    #             # if exists, ignore it
+    #             pass
 
-            clubHasPlayer = m.ClubHasPlayer.get(club=club, player=player)
-            if not clubHasPlayer.caldRelation:
-                # somewhere exists old relation
-                    m.ClubHasPlayer.update(
-                        caldRelation = False
-                    ).where(
-                        m.ClubHasPlayer.caldRelation == True,
-                        m.ClubHasPlayer.player == player
-                    ).execute()
-                    # set new relation
-                    qr = m.ClubHasPlayer.update(
-                        caldRelation = True
-                    ).where(
-                        m.ClubHasPlayer.club == club,
-                        m.ClubHasPlayer.player == player
-                    ).execute()
-                    newRelations += int(qr)
+    #         clubHasPlayer = m.ClubHasPlayer.get(club=club, player=player)
+    #         if not clubHasPlayer.caldRelation:
+    #             # somewhere exists old relation
+    #                 m.ClubHasPlayer.update(
+    #                     caldRelation = False
+    #                 ).where(
+    #                     m.ClubHasPlayer.caldRelation == True,
+    #                     m.ClubHasPlayer.player == player
+    #                 ).execute()
+    #                 # set new relation
+    #                 qr = m.ClubHasPlayer.update(
+    #                     caldRelation = True
+    #                 ).where(
+    #                     m.ClubHasPlayer.club == club,
+    #                     m.ClubHasPlayer.player == player
+    #                 ).execute()
+    #                 newRelations += int(qr)
 
-        return newRelations
+    #     return newRelations
 
     def importData(self):
         newClubs     = self._importClubs()
         newPlayers   = self._importPlayers()
-        newRelations = self._importRelations()
+        # newRelations = self._importRelations()
         print("Imported:\n"
             + "- %d new clubs\n"   % (newClubs)
             + "- %d new players\n" % (newPlayers)
-            + "- %d new relations" % (newRelations)
+            # + "- %d new relations" % (newRelations)
             )
 
 

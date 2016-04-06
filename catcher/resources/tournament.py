@@ -3,6 +3,9 @@
 
 from api.resource import Collection, Item
 import models as m
+from tournamentCreater import TournamentCreater
+import falcon
+import logging
 
 class TournamentQueries(object):
 
@@ -162,10 +165,81 @@ class TournamentQueries(object):
         return result
 
 class Tournament(Item):
-    pass
+
+    @m.db.atomic()
+    def activeTournament(self, id):
+        tournament = m.Tournament.\
+            select(m.Tournament.teams, m.Tournament.active).\
+            where(m.Tournament.id == id).get()
+
+        if tournament.active:
+            raise ValueError("Tournament %s is already active" % id)
+
+        teams = m.TeamAtTournament.select().\
+            where(m.TeamAtTournament.tournament == id).dicts()
+
+        if len(teams) != tournament.teams:
+            raise Exception(
+                "Tournament has different number of teams"
+                " in contrast to TeamAtTournament" % matchId
+                )
+
+        # active Tournament
+        m.Tournament.update(active=True).where(m.Tournament.id==id).execute()
+
+        # Standing
+        for x in range(1, len(teams)+1):
+             m.Standing.insert(
+                tournament = id,
+                standing = x
+                ).execute()
+
+        # Matches
+        teamsAdSeeding = {}
+        for team in teams:
+            teamsAdSeeding[team['seeding']] = team['team']
+
+        matches = m.Match.select().\
+            where(
+                m.Match.tournament == 1 and \
+                (m.Match.homeSeed != None or m.Match.awaySeed != None) 
+                )
+
+        for match in matches:
+            m.Match.update(
+                homeTeam = teamsAdSeeding[match.homeSeed],
+                awayTeam = teamsAdSeeding[match.awaySeed]
+                ).\
+                where(m.Match.id == match.id).execute()
+
+    @m.db.atomic()    
+    def terminateTournament(self, id):
+        logging.warning("Tournament.terminateTournament() neni implementovano")
+
+    def on_put(self, req, resp, id):
+        requestBody = req.context['data']
+
+        tournament = m.Tournament.select(m.Tournament).where(m.Tournament.id==id).get()
+
+        if tournament.active is False and requestBody.get('active') is True:
+            self.activeTournament(id)
+
+        if tournament.terminated is False and requestBody.get('terminated') is True:
+            self.terminateTournament(id)
+
+        super(Tournament, self).on_put(req, resp, id,
+            ['name', 'startDate', 'endDate', 'city', 'country', 'caldTournametId']
+            )
+
 
 class Tournaments(Collection):
-    pass
+    
+    def on_post(self, req, resp):
+        tournamentCreater = TournamentCreater()
+        createdTurnament = tournamentCreater.createTournament(req, resp)
+        req.context['result'] = createdTurnament 
+        resp.status = falcon.HTTP_201
+
 
 class TournamentStandings(object):
 
@@ -239,57 +313,3 @@ class TournamentPlayers(object):
         req.context['result'] = TournamentQueries.getPlayersPerTournament(
             tournamentId = id
             )
-
-class ActiveTournament(object):
-
-    @m.db.atomic()
-    def activeTournament(self, id):
-        tournament = m.Tournament.\
-            select(m.Tournament.teams, m.Tournament.active).\
-            where(m.Tournament.id == id).get()
-
-        if tournament.active:
-            raise ValueError("Tournament %s is already active" % id)
-
-        teams = m.TeamAtTournament.select().\
-            where(m.TeamAtTournament.tournament == id).dicts()
-
-        if len(teams) != tournament.teams:
-            raise Exception(
-                "Tournament has different number of teams"
-                " in contrast to TeamAtTournament" % matchId
-                )
-
-        # active Tournament
-        m.Tournament.update(active=True).where(m.Tournament.id==id).execute()
-
-        # Standing
-        for x in range(1, len(teams)+1):
-             m.Standing.insert(
-                tournament = id,
-                standing = x
-                ).execute()
-
-        # Matches
-        teamsAdSeeding = {}
-        for team in teams:
-            teamsAdSeeding[team['seeding']] = team['team']
-
-        matches = m.Match.select().\
-            where(
-                m.Match.tournament == 1 and \
-                (m.Match.homeSeed != None or m.Match.awaySeed != None) 
-                )
-
-        for match in matches:
-            m.Match.update(
-                homeTeam = teamsAdSeeding[match.homeSeed],
-                awayTeam = teamsAdSeeding[match.awaySeed]
-                ).\
-                where(m.Match.id == match.id).execute()
-
-    def on_put(self, req, resp, id):
-        self.activeTournament(id)
-        # result body
-        createdTurnament = m.Tournament.get(id=id)
-        req.context['result'] = createdTurnament

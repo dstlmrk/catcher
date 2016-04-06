@@ -86,8 +86,15 @@ CREATE TABLE IF NOT EXISTS `catcher`.`player` (
   `number` SMALLINT NULL,
   `ranking` FLOAT NULL,
   `cald_id` INT NULL,
+  `club_id` INT NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `cald_id_UNIQUE` (`cald_id` ASC))
+  UNIQUE INDEX `cald_id_UNIQUE` (`cald_id` ASC),
+  INDEX `fk_player_club1_idx` (`club_id` ASC),
+  CONSTRAINT `fk_player_club1`
+    FOREIGN KEY (`club_id`)
+    REFERENCES `catcher`.`club` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 SHOW WARNINGS;
@@ -129,34 +136,6 @@ CREATE TABLE IF NOT EXISTS `catcher`.`team` (
   CONSTRAINT `fk_team_category1`
     FOREIGN KEY (`division_id`)
     REFERENCES `catcher`.`division` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-SHOW WARNINGS;
-
--- -----------------------------------------------------
--- Table `catcher`.`club_has_player`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `catcher`.`club_has_player` ;
-
-SHOW WARNINGS;
-CREATE TABLE IF NOT EXISTS `catcher`.`club_has_player` (
-  `club_id` INT NOT NULL,
-  `player_id` INT NOT NULL,
-  `cald_relation` TINYINT(1) NOT NULL DEFAULT FALSE,
-  PRIMARY KEY (`club_id`, `player_id`),
-  INDEX `fk_club_has_player_player1_idx` (`player_id` ASC),
-  INDEX `fk_club_has_player_club1_idx` (`club_id` ASC),
-  UNIQUE INDEX `cald_relation_UNIQUE` (`cald_relation` ASC, `player_id` ASC),
-  CONSTRAINT `fk_club_has_player_club1`
-    FOREIGN KEY (`club_id`)
-    REFERENCES `catcher`.`club` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_club_has_player_player1`
-    FOREIGN KEY (`player_id`)
-    REFERENCES `catcher`.`player` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -435,26 +414,26 @@ SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`point` (
   `match_id` INT NOT NULL,
   `order` INT NOT NULL,
-  `player_id_assist` INT NULL,
-  `player_id_score` INT NULL,
-  `score_home` INT NOT NULL,
-  `score_away` INT NOT NULL,
+  `assist_player_id` INT NULL,
+  `score_player_id` INT NULL,
+  `home_score` INT NOT NULL,
+  `away_score` INT NOT NULL,
   `home_point` TINYINT(1) NULL COMMENT 'tento sloupec zatim nepouzivam, ale az budu, tak rekne, kdo dal bod',
   PRIMARY KEY (`match_id`, `order`),
-  INDEX `fk_point_player1_idx` (`player_id_assist` ASC),
-  INDEX `fk_point_player2_idx` (`player_id_score` ASC),
+  INDEX `fk_point_player1_idx` (`assist_player_id` ASC),
+  INDEX `fk_point_player2_idx` (`score_player_id` ASC),
   CONSTRAINT `fk_point_match1`
     FOREIGN KEY (`match_id`)
     REFERENCES `catcher`.`match` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_point_player1`
-    FOREIGN KEY (`player_id_assist`)
+    FOREIGN KEY (`assist_player_id`)
     REFERENCES `catcher`.`player` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_point_player2`
-    FOREIGN KEY (`player_id_score`)
+    FOREIGN KEY (`score_player_id`)
     REFERENCES `catcher`.`player` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
@@ -470,7 +449,8 @@ DROP TABLE IF EXISTS `catcher`.`team_spirit_at_match` ;
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`team_spirit_at_match` (
   `match_id` INT NOT NULL,
-  `team_id` INT NOT NULL COMMENT 'Getting team\n',
+  `receiving_team_id` INT NOT NULL,
+  `giving_team_id` INT NOT NULL,
   `comment` VARCHAR(255) NULL,
   `rules` TINYINT NOT NULL,
   `fouls` TINYINT NOT NULL,
@@ -478,11 +458,23 @@ CREATE TABLE IF NOT EXISTS `catcher`.`team_spirit_at_match` (
   `positive` TINYINT NOT NULL,
   `communication` TINYINT NOT NULL,
   `total` TINYINT NOT NULL,
-  PRIMARY KEY (`match_id`, `team_id`),
+  PRIMARY KEY (`match_id`, `receiving_team_id`),
   INDEX `fk_match_spirit_match1_idx` (`match_id` ASC),
+  INDEX `fk_team_spirit_at_match_team1_idx` (`receiving_team_id` ASC),
+  INDEX `fk_team_spirit_at_match_team2_idx` (`giving_team_id` ASC),
   CONSTRAINT `fk_match_spirit_match1`
     FOREIGN KEY (`match_id`)
     REFERENCES `catcher`.`match` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_team_spirit_at_match_team1`
+    FOREIGN KEY (`receiving_team_id`)
+    REFERENCES `catcher`.`team` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_team_spirit_at_match_team2`
+    FOREIGN KEY (`giving_team_id`)
+    REFERENCES `catcher`.`team` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
