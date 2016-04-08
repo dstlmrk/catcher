@@ -2,6 +2,7 @@
 # coding=utf-8
 
 import falcon
+import ujson
 import json
 import models
 import datetime
@@ -72,7 +73,7 @@ class JSONTranslator(object):
                 )
         
         try:
-            req.context['data'] = json.loads(body)
+            req.context['data'] = ujson.loads(body)
         except (ValueError, UnicodeDecodeError):
             raise falcon.HTTPBadRequest(
                 'Malformed JSON',

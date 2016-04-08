@@ -17,6 +17,7 @@ pip peewee
 pip falcon
 pip iso3166
 pip MySQL-python
+pip ujson
 ```
 
 ## Local deploy
