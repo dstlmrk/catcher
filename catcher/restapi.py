@@ -10,7 +10,6 @@ import peewee as pw
 
 import logger
 
-
 '''
 falcon.API instances are callable WSGI apps
 
@@ -18,12 +17,15 @@ Each component’s process_request, process_resource, and process_response
 methods are executed hierarchically, as a stack, following the ordering of the list
 passed via the middleware kwarg of falcon.API.
 '''
-api = falcon.API(middleware=[
-    middleware.PeeweeConnection(),
-    # middleware.Authorization(),
-    middleware.RequireJSON(),
-    middleware.JSONTranslator(),
-])
+api = falcon.API(
+    middleware = [
+        middleware.Crossdomain(),
+        middleware.PeeweeConnection(),
+        # middleware.Authorization(),
+        middleware.RequireJSON(),
+        middleware.JSONTranslator(),
+        ]
+    )
 
 # resources are represented by long-lived class instances
 # TODO: editable cols presunout nekam, kde je muzu upravovat zaroven i pro testy
@@ -48,7 +50,8 @@ api.add_route('/api/tournament/{id}/players', r.TournamentPlayers())
 api.add_route('/api/tournament/{id}/teams', r.TournamentTeams())
 api.add_route('/api/tournament/{id}/matches', r.TournamentMatches())
 api.add_route('/api/tournament/{id}/groups', r.TournamentGroups())
-api.add_route('/api/tournament/{id}/spirit', r.Spirit())
+api.add_route('/api/tournament/{id}/points', r.Points())
+# api.add_route('/api/tournament/{id}/spirit', r.Spirit())
 
 # # informace o konkretnim turnaji
 # api.add_route('/api/tournament/{id}', r.Tournament(m.Tournament, []))

@@ -11,12 +11,18 @@ from playhouse.shortcuts import model_to_dict
 import logging
 
 class PeeweeConnection(object):
+
     def process_request(self, req, resp):
         models.db.connect()
 
     def process_response(self, req, resp, resource):
         if not models.db.is_closed():
             models.db.close()
+
+class Crossdomain(object):
+
+    def process_response(self, req, resp, resource):
+        resp.set_header('Access-Control-Allow-Origin', '*')
 
 class Authorization(object):
     pass
@@ -45,6 +51,7 @@ class Authorization(object):
     #     return True  # Suuuuuure it's valid...
 
 class RequireJSON(object):
+
     def process_request(self, req, resp):
         if not req.client_accepts_json:
             raise falcon.HTTPNotAcceptable(
@@ -58,6 +65,7 @@ class RequireJSON(object):
                     href='http://docs.examples.com/api/json')
 
 class JSONTranslator(object):
+
     def process_request(self, req, resp):
         # req.stream corresponds to the WSGI wsgi.input environ variable,
         # and allows you to read bytes from the request body
