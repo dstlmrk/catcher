@@ -7,7 +7,7 @@ from division import *
 from team import *
 from tournament import *
 from match import *
-from roster import *
+from spirit import *
 
 		
 # from tournamentCreater import *

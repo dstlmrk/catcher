@@ -14,9 +14,12 @@ class Item(object):
 
     def on_put(self, req, resp, id, editableCols=None):
         requestBody = req.context['data']
+        params = None
         if editableCols is not None:
             params = { key : requestBody[key] for key in requestBody if key in editableCols}
-        qr = self.model.update(**params).where(self.model.id==id).execute()
+        qr = None
+        if params:
+            qr = self.model.update(**params).where(self.model.id==id).execute()
         # TODO: Nemuzu zatim vracet, protoze v nekolika pripadech zobrazuje udaje uzivatele
         # req.context['result'] = self.model.select().where(self.model.id==id).get()
         resp.status = falcon.HTTP_200 if qr else falcon.HTTP_304

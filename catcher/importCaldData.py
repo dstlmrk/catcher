@@ -164,7 +164,7 @@ class ClubsAndPlayers(ImportFile):
         newPlayers = 0
 
         for player in players:
-            clubId = int(player[0])
+            clubId = m.Club.get(caldId=int(player[0])).id
             caldId = int(player[1])
             lastname  = player[2]
             firstname = player[3]
@@ -177,6 +177,8 @@ class ClubsAndPlayers(ImportFile):
                     club      = clubId
                     ).execute()
             except m.pw.IntegrityError as ex:
+                print clubId, caldId, lastname, firstname
+                print ex
                 # duplicate rows will be not inserted
                 pass
             else:

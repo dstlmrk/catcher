@@ -44,6 +44,9 @@ class User(MySQLModel):
     createdAt   = pw.DateTimeField(db_column='created_at')
     lastLoginAt = pw.DateTimeField(db_column='last_login_at')
     nickname    = pw.CharField()
+
+    def prepared(self):
+        self.password = None
 # -------------------------------------------------------------------------------------
 class Club(MySQLModel):
     # id       = pw.PrimaryKeyField()
@@ -114,6 +117,7 @@ class Tournament(MySQLModel):
     endDate          = pw.DateTimeField(db_column='end_date')
     teams            = pw.IntegerField()
     active           = pw.BooleanField()
+    ready            = pw.BooleanField()
     terminated       = pw.BooleanField()
 # -------------------------------------------------------------------------------------
 class Field(MySQLModel):
@@ -141,10 +145,16 @@ class TeamAtTournament(MySQLModel):
         )
         primary_key = pw.CompositeKey('team', 'tournament')
 
-    # TODO: MAGICKE METODY
-    # TODO: zkusit se podivat, jak by se daly ziskavat jednotlive objekty a jake data k nim
-    # def __getitem__(self, obj):
-        # return "XXX"
+    def prepared(self):
+        self.json = {
+            "teamId"    : self.team_id,
+            "name"      : (self.team.club.name + " " + self.team.degree),
+            "degree"    : self.team.degree,
+            "divisionId": self.team.division_id,
+            "seeding"   : self.seeding,
+            "clubId"    : self.team.club_id
+            }
+
 # ------------------------------------------------------------------------------------- 
 class Identificator(MySQLModel):
     identificator = pw.CharField(max_length=3)
@@ -189,17 +199,26 @@ class Match(MySQLModel):
     homeTeam            = pw.ForeignKeyField(rel_model    = Team,
                                              db_column    = 'home_team_id',
                                              related_name = 'matchesAsAway')
+    active              = pw.BooleanField()
 # -------------------------------------------------------------------------------------
 class Standing(MySQLModel):
     standing   = pw.IntegerField()
     team       = pw.ForeignKeyField(Team)
     tournament = pw.ForeignKeyField(Tournament)
+    json       = None
 
     class Meta:
+        # pass
         indexes = (
             (('tournament', 'team', 'standing'), True),
         )
         primary_key = pw.CompositeKey('standing', 'team', 'tournament')
+
+    def prepared(self):
+        self.json = {
+            "standing": self.standing,
+            "teamId"  : self.team_id
+        }
 # -------------------------------------------------------------------------------------
 class PlayerAtTournament(MySQLModel):
     assists    = pw.IntegerField(default=0)
@@ -209,10 +228,22 @@ class PlayerAtTournament(MySQLModel):
     player     = pw.ForeignKeyField(Player)
     team       = pw.ForeignKeyField(Team)
     tournament = pw.ForeignKeyField(Tournament)
+    json       = None
 
     class Meta:
         db_table = 'player_at_tournament'
         primary_key = False
         # primary_key = CompositeKey('player', 'team', 'tournament')
+
+    def prepared(self):
+        self.json = {
+            "assists"     : self.assists,
+            "matches"     : self.matches,
+            "scores"      : self.scores,
+            "total"       : self.total,
+            "playerId"    : self.player_id,
+            "teamId"      : self.team_id, 
+            "tournamentId": self.tournament_id
+            }
 # -------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------

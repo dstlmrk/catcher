@@ -175,15 +175,16 @@ r = requests.post(url, data=tournament, headers=headers)
 # print("Tournament", r.status_code, r.reason)
 tournamentId = str(json.loads(r.text)['id'])
 print "TOURNAMENT ID:", tournamentId
-# active tournament --------------------------------------------------------------------
-url = host + str("/api/tournament/" + tournamentId + "/active")
-payload = ""
+# prepare tournament --------------------------------------------------------------------
+url = host + str("/api/tournament/" + tournamentId)
+payload = '{"ready":true}'
 headers = {'content-type': "application/json"}
 response = requests.request("PUT", url, data=payload, headers=headers)
-# print(response.text)
+if response.status_code != 200:
+    print("Tournaji nebyl nastaven priznak 'ready'")
 
 # add players on rosters----------------------------------------------------------------
-url = host + str("/api/tournament/" + tournamentId + "/rosters")
+url = host + str("/api/tournament/" + tournamentId + "/players")
 headers = {'content-type': "application/json"}
 payload = "{\"playerId\":1,\"teamId\":1}"
 response = requests.request("POST", url, data=payload, headers=headers)

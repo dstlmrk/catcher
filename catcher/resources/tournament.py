@@ -6,52 +6,37 @@ import models as m
 from tournamentCreater import TournamentCreater
 import falcon
 import logging
+import datetime
 
 class TournamentQueries(object):
 
     @staticmethod
-    def getMatchesFromDb(tournamentId, matchId = None):
-        findMatch = "" if matchId is None else ("AND match.id = %s" % matchId) 
-        q = ("SELECT match.id, identificator.identificator, field.id, field.name," +
-             " home_team_id, home_club.name, home_team.degree, away_team_id, away_club.name," +
-             " away_team.degree, match.start_time, match.end_time, match.terminated," +
-             " match.score_home, match.score_away, match.spirit_home, match.spirit_away," +
-             " match.description, match.looser_final_standing, match.winner_final_standing," +
-             " winner_next_step.identificator, winner_next_step.match_id, winner_next_step.group_id," +
-             " looser_next_step.identificator, looser_next_step.match_id, looser_next_step.group_id," +
-             " match.home_seed, match.away_seed FROM catcher.match" +
-             " JOIN identificator ON catcher.match.identificator_id = identificator.id" +
-             " JOIN field ON field.id = match.field_id AND field.tournament_id = match.tournament_id" +
-             " LEFT OUTER JOIN team AS home_team ON home_team.id = match.home_team_id" +
-             " LEFT OUTER JOIN team AS away_team ON away_team.id = match.away_team_id" +
-             " LEFT OUTER JOIN club AS home_club ON home_club.id = home_team.id" +
-             " LEFT OUTER JOIN club AS away_club ON away_club.id = away_team.id" +
-             " LEFT OUTER JOIN identificator AS winner_next_step ON winner_next_step.id = match.winner_next_step" +
-             " LEFT OUTER JOIN identificator AS looser_next_step ON looser_next_step.id = match.looser_next_step" +
-             " WHERE match.tournament_id = %s %s;" % (tournamentId, findMatch))
+    def getMatches(tournamentId, matchId = None, fieldId = None, date = None, active = None, terminated = None):
+        whereMatch      = "" if matchId is None else ("AND match.id = %s" % matchId) 
+        whereField      = "" if fieldId is None else ("AND field.id = %s" % fieldId) 
+        whereDate       = "" if date is None else ("AND DATE(match.start_time) = %s" % date) 
+        whereActive     = "" if active is None else ("AND match.active = %s" % active) 
+        whereTerminated = "" if terminated is None else ("AND match.terminated = %s" % terminated) 
+        q = ("SELECT match.id, identificator.identificator, field.id, field.name,"
+             " home_team_id, home_club.name, home_team.degree, away_team_id, away_club.name,"
+             " away_team.degree, match.start_time, match.end_time, match.terminated,"
+             " match.score_home, match.score_away, match.spirit_home, match.spirit_away,"
+             " match.description, match.looser_final_standing, match.winner_final_standing,"
+             " winner_next_step.identificator, winner_next_step.match_id, winner_next_step.group_id,"
+             " looser_next_step.identificator, looser_next_step.match_id, looser_next_step.group_id,"
+             " match.home_seed, match.away_seed, match.active FROM catcher.match"
+             " JOIN identificator ON catcher.match.identificator_id = identificator.id"
+             " JOIN field ON field.id = match.field_id AND field.tournament_id = match.tournament_id"
+             " LEFT OUTER JOIN team AS home_team ON home_team.id = match.home_team_id"
+             " LEFT OUTER JOIN team AS away_team ON away_team.id = match.away_team_id"
+             " LEFT OUTER JOIN club AS home_club ON home_club.id = home_team.id"
+             " LEFT OUTER JOIN club AS away_club ON away_club.id = away_team.id"
+             " LEFT OUTER JOIN identificator AS winner_next_step ON winner_next_step.id = match.winner_next_step"
+             " LEFT OUTER JOIN identificator AS looser_next_step ON looser_next_step.id = match.looser_next_step"
+             " WHERE match.tournament_id = %s %s %s %s %s %s;" 
+             % (tournamentId, whereMatch, whereField, whereDate, whereActive, whereTerminated)
+             )
         qr = m.db.execute_sql(q)
-        return qr
-
-    @staticmethod
-    def getPlayersFromDb(tournamentId, teamId = None):
-        findTeam = "" if teamId is None else ("AND team.id = %s" % teamId) 
-        q = ("SELECT team.degree, club.name, team.id, assists, scores, total, matches," +
-             " firstname, lastname, nickname, number, player_id" +
-             " FROM team_at_tournament INNER JOIN player_at_tournament" + 
-             " ON player_at_tournament.team_id = team_at_tournament.team_id" +
-             " AND player_at_tournament.tournament_id = team_at_tournament.tournament_id" +
-             " INNER JOIN player ON player.id = player_at_tournament.player_id" +
-             " INNER JOIN team ON team.id = team_at_tournament.team_id INNER JOIN club" +
-             " ON team.club_id = club.id WHERE team_at_tournament.tournament_id = %s %s" 
-             % (tournamentId, findTeam) +
-             " ORDER BY team.id, total, scores, assists;")
-        qr = m.db.execute_sql(q)
-        return qr
-
-    @staticmethod
-    def getMatches(tournamentId, matchId = None):
-        m.Tournament.get(id=tournamentId).id
-        qr = TournamentQueries.getMatchesFromDb(tournamentId, matchId)
         matches = []
         for row in qr:
             looserNextStep = None
@@ -102,48 +87,26 @@ class TournamentQueries(object):
                 'winner'        : {
                     'finalStanding': row[19],
                     'nextStep'  : winnerNextStep
-                    }
+                    },
+                'active'        : row[28]
                 })
-
-        result = {
-            'count'  : len(matches), 
-            'matches': matches
-        }
-        return result
+        return matches
 
     @staticmethod
-    def getPlayersPerTeams(tournamentId, teamId = None):
-        m.Tournament.get(id = tournamentId).id
-        qr = TournamentQueries.getPlayersFromDb(tournamentId, teamId)
-        teams = list()
-        for row in qr:
-            teamName = (row[1] + " " + row[0])
-            teamId = row[2]
-            teams.append({'name':teamName, 'id':teamId, 'players':[]})
-        # temporary dict with the key being the id
-        teams = {v['id']:v for v in teams}
-        for row in qr:
-            teamId    = row[2]
-            teams[teamId]['players'].append({
-                'assists'  : row[3],
-                'scores'   : row[4],
-                'total'    : row[5],
-                'matches'  : row[6],
-                'firstname': row[7],
-                'lastname' : row[8],
-                'nickname' : row[9],
-                'number'   : row[10],
-                'id'       : row[11]
-                })
-        result = {
-            'count': len(teams),
-            'teams': teams.values()
-        }
-        return result
-
-    @staticmethod
-    def getPlayersPerTournament(tournamentId):
-        qr = TournamentQueries.getPlayersFromDb(tournamentId, None)
+    def getPlayers(tournamentId, teamId = None, limit = None):
+        whereTeam = "" if teamId is None else ("AND team.id = %s" % teamId)
+        limit = "" if limit is None else ("LIMIT %s" % limit)
+        q = ("SELECT team.degree, club.name, team.id, assists, scores, total, matches,"
+             " firstname, lastname, nickname, number, player_id"
+             " FROM team_at_tournament INNER JOIN player_at_tournament"
+             " ON player_at_tournament.team_id = team_at_tournament.team_id"
+             " AND player_at_tournament.tournament_id = team_at_tournament.tournament_id"
+             " INNER JOIN player ON player.id = player_at_tournament.player_id"
+             " INNER JOIN team ON team.id = team_at_tournament.team_id INNER JOIN club"
+             " ON team.club_id = club.id WHERE team_at_tournament.tournament_id = %s %s" 
+             " ORDER BY total, scores, assists %s;" % (tournamentId, whereTeam, limit)
+             )
+        qr = m.db.execute_sql(q)
         players = list()
         for row in qr:
             teamId    = row[2]
@@ -158,22 +121,18 @@ class TournamentQueries(object):
                 'number'   : row[10],
                 'id'       : row[11]
                 })
-        result = {
-            'count'  : len(players),
-            'players': players
-        }
-        return result
+        return players
 
 class Tournament(Item):
 
     @m.db.atomic()
-    def activeTournament(self, id):
+    def prepareTournament(self, id):
         tournament = m.Tournament.\
-            select(m.Tournament.teams, m.Tournament.active).\
+            select(m.Tournament.teams, m.Tournament.ready).\
             where(m.Tournament.id == id).get()
 
-        if tournament.active:
-            raise ValueError("Tournament %s is already active" % id)
+        if tournament.ready:
+            raise ValueError("Tournament %s is already ready" % id)
 
         teams = m.TeamAtTournament.select().\
             where(m.TeamAtTournament.tournament == id).dicts()
@@ -184,8 +143,8 @@ class Tournament(Item):
                 " in contrast to TeamAtTournament" % matchId
                 )
 
-        # active Tournament
-        m.Tournament.update(active=True).where(m.Tournament.id==id).execute()
+        # ready Tournament
+        m.Tournament.update(ready=True).where(m.Tournament.id==id).execute()
 
         # Standing
         for x in range(1, len(teams)+1):
@@ -221,15 +180,21 @@ class Tournament(Item):
 
         tournament = m.Tournament.select(m.Tournament).where(m.Tournament.id==id).get()
 
-        if tournament.active is False and requestBody.get('active') is True:
-            self.activeTournament(id)
+        super(Tournament, self).on_put(req, resp, id,
+            ['active', 'name', 'startDate', 'endDate', 'city', 'country', 'caldTournametId']
+            )
+
+        edited = False
+        if tournament.ready is False and requestBody.get('ready') is True:
+            self.prepareTournament(id)
+            edited = True
 
         if tournament.terminated is False and requestBody.get('terminated') is True:
             self.terminateTournament(id)
+            edited = True
 
-        super(Tournament, self).on_put(req, resp, id,
-            ['name', 'startDate', 'endDate', 'city', 'country', 'caldTournametId']
-            )
+        if edited:
+            resp.status = falcon.HTTP_200 
 
 
 class Tournaments(Collection):
@@ -244,72 +209,141 @@ class Tournaments(Collection):
 class TournamentStandings(object):
 
     def on_get(self, req, resp, id):
-        tournament = m.Tournament.select(m.Tournament.active, m.Tournament.terminated).where(m.Tournament.id==id).get()
-        if not tournament.active and not tournament.terminated:
+        tournament = m.Tournament.select(m.Tournament.ready, m.Tournament.terminated).where(m.Tournament.id==id).get()
+        if not tournament.ready and not tournament.terminated:
             raise ValueError("Tournament hasn't any standings")
-
         qr = m.Standing.select().where(m.Standing.tournament==id)
-        items = []
+        standings = []
         for standing in qr:
-            items.append({
-                "standing": standing.standing,
-                "team": standing.team if standing.team_id else None
-                })
+            standings.append(standing.json)
         collection = {
-            'count' : len(items),
-            'items' : items
-        }
+            'teams'     : len(standings),
+            'standings' : standings,
+            'spirit'    : "UNFINISHED"
+            }
         req.context['result'] = collection
 
 class TournamentTeams(object):
 
     def on_get(self, req, resp, id):
         teams = m.TeamAtTournament.\
-            select(m.TeamAtTournament.team).\
+            select(m.TeamAtTournament, m.TeamAtTournament.team).\
             where(m.TeamAtTournament.tournament==id)
         items = []
         for team in teams:
-            items.append(team.team)
+            items.append(team.json)
         collection = {
             'count' : len(items),
             'items' : items
         }
         req.context['result'] = collection
 
+    def on_put(self, req, resp, id):
+        prepared =  m.Tournament.select(m.Tournament.ready).where(m.Tournament.id==id).get().ready
+        if ready:
+            raise ValueError("Tournament is ready and teams can't be changed")
+        requestBody = req.context['data']
+        qr = m.TeamAtTournament.\
+            update(
+                team    = requestBody['teamId']
+                ).\
+            where(
+                m.TeamAtTournament.tournament == id,
+                m.TeamAtTournament.seeding == requestBody['seeding']
+            ).execute()
+        resp.status = falcon.HTTP_200 if qr else falcon.HTTP_304
+        req.context['result'] =  m.TeamAtTournament.get(
+            tournament = id,
+            seeding = requestBody['seeding']
+            )
+
 class TournamentMatches(object):
 
     def on_get(self, req, resp, id):
-        req.context['result'] = TournamentQueries.getMatches(
-            tournamentId = id
+        matches = TournamentQueries.getMatches(
+            id,
+            req.params.get('matchId'),
+            req.params.get('fieldId'),
+            req.params.get('date'),
+            req.params.get('active'),
+            req.params.get('terminated')
             )
 
-class TournamentMatch(object):
+        collection = {
+            'count'  : len(matches),
+            'matches': matches
+        }
+        
+        req.context['result'] = collection
 
-    def on_get(self, req, resp, id, matchId):
-        req.context['result'] = TournamentQueries.getMatches(
-            tournamentId = id,
-            matchId = matchId
-            )
-
-class TournamentTeamsAndPlayers(object):
-
-    def on_get(self, req, resp, id):
-        req.context['result'] = TournamentQueries.getPlayersPerTeams(
-            tournamentId = id
-            )
-
-class TournamentTeamAndPlayers(object):
-
-    def on_get(self, req, resp, id, teamId):
-        req.context['result'] = TournamentQueries.getPlayersPerTeams(
-            tournamentId = id,
-            teamId = teamId
-            )
+    def on_put(self, req, resp, id):
+        editableCols = [
+            'active', 'fieldId', 'startTime', 'endTime', 'terminated', 'description'
+            ]
+        requestBody = req.context['data']
+        matchId = requestBody['matchId']
+        if editableCols is not None:
+            params = { key : requestBody[key] for key in requestBody if key in editableCols}
+        qr = None
+        if params and matchId:
+            qr = m.Match.update(**params).where(
+                m.Match.tournament==id and m.Match.id==matchId
+                ).execute()
+        matches = TournamentQueries.getMatches(id, matchId)
+        req.context['result'] = matches[0]
+        resp.status = falcon.HTTP_200 if qr else falcon.HTTP_304
 
 class TournamentPlayers(object):
 
-    # TODO: jako parametr zde muze byt limit
     def on_get(self, req, resp, id):
-        req.context['result'] = TournamentQueries.getPlayersPerTournament(
-            tournamentId = id
+        players = TournamentQueries.getPlayers(
+            id, req.params.get('teamId'), req.params.get('limit')
             )
+
+        collection = {
+            'count': len(players),
+            'players': players
+        }
+        
+        req.context['result'] = collection
+
+    def on_post(self, req, resp, id):
+        teamId   = req.context['data'].get('teamId')
+        playerId = req.context['data'].get('playerId')
+
+        r = m.PlayerAtTournament.insert(
+            tournament = id,
+            team       = teamId,
+            player     = playerId
+            ).execute()
+
+        newPlayer = m.PlayerAtTournament.get(
+            tournament = id,
+            team       = teamId,
+            player     = playerId
+            )
+
+        resp.status = falcon.HTTP_201 if r else falcon.HTTP_200
+        req.context['result'] = newPlayer.json
+
+    def on_delete(self, req, resp, id):
+        teamId   = req.context['data'].get('teamId')
+        playerId = req.context['data'].get('playerId')
+        
+        matches = m.PlayerAtTournament.get(
+            m.PlayerAtTournament.tournament == id,
+            m.PlayerAtTournament.team       == teamId,
+            m.PlayerAtTournament.player     == playerId
+            ).matches
+
+        if matches == 0:
+            d = m.PlayerAtTournament.delete().where(
+                m.PlayerAtTournament.tournament == id,
+                m.PlayerAtTournament.team       == teamId,
+                m.PlayerAtTournament.player     == playerId
+                ).execute()
+        else:
+            raise ValueError("Player has played matches")
+
+class TournamentGroups(object):
+    pass
