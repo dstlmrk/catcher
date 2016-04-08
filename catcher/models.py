@@ -189,8 +189,8 @@ class Match(MySQLModel):
     awaySeed            = pw.IntegerField(db_column = 'away_seed')
 
     flip                = pw.BooleanField()
-    scoreAway           = pw.IntegerField(db_column = 'score_away')
-    scoreHome           = pw.IntegerField(db_column = 'score_home')
+    awayScore           = pw.IntegerField(db_column = 'away_score')
+    homeScore           = pw.IntegerField(db_column = 'home_score')
     spiritAway          = pw.IntegerField(db_column = 'spirit_away')
     spiritHome          = pw.IntegerField(db_column = 'spirit_home')
     awayTeam            = pw.ForeignKeyField(rel_model    = Team,
@@ -246,4 +246,26 @@ class PlayerAtTournament(MySQLModel):
             "tournamentId": self.tournament_id
             }
 # -------------------------------------------------------------------------------------
+class PlayerAtMatch(MySQLModel):
+    assists    = pw.IntegerField()
+    match      = pw.ForeignKeyField(Match)
+    player     = pw.ForeignKeyField(Player)
+    scores     = pw.IntegerField()
+    team       = pw.ForeignKeyField(Team)
+    total      = pw.IntegerField()
+    
+    class Meta:
+        db_table = 'player_at_match'
 # -------------------------------------------------------------------------------------
+class Point(MySQLModel):
+    homePoint      = pw.BooleanField(db_column='home_point')
+    matchId        = pw.IntegerField(db_column='match_id')
+    order          = pw.IntegerField()
+    assistPlayerId = pw.IntegerField(db_column='assist_player_id')
+    scorePlayerId  = pw.IntegerField(db_column='score_player_id')
+    awayScore      = pw.IntegerField(db_column='away_score')
+    homeScore      = pw.IntegerField(db_column='home_score')
+    callahan       = pw.BooleanField()
+
+    class Meta:
+        primary_key = False

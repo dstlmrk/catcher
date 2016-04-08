@@ -41,7 +41,10 @@ class Collection(object):
         }
         req.context['result'] = collection
 
+    def cutId(self, key):
+        return key[:-2] if key.endswith('Id') else key
+
     def on_post(self, req, resp):
-        requestJson = req.context['data']
-        item = self.model.create(**requestJson)
+        data = req.context['data']
+        item = self.model.create(**data)
         req.context['result'] = item

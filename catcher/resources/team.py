@@ -43,3 +43,10 @@ class Teams(Collection):
         }
 
         req.context['result'] = collection
+
+    def on_post(self, req, resp):
+        req.context['data']['division'] = req.context['data']['divisionId']
+        del req.context['data']['divisionId']
+        req.context['data']['club'] = req.context['data']['clubId']
+        del req.context['data']['clubId']
+        super(Teams, self).on_post(req, resp)

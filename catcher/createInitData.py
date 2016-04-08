@@ -9,73 +9,39 @@ models.db.connect()
 
 local  = "http://localhost:8080"
 server = "http://catcher.zlutazimnice.cz"
-host   = server
-
-# create divisions --------------------------------------------------------------------
-divisions = [
-    {"division": "open"},
-    {"division": "women"},
-    {"division": "mixed"},
-    {"division": "masters"},
-    {"division": "junior"},
-    ]
-try:
-    models.Division.insert_many(divisions).execute()
-except models.pw.IntegrityError as ex:
-    pass
+host   = local
 
 # create 10 teams --------------------------------------------------------------------
-teams = [
-    {
-    "club"     : 1,
-    "division" : 1,
-    "degree"   : "A"
-    }
-    ,{
-    "club"     : 2,
-    "division" : 1,
-    "degree"   : "A"
-    },{
-    "club"     : 3,
-    "division" : 1,
-    "degree"   : "A"
-    },{
-    "club"     : 4,
-    "division" : 1,
-    "degree"   : "A"
-    },{
-    "club"     : 5,
-    "division" : 1,
-    "degree"   : "A"
-    },{
-    "club"     : 6,
-    "division" : 1,
-    "degree"   : "A"
-    },{
-    "club"     : 7,
-    "division" : 1,
-    "degree"   : "A"
-    },{
-    "club"     : 8,
-    "division" : 1,
-    "degree"   : "A"
-    },{
-    "club"     : 9,
-    "division" : 1,
-    "degree"   : "A"
-    },{
-    "club"     : 10,
-    "division" : 1,
-    "degree"   : "A"
-    }
-    ]
-try:
-    models.Team.insert_many(teams).execute()
-except models.pw.IntegrityError as ex:
-    pass
 
-if not models.db.is_closed():
-    models.db.close()
+url = host + str("/api/teams/")
+headers = {'content-type': "application/json"}
+
+payload = "{\"clubId\":1,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":2,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":3,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":4,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":5,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":6,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":8,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":9,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":10,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":11,\"divisionId\":1,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+
+payload = "{\"clubId\":1,\"divisionId\":1,\"degree\":\"B\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = "{\"clubId\":1,\"divisionId\":2,\"degree\":\"A\"}"
+response = requests.request("POST", url, data=payload, headers=headers)
+
 # -------------------------------------------------
 
 tournament = '''{
@@ -229,3 +195,18 @@ response = requests.request("POST", url, data=payload, headers=headers)
 payload = "{\"playerId\":21,\"teamId\":4}"
 response = requests.request("POST", url, data=payload, headers=headers)
 
+# active tournament --------------------------------------------------------------------
+url = host + str("/api/tournament/" + tournamentId)
+payload = '{"active":true}'
+headers = {'content-type': "application/json"}
+response = requests.request("PUT", url, data=payload, headers=headers)
+if response.status_code != 200:
+    print("Tournaji nebyl nastaven priznak 'active'")
+
+# active match --------------------------------------------------------------------
+url = host + str("/api/tournament/" + tournamentId + "/matches")
+payload = '{"active":true, "matchId": 1, "description": "Semifinale 1"}'
+headers = {'content-type': "application/json"}
+response = requests.request("PUT", url, data=payload, headers=headers)
+if response.status_code != 200:
+    print("Zapasu nebyl nastaven priznak 'active'")

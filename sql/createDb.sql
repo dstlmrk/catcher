@@ -251,16 +251,15 @@ DROP TABLE IF EXISTS `catcher`.`player_at_tournament` ;
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`player_at_tournament` (
   `tournament_id` INT NOT NULL,
-  `team_id` INT NOT NULL,
   `player_id` INT NOT NULL,
+  `team_id` INT NOT NULL,
   `assists` SMALLINT NOT NULL DEFAULT 0,
   `scores` SMALLINT NOT NULL DEFAULT 0,
   `total` SMALLINT NOT NULL DEFAULT 0,
   `matches` SMALLINT NOT NULL DEFAULT 0,
-  PRIMARY KEY (`tournament_id`, `team_id`, `player_id`),
+  PRIMARY KEY (`tournament_id`, `player_id`),
   INDEX `fk_tournament_has_team_has_player_player1_idx` (`player_id` ASC),
   INDEX `fk_tournament_has_team_has_player_tournament_has_team1_idx` (`tournament_id` ASC, `team_id` ASC),
-  UNIQUE INDEX `player_UNIQUE` (`team_id` ASC, `player_id` ASC),
   CONSTRAINT `fk_tournament_has_team_has_player_tournament_has_team1`
     FOREIGN KEY (`tournament_id` , `team_id`)
     REFERENCES `catcher`.`team_at_tournament` (`tournament_id` , `team_id`)
@@ -318,8 +317,8 @@ CREATE TABLE IF NOT EXISTS `catcher`.`match` (
   `start_time` TIMESTAMP NULL,
   `end_time` TIMESTAMP NULL,
   `terminated` TINYINT(1) NOT NULL DEFAULT FALSE,
-  `score_home` TINYINT NULL,
-  `score_away` TINYINT NULL,
+  `home_score` TINYINT NULL,
+  `away_score` TINYINT NULL,
   `spirit_away` TINYINT NULL,
   `spirit_home` TINYINT NULL,
   `description` VARCHAR(45) NULL,
@@ -331,7 +330,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`match` (
   `home_seed` SMALLINT NULL,
   `away_seed` SMALLINT NULL,
   `active` TINYINT(1) NOT NULL DEFAULT FALSE,
-  PRIMARY KEY (`id`, `tournament_id`),
+  PRIMARY KEY (`id`),
   INDEX `fk_game_tournament1_idx` (`tournament_id` ASC),
   INDEX `fk_match_team1_idx` (`home_team_id` ASC),
   INDEX `fk_match_team2_idx` (`away_team_id` ASC),
@@ -386,14 +385,12 @@ DROP TABLE IF EXISTS `catcher`.`player_at_match` ;
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`player_at_match` (
   `match_id` INT NOT NULL,
-  `tournament_id` INT NOT NULL,
-  `team_id` INT NOT NULL,
   `player_id` INT NOT NULL,
-  `asissts` INT NOT NULL,
+  `assists` INT NOT NULL,
   `scores` INT NOT NULL,
   `total` INT NOT NULL,
-  PRIMARY KEY (`match_id`, `tournament_id`, `team_id`, `player_id`),
-  INDEX `fk_match_has_tournament_has_player_tournament_has_player1_idx` (`tournament_id` ASC, `team_id` ASC, `player_id` ASC),
+  PRIMARY KEY (`match_id`, `player_id`),
+  INDEX `fk_match_has_tournament_has_player_tournament_has_player1_idx` (`player_id` ASC),
   INDEX `fk_match_has_tournament_has_player_match1_idx` (`match_id` ASC),
   CONSTRAINT `fk_match_has_tournament_has_player_match1`
     FOREIGN KEY (`match_id`)
@@ -401,8 +398,8 @@ CREATE TABLE IF NOT EXISTS `catcher`.`player_at_match` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_match_has_tournament_has_player_tournament_has_player1`
-    FOREIGN KEY (`tournament_id` , `team_id` , `player_id`)
-    REFERENCES `catcher`.`player_at_tournament` (`tournament_id` , `team_id` , `player_id`)
+    FOREIGN KEY (`player_id`)
+    REFERENCES `catcher`.`player_at_tournament` (`player_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -423,6 +420,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`point` (
   `home_score` INT NOT NULL,
   `away_score` INT NOT NULL,
   `home_point` TINYINT(1) NULL COMMENT 'tento sloupec zatim nepouzivam, ale az budu, tak rekne, kdo dal bod',
+  `callahan` TINYINT(1) NOT NULL DEFAULT FALSE,
   PRIMARY KEY (`match_id`, `order`),
   INDEX `fk_point_player1_idx` (`assist_player_id` ASC),
   INDEX `fk_point_player2_idx` (`score_player_id` ASC),
@@ -664,3 +662,17 @@ SHOW WARNINGS;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- Data for table `catcher`.`division`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `catcher`;
+INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (1, 'open');
+INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (2, 'women');
+INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (3, 'mixed');
+INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (4, 'masters');
+INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (5, 'junior');
+
+COMMIT;
+

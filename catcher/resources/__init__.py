@@ -8,6 +8,7 @@ from team import *
 from tournament import *
 from match import *
 from spirit import *
+from point import *
 
 		
 # from tournamentCreater import *

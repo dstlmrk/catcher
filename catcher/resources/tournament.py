@@ -20,7 +20,7 @@ class TournamentQueries(object):
         q = ("SELECT match.id, identificator.identificator, field.id, field.name,"
              " home_team_id, home_club.name, home_team.degree, away_team_id, away_club.name,"
              " away_team.degree, match.start_time, match.end_time, match.terminated,"
-             " match.score_home, match.score_away, match.spirit_home, match.spirit_away,"
+             " match.home_score, match.away_score, match.spirit_home, match.spirit_away,"
              " match.description, match.looser_final_standing, match.winner_final_standing,"
              " winner_next_step.identificator, winner_next_step.match_id, winner_next_step.group_id,"
              " looser_next_step.identificator, looser_next_step.match_id, looser_next_step.group_id,"
@@ -290,7 +290,7 @@ class TournamentMatches(object):
                 m.Match.tournament==id and m.Match.id==matchId
                 ).execute()
         matches = TournamentQueries.getMatches(id, matchId)
-        req.context['result'] = matches[0]
+        req.context['result'] = matches
         resp.status = falcon.HTTP_200 if qr else falcon.HTTP_304
 
 class TournamentPlayers(object):
