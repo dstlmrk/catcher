@@ -255,21 +255,21 @@ if __name__ == "__main__":
     m.db.connect()
 
     clubs = ClubsAndPlayers(
-        config.cald.clubs['url'],
-        config.cald.clubs['columns'],
-        config.cald.clubs['delimiter']
+        config.imp.['clubs']]['url'],
+        config.imp.['clubs']]['columns'],
+        config.imp.['clubs']]['delimiter']
         ).importData()
 
     tournaments = Tournaments(
-        config.cald.tournaments['url'],
-        config.cald.tournaments['columns'],
-        config.cald.tournaments['delimiter']
+        config.imp.['tournaments']['url'],
+        config.imp.['tournaments']['columns'],
+        config.imp.['tournaments']['delimiter']
         ).importData()
 
     rosters = Rosters(
-        config.cald.rosters['url'],
-        config.cald.rosters['columns'],
-        config.cald.rosters['delimiter']
+        config.imp.['rosters']['url'],
+        config.imp.['rosters']['columns'],
+        config.imp.['rosters']['delimiter']
         ).importData()
 
     if not m.db.is_closed():
