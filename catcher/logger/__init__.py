@@ -3,7 +3,7 @@
 
 import logging
 from loggingStreamHandler import ColorizingStreamHandler
-import config
+from catcher import config
 
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)

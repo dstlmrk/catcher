@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf-8
 
-import models as m
+from catcher import models as m
 from datetime import datetime
 import falcon
 

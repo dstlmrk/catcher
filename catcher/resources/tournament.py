@@ -1,14 +1,14 @@
 #!/usr/bin/python
 # coding=utf-8
 
-from api.resource import Collection, Item
-import models as m
-from tournamentCreater import TournamentCreater
+from catcher.api.resource import Collection, Item
+from catcher import models as m
+from catcher.resources.tournamentCreater import TournamentCreater
 import falcon
 import logging
 import datetime
 
-class TournamentQueries(object):
+class Queries(object):
 
     @staticmethod
     def getMatches(tournamentId, matchId = None, fieldId = None, date = None, active = None, terminated = None):
@@ -43,15 +43,15 @@ class TournamentQueries(object):
             if row[20] is not None:
                 looserNextStep = {
                     'identificator':row[20],
-                    'match_id':row[21],
-                    'group_id':row[22]
+                    'matchId':row[21],
+                    'groupId':row[22]
                 }
             winnerNextStep = None
             if row[23] is not None:
                 winnerNextStep = {
                     'identificator':row[23],
-                    'match_id'     :row[24],
-                    'group_id'     :row[25]
+                    'matchId'     :row[24],
+                    'groupId'     :row[25]
                 }
             matches.append({
                 'id'            : row[0],
@@ -260,7 +260,7 @@ class TournamentTeams(object):
 class TournamentMatches(object):
 
     def on_get(self, req, resp, id):
-        matches = TournamentQueries.getMatches(
+        matches = Queries.getMatches(
             id,
             req.params.get('matchId'),
             req.params.get('fieldId'),
@@ -289,14 +289,14 @@ class TournamentMatches(object):
             qr = m.Match.update(**params).where(
                 m.Match.tournament==id and m.Match.id==matchId
                 ).execute()
-        matches = TournamentQueries.getMatches(id, matchId)
+        matches = Queries.getMatches(id, matchId)
         req.context['result'] = matches
         resp.status = falcon.HTTP_200 if qr else falcon.HTTP_304
 
 class TournamentPlayers(object):
 
     def on_get(self, req, resp, id):
-        players = TournamentQueries.getPlayers(
+        players = Queries.getPlayers(
             id, req.params.get('teamId'), req.params.get('limit')
             )
 

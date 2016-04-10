@@ -4,10 +4,9 @@
 import falcon
 import ujson
 import json
-import models
+from catcher import models
 import datetime
 from playhouse.shortcuts import model_to_dict
-# from catcher import models
 import logging
 
 class PeeweeConnection(object):

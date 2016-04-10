@@ -9,10 +9,10 @@ from playhouse.shortcuts import model_to_dict, dict_to_model
 import config
 
 db = pw.MySQLDatabase(
-    config.db.login['db'],
-    user   = config.db.login['user'],
-    passwd = config.db.login['passwd'],
-    host   = config.db.login['host']
+             config.db['name'],
+    user   = config.db['user'],
+    passwd = config.db['passwd'],
+    host   = config.db['host']
     )
 
 # -------------------------------------------------------------------------------------
@@ -221,19 +221,19 @@ class Standing(MySQLModel):
         }
 # -------------------------------------------------------------------------------------
 class PlayerAtTournament(MySQLModel):
-    assists    = pw.IntegerField(default=0)
-    matches    = pw.IntegerField(default=0)
-    scores     = pw.IntegerField(default=0)
-    total      = pw.IntegerField(default=0)
-    player     = pw.ForeignKeyField(Player)
-    team       = pw.ForeignKeyField(Team)
-    tournament = pw.ForeignKeyField(Tournament)
-    json       = None
+    assists      = pw.IntegerField(default=0)
+    matches      = pw.IntegerField(default=0)
+    scores       = pw.IntegerField(default=0)
+    total        = pw.IntegerField(default=0)
+    playerId     = pw.IntegerField()
+    teamId       = pw.IntegerField()
+    tournamentId = pw.IntegerField()
+    json         = None
 
     class Meta:
         db_table = 'player_at_tournament'
-        primary_key = False
-        # primary_key = CompositeKey('player', 'team', 'tournament')
+        # primary_key = False
+        primary_key = pw.CompositeKey('playerId', 'teamId', 'tournamentId')
 
     def prepared(self):
         self.json = {
@@ -241,9 +241,9 @@ class PlayerAtTournament(MySQLModel):
             "matches"     : self.matches,
             "scores"      : self.scores,
             "total"       : self.total,
-            "playerId"    : self.player_id,
-            "teamId"      : self.team_id, 
-            "tournamentId": self.tournament_id
+            "playerId"    : self.playerId,
+            "teamId"      : self.teamId, 
+            "tournamentId": self.tournamentId
             }
 # -------------------------------------------------------------------------------------
 class PlayerAtMatch(MySQLModel):

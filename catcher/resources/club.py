@@ -2,8 +2,8 @@
 # coding=utf-8
 
 # from catcher import api
-from api.resource import Collection, Item
-import models as m
+from catcher.api.resource import Collection, Item
+from catcher import models as m
 import peewee as pw
 from peewee import JOIN
 

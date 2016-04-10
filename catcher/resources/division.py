@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf-8
 
-from api.resource import Collection
+from catcher.api.resource import Collection
 import falcon
 
 class Divisions(Collection):

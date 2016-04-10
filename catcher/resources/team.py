@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # coding=utf-8
 
-from api.resource import Collection, Item
+from catcher.api.resource import Collection, Item
 from playhouse.shortcuts import model_to_dict
-import models as m
+from catcher import models as m
 
 class Team(Item):
     
