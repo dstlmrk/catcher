@@ -11,21 +11,16 @@ class Team(Item):
         super(Team, self).on_put(req, resp, id, ['divisionId', 'degree'])
     
     def on_get(self, req, resp, id):
-        qr = self.model.select().where(self.model.id==id).get()
-        team = {
-            'id'    : qr.id,
-            'degree': qr.degree,
-            'clubId': qr.club_id,
-            'name'  : qr.name,
-            'division' : qr.division
-        }
-        req.context['result'] = team
+        req.context['result'] = Teams.getTeams(id)[0]
 
 class Teams(Collection):
-    
-    def on_get(self, req, resp):
+
+    @staticmethod
+    def getTeams(teamId = None):
+        whereTeam = "" if teamId is None else (" WHERE team.id = %s" % teamId)
         q = ("SELECT team.id, team.degree, team.division_id, club.name," +
-             " team.club_id FROM catcher.team JOIN club ON club.id = team.club_id")
+             " team.club_id FROM team JOIN club ON club.id = team.club_id %s"
+             % (whereTeam))
         qr = m.db.execute_sql(q)
         teams = []
         for row in qr:
@@ -36,6 +31,10 @@ class Teams(Collection):
                 'name'       : (row[3] + " " + row[1]),
                 'clubId'     : row[4]
                 })
+        return teams
+    
+    def on_get(self, req, resp):
+        teams = Teams.getTeams()
 
         collection = {
             'count'   : len(teams),
@@ -43,10 +42,3 @@ class Teams(Collection):
         }
 
         req.context['result'] = collection
-
-    def on_post(self, req, resp):
-        req.context['data']['division'] = req.context['data']['divisionId']
-        del req.context['data']['divisionId']
-        req.context['data']['club'] = req.context['data']['clubId']
-        del req.context['data']['clubId']
-        super(Teams, self).on_post(req, resp)

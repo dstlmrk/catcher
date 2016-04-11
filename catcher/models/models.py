@@ -6,14 +6,9 @@ from iso3166 import countries
 from playhouse.fields import ManyToManyField
 from playhouse.fields import DeferredThroughModel
 from playhouse.shortcuts import model_to_dict, dict_to_model
-import config
+import connection
 
-db = pw.MySQLDatabase(
-             config.db['name'],
-    user   = config.db['user'],
-    passwd = config.db['passwd'],
-    host   = config.db['host']
-    )
+db = connection.connectDatabase()
 
 # -------------------------------------------------------------------------------------
 class CountryCode(pw.FixedCharField):
@@ -50,7 +45,7 @@ class User(MySQLModel):
 # -------------------------------------------------------------------------------------
 class Club(MySQLModel):
     # id       = pw.PrimaryKeyField()
-    user     = pw.ForeignKeyField(User)
+    user     = pw.IntegerField(db_column='user_id')
     caldId   = pw.IntegerField(db_column='cald_id')
     name     = pw.CharField()
     shortcut = pw.FixedCharField(max_length=3)
@@ -67,7 +62,7 @@ class Player(MySQLModel):
     number    = pw.IntegerField()
     ranking   = pw.FloatField()
     caldId    = pw.IntegerField(db_column='cald_id')
-    club      = pw.ForeignKeyField(Club)
+    clubId    = pw.IntegerField(db_column='club_id')
     # clubs     = ManyToManyField(Club, through_model=DeferredClubHasPlayer)
 # -------------------------------------------------------------------------------------
 # class ClubHasPlayer(MySQLModel):
@@ -89,14 +84,14 @@ class Division(MySQLModel):
     division = pw.CharField()
 # -------------------------------------------------------------------------------------
 class Team(MySQLModel):
-    club       = pw.ForeignKeyField(Club, db_column='club_id', related_name='teams')
-    division   = pw.ForeignKeyField(Division, db_column='division_id')
+    clubId     = pw.IntegerField(db_column='club_id')
+    divisionId = pw.IntegerField(db_column='division_id')
     degree     = pw.FixedCharField(max_length=1)
-    # TODO: invent, how to remove dependency with db column
-    name       = pw.CharField(db_column='degree')
+    # # TODO: invent, how to remove dependency with db column
+    # name       = pw.CharField(db_column='degree')
 
-    def prepared(self):
-        self.name = self.club.name + " " + self.degree
+    # def prepared(self):
+    #     self.name = self.club.name + " " + self.degree
 # -------------------------------------------------------------------------------------
 class CaldTournament(MySQLModel):
     id    = pw.PrimaryKeyField()
@@ -108,10 +103,10 @@ class CaldTournament(MySQLModel):
         db_table = 'cald_tournament'
 # -------------------------------------------------------------------------------------
 class Tournament(MySQLModel):
-    caldTournament   = pw.ForeignKeyField(CaldTournament, db_column='cald_tournament_id')
+    caldTournamentId = pw.IntegerField(db_column='cald_tournament_id')
     city             = pw.CharField()
     country          = CountryCode()
-    division         = pw.ForeignKeyField(Division, db_column='division_id')
+    divisionId       = pw.IntegerField(db_column='division_id')
     name             = pw.CharField()
     startDate        = pw.DateTimeField(db_column='start_date')
     endDate          = pw.DateTimeField(db_column='end_date')

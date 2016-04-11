@@ -9,7 +9,8 @@ class Item(object):
         self.model = model
 
     def on_get(self, req, resp, id):
-        item = self.model.select().where(self.model.id==id).get()
+        item = self.model.get(id=id)
+        # item = self.model.select().where(self.model.id==id).get()
         req.context['result'] = item
 
     def on_put(self, req, resp, id, editableCols=None):
@@ -20,8 +21,7 @@ class Item(object):
         qr = None
         if params:
             qr = self.model.update(**params).where(self.model.id==id).execute()
-        # TODO: Nemuzu zatim vracet, protoze v nekolika pripadech zobrazuje udaje uzivatele
-        # req.context['result'] = self.model.select().where(self.model.id==id).get()
+        req.context['result'] = self.model.select().where(self.model.id==id).get()
         resp.status = falcon.HTTP_200 if qr else falcon.HTTP_304
 
     def on_delete(self, req, resp, id):
@@ -48,3 +48,4 @@ class Collection(object):
         data = req.context['data']
         item = self.model.create(**data)
         req.context['result'] = item
+        resp.status = falcon.HTTP_201

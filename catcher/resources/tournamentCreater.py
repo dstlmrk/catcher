@@ -25,7 +25,7 @@ class TournamentCreater(object):
             # check, if team exists
             dbTeam = m.Team.select().where(m.Team.id == team['id']).get()
             # check, if team is in correct divison
-            if dbTeam.division_id != divisionId:
+            if dbTeam.divisionId != divisionId:
                 raise ValueError("Team %s is in incorrect division" % team['id'])
         # check, if set of seeds does match the correct set of seeds
         if seeding != set([x for x in range(1, teamsCount + 1)]):
@@ -245,10 +245,10 @@ class TournamentCreater(object):
         print data['endDate']
         # Tournament
         tournamentId = m.Tournament.insert(
-            caldTournament   = data.get('caldTournament'),
+            caldTournamentId = data.get('caldTournamentId'),
             city             = data.get('city'),
             country          = data.get('country'),
-            division         = data['division'],
+            divisionId       = data['divisionId'],
             name             = data['name'],
             startDate        = data['startDate'],
             endDate          = data['endDate'],
@@ -323,7 +323,7 @@ class TournamentCreater(object):
             raise ValueError("Tournament has incorrect term (from is after to)")
         
         # check, if division exists
-        divisionId = data['division']
+        divisionId = data['divisionId']
         m.Division.get(m.Division.id == divisionId)
 
         # load and check teams

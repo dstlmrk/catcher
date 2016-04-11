@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`player` (
   `number` SMALLINT NULL,
   `ranking` FLOAT NULL,
   `cald_id` INT NULL,
-  `club_id` INT NOT NULL,
+  `club_id` INT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `cald_id_UNIQUE` (`cald_id` ASC),
   INDEX `fk_player_club1_idx` (`club_id` ASC),

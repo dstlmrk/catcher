@@ -3,7 +3,7 @@
 
 import urllib2
 import sys, time
-import config
+from catcher import config
 import models as m
 
 class ImportFile(object):
@@ -255,21 +255,21 @@ if __name__ == "__main__":
     m.db.connect()
 
     clubs = ClubsAndPlayers(
-        config.imp.['clubs']]['url'],
-        config.imp.['clubs']]['columns'],
-        config.imp.['clubs']]['delimiter']
+        config.imp['clubs']['url'],
+        config.imp['clubs']['columns'],
+        config.imp['clubs']['delimiter']
         ).importData()
 
     tournaments = Tournaments(
-        config.imp.['tournaments']['url'],
-        config.imp.['tournaments']['columns'],
-        config.imp.['tournaments']['delimiter']
+        config.imp['tournaments']['url'],
+        config.imp['tournaments']['columns'],
+        config.imp['tournaments']['delimiter']
         ).importData()
 
     rosters = Rosters(
-        config.imp.['rosters']['url'],
-        config.imp.['rosters']['columns'],
-        config.imp.['rosters']['delimiter']
+        config.imp['rosters']['url'],
+        config.imp['rosters']['columns'],
+        config.imp['rosters']['delimiter']
         ).importData()
 
     if not m.db.is_closed():

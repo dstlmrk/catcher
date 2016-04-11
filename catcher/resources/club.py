@@ -10,40 +10,25 @@ from peewee import JOIN
 class Club(Item):
 
     def on_get(self, req, resp, id):
-        qr = m.Club.select(m.Club, m.User).join(m.User, JOIN.LEFT_OUTER).where(m.Club.id==id).get()
-        user = {}
-        if qr.user.id is not None:
-            user = {
-                'id'          : qr.user.id,
-                'nickname'    : qr.user.nickname,
-                'email'       : qr.user.email,
-                'createdAt'   : qr.user.createdAt,
-                'lastLoginAt' : qr.user.lastLoginAt
-            }
-        club = {
-            'id'      : qr.id,
-            'caldId'  : qr.caldId,
-            'name'    : qr.name,
-            'shortcut': qr.shortcut,
-            'city'    : qr.city,
-            'country' : qr.country,
-            'user'    : user
-        }
-        req.context['result'] = club
+        req.context['result'] = Clubs.getClubs(id)[0]
 
     def on_put(self, req, resp, id):
         super(Club, self).on_put(req, resp, id, ['shortcut', 'city', 'country'])
+        req.context['result'] = Clubs.getClubs(id)[0]
 
 class Clubs(Collection):
     
-    def on_get(self, req, resp):
+    @staticmethod
+    def getClubs(clubId = None):
+        whereClub = "" if clubId is None else (" WHERE club.id = %s" % clubId)
         q = ("SELECT club.id, club.cald_id, club.name, club.shortcut, club.city, club.country," +
              " user.id, user.nickname, user.email, user.created_at, user.last_login_at"
-             " FROM catcher.club LEFT OUTER JOIN user ON user.id = club.user_id")
+             " FROM club LEFT OUTER JOIN user ON user.id = club.user_id %s"
+             % (whereClub))
         qr = m.db.execute_sql(q)
         clubs = []
         for row in qr:
-            user = {}
+            user = None
             if row[6] is not None:
                 user = {
                     'id'          : row[6],
@@ -61,18 +46,20 @@ class Clubs(Collection):
                 'country' : row[5],
                 'user'    : user
                 })
+        return clubs
 
+    def on_get(self, req, resp):
+        clubs = Clubs.getClubs()
         collection = {
             'count' : len(clubs),
             'clubs' : clubs
         }
-
         req.context['result'] = collection
 
 class ClubPlayers():
 
     def on_get(self, req, resp, id):
-        qr = m.Player.select().where(m.Player.club==id).order_by(m.Player.ranking.desc())
+        qr = m.Player.select().where(m.Player.clubId==id).order_by(m.Player.ranking.desc())
         players = []
 
         for player in qr:
@@ -84,7 +71,7 @@ class ClubPlayers():
                 'number'   : player.number,
                 'ranking'  : player.ranking,
                 'caldId'   : player.caldId,
-                'clubId'   : player.club_id
+                'clubId'   : player.clubId
             })
 
         collection = {
@@ -98,7 +85,7 @@ class ClubTeams():
 
     def on_get(self, req, resp, id):
         q = ("SELECT team.id, team.degree, division.division, division.id, club.name" +
-             " FROM catcher.team JOIN division ON team.division_id = division.id" +
+             " FROM team JOIN division ON team.division_id = division.id" +
              " JOIN club ON club.id = team.club_id" +
              " WHERE team.club_id = %s;" % (id))
         qr = m.db.execute_sql(q)
