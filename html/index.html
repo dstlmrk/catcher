@@ -496,6 +496,7 @@ Host: catcher.zlutazimnice.cz</pre>
                         <span class="label label-default">admin</span>
                         <p>
                         <p>Hráče může upravovat pouze účet s rolí <span class="label label-info">club</span>, kterému hráč náleží.</p>
+                        <p>Editovat lze <code>firstname</code>, <code>lastname</code>, <code>nickname</code> a <code>number</code>.</p>
                      </div>
                      <div>
                         <h3>DELETE - Smazání hráče</h3>
@@ -701,7 +702,7 @@ Host: catcher.zlutazimnice.cz
       },
       "country": "CZE",
       "teams": 4,
-      "caldTournament": {},
+      "caldTournamentId": null,
       "active": true,
       "ready": true,
       "terminated": false,
@@ -741,95 +742,83 @@ Content-Type: application/json
 </pre>
                         <pre>
 {
-  "name":"PFL 2016",
-  "city":"Prague",
-  "country":"CZE",
-  "startDate":"2016-04-01",
-  "endDate":"2016-04-01",
-  "division":1,
-  "caldTournament":false,
-  "teams":[
-    {
-      "id":1,
-      "seeding":1
-    },
-    {
-      "id":2,
-      "seeding":2
-    },
-    {
-      "id":3,
-      "seeding":3
-    },
-    {
-      "id":4,
-      "seeding":4
-    }
-  ],
-  "fieldsCount":1,
-  "fields":[
-    {
-      "id":1,
-      "name":"Main field"
-    }
-  ],
-  "groups":[
+  "name": "PFL 2016",
+  "city": "Prague",
+  "country": "CZE",
+  "startDate": "2016-04-01",
+  "endDate": "2016-04-01",
+  "divisionId": 1,
+  "caldTournamentId": null,
+  "teams": [{
+    "id": 1,
+    "seeding": 1
+  }, {
+    "id": 2,
+    "seeding": 2
+  }, {
+    "id": 3,
+    "seeding": 3
+  }, {
+    "id": 4,
+    "seeding": 4
+  }],
+  "fieldsCount": 1,
+  "fields": [{
+    "id": 1,
+    "name": "Main field"
+  }],
+  "groups": [
 
   ],
-  "matches":[
-    {
-      "field":1,
-      "startTime":"2016-04-01T09:00:00",
-      "endTime":"2016-04-01T09:29:00",
-      "homeSeed":1,
-      "awaySeed":4,
-      "looserNextStep":"3RD",
-      "winnerNextStep":"FIN",
-      "looserFinalStanding":null,
-      "winnerFinalStanding":null,
-      "identificator":"SE1",
-      "description":null
-    },
-    {
-      "field":1,
-      "startTime":"2016-04-01T09:30:00",
-      "endTime":"2016-04-01T09:59:00",
-      "homeSeed":2,
-      "awaySeed":3,
-      "looserNextStep":"3RD",
-      "winnerNextStep":"FIN",
-      "looserFinalStanding":null,
-      "winnerFinalStanding":null,
-      "identificator":"SE2",
-      "description":null
-    },
-    {
-      "field":1,
-      "startTime":"2016-04-01T10:00:00",
-      "endTime":"2016-04-01T10:29:00",
-      "homeSeed":null,
-      "awaySeed":null,
-      "looserNextStep":null,
-      "winnerNextStep":null,
-      "looserFinalStanding":4,
-      "winnerFinalStanding":3,
-      "identificator":"3RD",
-      "description":null
-    },
-    {
-      "field":1,
-      "startTime":"2016-04-01T10:30:00",
-      "endTime":"2016-04-01T10:59:00",
-      "homeSeed":null,
-      "awaySeed":null,
-      "looserNextStep":null,
-      "winnerNextStep":null,
-      "looserFinalStanding":2,
-      "winnerFinalStanding":1,
-      "identificator":"FIN",
-      "description":"Finale"
-    }
-  ]
+  "matches": [{
+    "fieldId": 1,
+    "startTime": "2016-04-01T09:00:00",
+    "endTime": "2016-04-01T09:29:00",
+    "homeSeed": 1,
+    "awaySeed": 4,
+    "looserNextStep": "3RD",
+    "winnerNextStep": "FIN",
+    "looserFinalStanding": null,
+    "winnerFinalStanding": null,
+    "identificator": "SE1",
+    "description": null
+  }, {
+    "fieldId": 1,
+    "startTime": "2016-04-01T09:30:00",
+    "endTime": "2016-04-01T09:59:00",
+    "homeSeed": 2,
+    "awaySeed": 3,
+    "looserNextStep": "3RD",
+    "winnerNextStep": "FIN",
+    "looserFinalStanding": null,
+    "winnerFinalStanding": null,
+    "identificator": "SE2",
+    "description": null
+  }, {
+    "fieldId": 1,
+    "startTime": "2016-04-01T10:00:00",
+    "endTime": "2016-04-01T10:29:00",
+    "homeSeed": null,
+    "awaySeed": null,
+    "looserNextStep": null,
+    "winnerNextStep": null,
+    "looserFinalStanding": 4,
+    "winnerFinalStanding": 3,
+    "identificator": "3RD",
+    "description": null
+  }, {
+    "fieldId": 1,
+    "startTime": "2016-04-01T10:30:00",
+    "endTime": "2016-04-01T10:59:00",
+    "homeSeed": null,
+    "awaySeed": null,
+    "looserNextStep": null,
+    "winnerNextStep": null,
+    "looserFinalStanding": 2,
+    "winnerFinalStanding": 1,
+    "identificator": "FIN",
+    "description": "Finale"
+  }]
 }</pre>
                         <h5>Odpověď</h5>
                         <pre>HTTP/1.1 201 Created</pre>
@@ -1090,15 +1079,14 @@ Host: catcher.zlutazimnice.cz
                         </table>
                         <h5>Požadavek</h5>
                         <pre>
-   PUT /api/tournament/1/teams HTTP/1.1
-   Host: catcher.zlutazimnice.cz
-   Content-Type: application/json
-   </pre>
-                        <pre>
-   {
-     "seeding": 2,   
-     "teamId": 3
-   }</pre>
+PUT /api/tournament/1/teams HTTP/1.1
+Host: catcher.zlutazimnice.cz
+Content-Type: application/json
+</pre><pre>
+{
+ "seeding": 2,   
+ "teamId": 3
+}</pre>
                         <h5>Odpověď</h5>
                         <pre>HTTP/1.1 200 OK</pre>
                      </div>
@@ -1117,7 +1105,7 @@ Host: catcher.zlutazimnice.cz
                         </h3>
                      </div>
                      <div class="col-md-6" align="right">
-                        <strong>Zápasy na turnaji</strong>
+                        <strong>Turnajová utkání</strong>
                      </div>
                   </div>
                </div>
@@ -1226,255 +1214,6 @@ Content-Type: application/json
     ...
   ]
 }</pre>
-                     <div>
-                        <h3>PUT - Úprava zápasu</h3>
-                        <span class="label label-default">organizer</span>
-                        <span class="label label-default">admin</span>
-                        <p>
-                        <p>Nejčastěji půjde o zahájení a ukončení zápasu úpravou atributů <code>active</code> a <code>terminate</code>. Povinným parametrem je <code>matchId</code>.</p>
-                        <h5>Tělo požadavku</h5>
-                        <table class="table table-sm">
-                           <tbody>
-                              <tr>
-                                 <td><code>matchId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>povinný</td>
-                                 <td>ID zápasu
-                              </tr>
-                              <tr>
-                                 <td><code>active</code></td>
-                                 <td><code>boolean</code></td>
-                                 <td>nepovinný</td>
-                                 <td>příznak, že utkání se právě odehrává</td>
-                              </tr>
-                              <tr>
-                                 <td><code>terminated</code></td>
-                                 <td><code>boolean</code></td>
-                                 <td>nepovinný</td>
-                                 <td>příznak, že utkání je již ukončeno</td>
-                              </tr>
-                              <tr>
-                                 <td><code>fieldId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>nepovinný</td>
-                                 <td>ID hřiště</td>
-                              </tr>
-                              <tr>
-                                 <td><code>description</code></td>
-                                 <td><code>string</code></td>
-                                 <td>nepovinný</td>
-                                 <td>textový popis zápasu</td>
-                              </tr>
-                              <tr>
-                                 <td><code>startTime</code></td>
-                                 <td><code>timestamp</code></td>
-                                 <td>nepovinný</td>
-                                 <td>čas zajájení</td>
-                              </tr>
-                              <tr>
-                                 <td><code>endTime</code></td>
-                                 <td><code>timestamp</code></td>
-                                 <td>nepovinný</td>
-                                 <td>čas ukončení</td>
-                              </tr>
-                           </tbody>
-                        </table>
-                        <h5>Požadavek</h5>
-                        <pre>
-PUT /api/tournament/1/matches HTTP/1.1
-Host: catcher.zlutazimnice.cz
-Content-Type: application/json
-</pre>
-                        <pre>
-{
-  "matchId": 1,
-  "active": true,
-  "description": "Semifinale 1",
-}
-</pre>
-                        <h5>Odpověď</h5>
-                        <pre>HTTP/1.1 200 OK</pre>
-                        <pre>
-{
-  "description": "Semifinale 1",
-  "homeTeam": {
-    "score": null,
-    "seed": 1,
-    "id": 1,
-    "spirit": null,
-    "name": "Ježkovy voči A"
-  },
-  "active": 1,
-  "id": 1,
-  "looser": {
-    "nextStep": {
-      "identificator": "FIN",
-      "group_id": null,
-      "match_id": 4
-    },
-    "finalStanding": null
-  },
-  "terminated": 0,
-  "awayTeam": {
-    "score": null,
-    "seed": 4,
-    "id": 4,
-    "spirit": null,
-    "name": "Létající Cirkus A"
-  },
-  "winner": {
-    "nextStep": {
-      "identificator": "3RD",
-      "group_id": null,
-      "match_id": 3
-    },
-    "finalStanding": null
-  },
-  "field": {
-    "id": 1,
-    "name": "Main field"
-  },
-  "time": {
-    "start": "2016-04-01T09:00:00",
-    "end": "2016-04-01T09:29:00"
-  },
-  "identificator": "SE1"
-}</pre>
-                     </div>
-                  </div>
-               </div>
-            </div>
-            <!-- ----------------------------------------------- -->
-            <div class="panel panel-default">
-               <div class="panel-heading" role="tab">
-                  <div class="row">
-                     <div class="col-md-6">
-                        <h3 class="panel-title">
-                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentPoints" aria-expanded="false" aria-controls="tournamentPoints">
-                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/points</strong>
-                           </a>
-                        </h3>
-                     </div>
-                     <div class="col-md-6" align="right">
-                        <strong>Body v zápase</strong>
-                     </div>
-                  </div>
-               </div>
-               <div id="tournamentPoints" class="panel-collapse collapse" role="tabpanel">
-                  <div class="panel-body">
-                     <h3>GET - Získá odehrané body v konkrétním zápase</h3>
-                     <span class="label label-info">public</span>
-                     <span class="label label-info">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <p>BUDE BRZY ...</p>
-                     <p>Vrátí informace o zápase a kolekci všech již odehraných bodů.</p>
-                     <h3>POST - Započítá nový bod</h3>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <h5>Tělo požadavku</h5>
-                     <table class="table table-sm">
-                        <tbody>
-                           <tr>
-                              <td><code>matchId</code></td>
-                              <td><code>int</code></td>
-                              <td>povinný</td>
-                              <td>ID zápasu</td>
-                           </tr>
-                           <tr>
-                              <td><code>homePoint</code></td>
-                              <td><code>boolean</code></td>
-                              <td>povinný</td>
-                              <td>příznak, zda domácí tým dal bod</td>
-                           </tr>
-                           <tr>
-                              <td><code>scorePlayerId</code></td>
-                              <td><code>int</code></td>
-                              <td>nepovinný</td>
-                              <td>ID skórujícího hráče</td>
-                           </tr>
-                           <tr>
-                              <td><code>assistPlayerId</code></td>
-                              <td><code>int</code></td>
-                              <td>nepovinný</td>
-                              <td>ID asistujícího hráč</td>
-                           </tr>
-                           <tr>
-                              <td><code>callahan</code></td>
-                              <td><code>boolean</code></td>
-                              <td>nepovinný</td>
-                              <td>Callahan</td>
-                           </tr>
-                        </tbody>
-                     </table>
-                     <h5>Požadavek</h5>
-                     <pre>
-POST /api/tournament/1/points HTTP/1.1
-Host: catcher.zlutazimnice.cz
-Content-Type: application/json
-</pre>
-                     <pre>
-{
-  "matchId": 1
-  "assistPlayerId": 3,   
-  "scorePlayerId": 2,
-  "homePoint": true,
-  "callahan": false
-}</pre>
-                     <h5>Odpověď</h5>
-                     <pre>HTTP/1.1 201 Created</pre>
-                     <pre>
-{
-  "awayScore": 3,
-  "matchId": 1,
-  "homePoint": true,
-  "scorePlayerId": 2,
-  "homeScore": 7,
-  "callahan": false,
-  "assistPlayerId": 3,
-  "order": 9
-}</pre>
-                     <h3>PUT - Upraví bod</h3>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <p>Slouží pro zpětnou editaci. V průběhu zápasů je doporučeno bod smazat a znovu vytvořit. Nelze totiž upravit skóre (tj. změna týmu, který dal bod). V tom případě je nutné daný bod i všechny násedující vymazat a vytvořit je znovu.</p>
-                     <h5>Tělo požadavku</h5>
-                     <table class="table table-sm">
-                        <tbody>
-                           <tr>
-                              <td><code>scorePlayerId</code></td>
-                              <td><code>int</code></td>
-                              <td>nepovinný</td>
-                              <td>ID skórujícího hráče</td>
-                           </tr>
-                           <tr>
-                              <td><code>assistPlayerId</code></td>
-                              <td><code>int</code></td>
-                              <td>nepovinný</td>
-                              <td>ID asistujícího hráč</td>
-                           </tr>
-                           <tr>
-                              <td><code>callahan</code></td>
-                              <td><code>boolean</code></td>
-                              <td>Callahan</td>
-                           </tr>
-                        </tbody>
-                     </table>
-                     <h3>DELETE - Smaže poslední uložený bod</h3>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <p>Smaže <strong>poslední</strong> uložený bod. Opakovaným voláním lze smazat všechny již dříve uložené body. Tento požadavek lze volat pouze na zápasy, které ještě nebyly ukončeny.</p>
-                     <h5>Požadavek</h5>
-                     <pre>
-DELETE /api/tournament/1/match/12/points HTTP/1.1
-Host: catcher.zlutazimnice.cz
-</pre>
-                     <h5>Odpověď</h5>
-                     <pre>HTTP/1.1 200 OK</pre>
                   </div>
                </div>
             </div>
@@ -1631,6 +1370,338 @@ Content-Type: application/json
                      <span class="label label-default">admin</span>
                      <p>
                      <p>Platí stejné podmínky jako u metody POST. Měnit hodnocení SOTG nelze po ukončení turnaje (příznak <code>terminated</code>).</p>
+                  </div>
+               </div>
+            </div>
+            <hr>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentMatch" aria-expanded="false" aria-controls="tournamentMatch">
+                           <strong>/match/{id}</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Utkání</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="tournamentMatch" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <div>
+                        <h3>GET - Utkání</h3>
+                        <span class="label label-default">public</span>
+                        <span class="label label-default">club</span>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Vrátí jeden konkrétní zápas.</p>
+                        <h3>PUT - Úprava zápasu</h3>
+                        <span class="label label-default">organizer</span>
+                        <span class="label label-default">admin</span>
+                        <p>
+                        <p>Nejčastěji půjde o zahájení a ukončení zápasu úpravou atributů <code>active</code> a <code>terminate</code>.</p>
+                        <h5>Tělo požadavku</h5>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>active</code></td>
+                                 <td><code>boolean</code></td>
+                                 <td>nepovinný</td>
+                                 <td>příznak, že utkání se právě odehrává</td>
+                              </tr>
+                              <tr>
+                                 <td><code>terminated</code></td>
+                                 <td><code>boolean</code></td>
+                                 <td>nepovinný</td>
+                                 <td>příznak, že utkání je již ukončeno</td>
+                              </tr>
+                              <tr>
+                                 <td><code>fieldId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>nepovinný</td>
+                                 <td>ID hřiště</td>
+                              </tr>
+                              <tr>
+                                 <td><code>description</code></td>
+                                 <td><code>string</code></td>
+                                 <td>nepovinný</td>
+                                 <td>textový popis zápasu</td>
+                              </tr>
+                              <tr>
+                                 <td><code>startTime</code></td>
+                                 <td><code>timestamp</code></td>
+                                 <td>nepovinný</td>
+                                 <td>čas zajájení</td>
+                              </tr>
+                              <tr>
+                                 <td><code>endTime</code></td>
+                                 <td><code>timestamp</code></td>
+                                 <td>nepovinný</td>
+                                 <td>čas ukončení</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <h5>Požadavek</h5>
+                        <pre>
+PUT /api/match/1 HTTP/1.1
+Host: catcher.zlutazimnice.cz
+Content-Type: application/json
+</pre>
+                        <pre>
+{
+  "active": true,
+  "description": "Semifinale 1",
+}
+</pre>
+                        <h5>Odpověď</h5>
+                        <pre>HTTP/1.1 200 OK</pre>
+                        <pre>
+{
+  "description": "Semifinale 1",
+  "homeTeam": {
+    "score": null,
+    "seed": 1,
+    "id": 1,
+    "spirit": null,
+    "name": "Ježkovy voči A"
+  },
+  "active": 1,
+  "id": 1,
+  "looser": {
+    "nextStep": {
+      "identificator": "FIN",
+      "groupId": null,
+      "matchId": 4
+    },
+    "finalStanding": null
+  },
+  "terminated": 0,
+  "awayTeam": {
+    "score": null,
+    "seed": 4,
+    "id": 4,
+    "spirit": null,
+    "name": "Létající Cirkus A"
+  },
+  "winner": {
+    "nextStep": {
+      "identificator": "3RD",
+      "groupId": null,
+      "matchId": 3
+    },
+    "finalStanding": null
+  },
+  "field": {
+    "id": 1,
+    "name": "Main field"
+  },
+  "time": {
+    "start": "2016-04-01T09:00:00",
+    "end": "2016-04-01T09:29:00"
+  },
+  "identificator": "SE1"
+}</pre>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentPoints" aria-expanded="false" aria-controls="tournamentPoints">
+                           <strong>/match/{id}/points</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Body v zápase</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="tournamentPoints" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Získá odehrané body v konkrétním zápase</h3>
+                     <span class="label label-info">public</span>
+                     <span class="label label-info">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Vrátí informace o zápase a kolekci všech již odehraných bodů (seřazené sestupně).</p>
+
+                     <h5>Požadavek</h5>
+                        <pre>
+GET /api/tournament/1/match/1/points HTTP/1.1
+Host: catcher.zlutazimnice.cz
+</pre>
+<h5>Odpověď</h5>
+                        <pre>HTTP/1.1 200 OK</pre>
+<pre>{
+  "description": "Semifinale 1",
+  "homeTeam": {
+    "score": 16,
+    "seed": 1,
+    "id": 1,
+    "spirit": null,
+    "name": "Ježkovy voči A"
+  },
+  "active": 1,
+  "id": 1,
+  "looser": {
+    "nextStep": {
+      "identificator": "FIN",
+      "matchId": 4,
+      "groupId": null
+    },
+    "finalStanding": null
+  },
+  "terminated": 0,
+  "awayTeam": {
+    "score": 3,
+    "seed": 4,
+    "id": 4,
+    "spirit": null,
+    "name": "Létající Cirkus A"
+  },
+  "winner": {
+    "nextStep": {
+      "identificator": "3RD",
+      "matchId": 3,
+      "groupId": null
+    },
+    "finalStanding": null
+  },
+  "field": {
+    "id": 1,
+    "name": "Main field"
+  },
+  "points": [
+    {
+      "homeScore": 7,
+      "callahan": 1,
+      "assistPlayerId": 1,
+      "awayScore": 3,
+      "matchId": 1,
+      "homePoint": 1,
+      "order": 10,
+      "scorePlayerId": 2
+    },
+    ...
+  ]
+}
+</pre>
+                     <h3>POST - Započítá nový bod</h3>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <h5>Tělo požadavku</h5>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>homePoint</code></td>
+                              <td><code>boolean</code></td>
+                              <td>povinný</td>
+                              <td>příznak, zda domácí tým dal bod</td>
+                           </tr>
+                           <tr>
+                              <td><code>scorePlayerId</code></td>
+                              <td><code>int</code></td>
+                              <td>nepovinný</td>
+                              <td>ID skórujícího hráče</td>
+                           </tr>
+                           <tr>
+                              <td><code>assistPlayerId</code></td>
+                              <td><code>int</code></td>
+                              <td>nepovinný</td>
+                              <td>ID asistujícího hráč</td>
+                           </tr>
+                           <tr>
+                              <td><code>callahan</code></td>
+                              <td><code>boolean</code></td>
+                              <td>nepovinný</td>
+                              <td>Callahan</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h5>Požadavek</h5>
+                     <pre>
+POST /api/tournament/1/match/1/points HTTP/1.1
+Host: catcher.zlutazimnice.cz
+Content-Type: application/json
+</pre>
+                     <pre>
+{
+  "assistPlayerId": 3,   
+  "scorePlayerId": 2,
+  "homePoint": true,
+  "callahan": false
+}</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 201 Created</pre>
+                     <pre>
+{
+  "awayScore": 3,
+  "matchId": 1,
+  "homePoint": true,
+  "scorePlayerId": 2,
+  "homeScore": 7,
+  "callahan": false,
+  "assistPlayerId": 3,
+  "order": 9
+}</pre>
+                     <h3>PUT - Upraví bod</h3>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Slouží pro zpětnou editaci. Pro chybně zadané body je v průběhu zápasů doporučeno body smazat a znovu vytvořit. Nelze totiž upravit skóre (tj. změna týmu, který dal bod). V tom případě je nutné daný bod i všechny násedující vymazat a vytvořit je znovu.</p>
+                     <h5>Tělo požadavku</h5>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>order</code></td>
+                              <td><code>int</code></td>
+                              <td>povinný</td>
+                              <td>bod, který má být upraven</td>
+                           </tr>
+                           <tr>
+                              <td><code>scorePlayerId</code></td>
+                              <td><code>int</code></td>
+                              <td>nepovinný</td>
+                              <td>ID skórujícího hráče</td>
+                           </tr>
+                           <tr>
+                              <td><code>assistPlayerId</code></td>
+                              <td><code>int</code></td>
+                              <td>nepovinný</td>
+                              <td>ID asistujícího hráč</td>
+                           </tr>
+                           <tr>
+                              <td><code>callahan</code></td>
+                              <td><code>boolean</code></td>
+                              <td>nepovinný</td>
+                              <td>Callahan</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h3>DELETE - Smaže poslední uložený bod</h3>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Smaže <strong>poslední</strong> uložený bod. Opakovaným voláním lze smazat všechny již dříve uložené body. Tento požadavek lze volat pouze na zápasy, které ještě nebyly ukončeny.</p>
+                     <h5>Požadavek</h5>
+                     <pre>
+DELETE /api/tournament/1/match/12/points HTTP/1.1
+Host: catcher.zlutazimnice.cz
+</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 200 OK</pre>
                   </div>
                </div>
             </div>
