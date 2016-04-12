@@ -2,7 +2,6 @@
 # coding=utf-8
 
 import falcon
-# from playhouse.shortcuts import model_to_dict
 
 class Item(object):
     def __init__(self, model):
@@ -10,7 +9,6 @@ class Item(object):
 
     def on_get(self, req, resp, id):
         item = self.model.get(id=id)
-        # item = self.model.select().where(self.model.id==id).get()
         req.context['result'] = item
 
     def on_put(self, req, resp, id, editableCols=None):
@@ -40,9 +38,6 @@ class Collection(object):
             'items' : items
         }
         req.context['result'] = collection
-
-    def cutId(self, key):
-        return key[:-2] if key.endswith('Id') else key
 
     def on_post(self, req, resp):
         data = req.context['data']

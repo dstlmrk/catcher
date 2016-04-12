@@ -129,31 +129,32 @@ class Field(MySQLModel):
         # primary_key = pw.CompositeKey('id', 'tournament')
 # -------------------------------------------------------------------------------------
 class TeamAtTournament(MySQLModel):
-    seeding    = pw.IntegerField()
-    team       = pw.ForeignKeyField(Team)
-    tournament = pw.ForeignKeyField(Tournament)
+    seeding      = pw.IntegerField()
+    teamId       = pw.IntegerField(db_column='team_id')
+    tournamentId = pw.IntegerField(db_column='tournament_id')
 
     class Meta:
         db_table = 'team_at_tournament'
-        indexes = (
-            (('tournament', 'team'), True),
-        )
-        primary_key = pw.CompositeKey('team', 'tournament')
+        primary_key = False
+        # indexes = (
+        #     (('tournament', 'team'), True),
+        # )
+        # primary_key = pw.CompositeKey('team', 'tournament')
 
-    def prepared(self):
-        self.json = {
-            "teamId"    : self.team_id,
-            "name"      : (self.team.club.name + " " + self.team.degree),
-            "degree"    : self.team.degree,
-            "divisionId": self.team.division_id,
-            "seeding"   : self.seeding,
-            "clubId"    : self.team.club_id
-            }
+    # def prepared(self):
+        # self.json = {
+        #     "teamId"    : self.team_id,
+        #     "name"      : (self.team.club.name + " " + self.team.degree),
+        #     "degree"    : self.team.degree,
+        #     "divisionId": self.team.division_id,
+        #     "seeding"   : self.seeding,
+        #     "clubId"    : self.team.club_id
+        #     }
 
 # ------------------------------------------------------------------------------------- 
 class Identificator(MySQLModel):
     identificator = pw.CharField(max_length=3)
-    tournament    = pw.ForeignKeyField(Tournament)
+    tournamentId  = pw.IntegerField(db_column='tournament_id')
     matchId       = pw.IntegerField(db_column='match_id')
 
     class Meta:
@@ -164,55 +165,46 @@ class Identificator(MySQLModel):
         # primary_key = pw.CompositeKey('id', 'tournament')
 # ------------------------------------------------------------------------------------- 
 class Match(MySQLModel):
-    field               = pw.ForeignKeyField(Field)
+    fieldId             = pw.IntegerField(db_column='field_id')
     description         = pw.CharField()
     startTime           = pw.DateTimeField(db_column = 'start_time')
     endTime             = pw.DateTimeField(db_column = 'end_time')
-    tournament          = pw.ForeignKeyField(Tournament)
+    tournamentId        = pw.IntegerField(db_column='tournament_id')
     terminated          = pw.BooleanField()
     looserFinalStanding = pw.IntegerField(db_column = 'looser_final_standing')
     winnerFinalStanding = pw.IntegerField(db_column = 'winner_final_standing')
-    identificator       = pw.ForeignKeyField(Identificator)
-    looserNextStep      = pw.ForeignKeyField(rel_model = Identificator,
-                                             db_column = 'looser_next_step',
-                                             related_name = 'looserIds') 
-    winnerNextStep      = pw.ForeignKeyField(rel_model = Identificator,
-                                             db_column = 'winner_next_step',
-                                             related_name = 'winnerIds')
-    # TODO: musi existovat akce, kde odstartuje turnaj a doplni tymy
+    identificatorId     = pw.IntegerField(db_column='identificator_id')
+    looserNextStepId    = pw.IntegerField(db_column='looser_next_step')
+    winnerNextStepId    = pw.IntegerField(db_column='winner_next_step')
     homeSeed            = pw.IntegerField(db_column = 'home_seed')
     awaySeed            = pw.IntegerField(db_column = 'away_seed')
-
     flip                = pw.BooleanField()
     awayScore           = pw.IntegerField(db_column = 'away_score')
     homeScore           = pw.IntegerField(db_column = 'home_score')
     spiritAway          = pw.IntegerField(db_column = 'spirit_away')
     spiritHome          = pw.IntegerField(db_column = 'spirit_home')
-    awayTeam            = pw.ForeignKeyField(rel_model    = Team,
-                                             db_column    = 'away_team_id',
-                                             related_name = 'matchesAsHome')
-    homeTeam            = pw.ForeignKeyField(rel_model    = Team,
-                                             db_column    = 'home_team_id',
-                                             related_name = 'matchesAsAway')
+    awayTeamId          = pw.IntegerField(db_column='away_team_id')
+    homeTeamId          = pw.IntegerField(db_column='home_team_id')
     active              = pw.BooleanField()
 # -------------------------------------------------------------------------------------
 class Standing(MySQLModel):
-    standing   = pw.IntegerField()
-    team       = pw.ForeignKeyField(Team)
-    tournament = pw.ForeignKeyField(Tournament)
-    json       = None
+    standing     = pw.IntegerField()
+    teamId       = pw.IntegerField(db_column = 'team_id')
+    tournamentId = pw.IntegerField(db_column = 'tournament_id')
+    json         = None
 
     class Meta:
         # pass
-        indexes = (
-            (('tournament', 'team', 'standing'), True),
-        )
-        primary_key = pw.CompositeKey('standing', 'team', 'tournament')
+        # indexes = (
+        #     (('tournament', 'team', 'standing'), True),
+        # )
+        primary_key = False
+        # pw.CompositeKey('standing', 'team', 'tournament')
 
     def prepared(self):
         self.json = {
             "standing": self.standing,
-            "teamId"  : self.team_id
+            "teamId"  : self.teamId
         }
 # -------------------------------------------------------------------------------------
 class PlayerAtTournament(MySQLModel):
@@ -220,37 +212,38 @@ class PlayerAtTournament(MySQLModel):
     matches      = pw.IntegerField(default=0)
     scores       = pw.IntegerField(default=0)
     total        = pw.IntegerField(default=0)
-    playerId     = pw.IntegerField()
-    teamId       = pw.IntegerField()
-    tournamentId = pw.IntegerField()
+    playerId     = pw.IntegerField(db_column='player_id')
+    teamId       = pw.IntegerField(db_column='team_id')
+    tournamentId = pw.IntegerField(db_column='tournament_id')
     json         = None
 
     class Meta:
         db_table = 'player_at_tournament'
-        # primary_key = False
-        primary_key = pw.CompositeKey('playerId', 'teamId', 'tournamentId')
+        primary_key = False
+    #     primary_key = pw.CompositeKey('playerId', 'teamId', 'tournamentId')
 
-    def prepared(self):
-        self.json = {
-            "assists"     : self.assists,
-            "matches"     : self.matches,
-            "scores"      : self.scores,
-            "total"       : self.total,
-            "playerId"    : self.playerId,
-            "teamId"      : self.teamId, 
-            "tournamentId": self.tournamentId
-            }
+    # def prepared(self):
+    #     self.json = {
+    #         "assists"     : self.assists,
+    #         "matches"     : self.matches,
+    #         "scores"      : self.scores,
+    #         "total"       : self.total,
+    #         "playerId"    : self.playerId,
+    #         "teamId"      : self.teamId, 
+    #         "tournamentId": self.tournamentId
+    #         }
 # -------------------------------------------------------------------------------------
 class PlayerAtMatch(MySQLModel):
     assists    = pw.IntegerField()
-    match      = pw.ForeignKeyField(Match)
-    player     = pw.ForeignKeyField(Player)
+    matchId    = pw.IntegerField(db_column='match_id')
+    playerId   = pw.IntegerField(db_column='player_id')
     scores     = pw.IntegerField()
-    team       = pw.ForeignKeyField(Team)
+    teamId     = pw.IntegerField(db_column='team_id')
     total      = pw.IntegerField()
     
     class Meta:
-        db_table = 'player_at_match'
+        primary_key = False
+        # db_table = 'player_at_match'
 # -------------------------------------------------------------------------------------
 class Point(MySQLModel):
     homePoint      = pw.BooleanField(db_column='home_point')

@@ -44,13 +44,16 @@ api.add_route('/api/teams', r.Teams(m.Team))
 
 api.add_route('/api/tournaments', r.Tournaments(m.Tournament))
 api.add_route('/api/tournament/{id}', r.Tournament(m.Tournament))
-# TODO: rename id for tournamentId (only with tests)
 api.add_route('/api/tournament/{id}/standings', r.TournamentStandings())
 api.add_route('/api/tournament/{id}/players', r.TournamentPlayers())
 api.add_route('/api/tournament/{id}/teams', r.TournamentTeams())
 api.add_route('/api/tournament/{id}/matches', r.TournamentMatches())
 api.add_route('/api/tournament/{id}/groups', r.TournamentGroups())
-api.add_route('/api/tournament/{id}/match/{matchId}/points', r.Points())
+
+api.add_route('/api/match/{id}', r.Match(m.Match))
+api.add_route('/api/match/{id}/points', r.MatchPoints())
+
+
 # api.add_route('/api/tournament/{id}/spirit', r.Spirit())
 
 # # informace o konkretnim turnaji

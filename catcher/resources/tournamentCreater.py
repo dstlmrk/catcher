@@ -5,6 +5,8 @@ from catcher import models as m
 from datetime import datetime
 import falcon
 
+# TODO: kdyz zadam u finale homeSeed, turnaj se vytvori
+
 class TournamentCreater(object):
 
     def getTimestamp(self, timestamp):
@@ -99,7 +101,7 @@ class TournamentCreater(object):
                     " (isn't in the tournament term)" % match['identificator']
                     )
             # on the field is added match
-            schedule[match['field']].append(
+            schedule[match['fieldId']].append(
                 (match['identificator'], startTime, endTime)
                 )
         self.checkMatchTimes(schedule)
@@ -240,9 +242,6 @@ class TournamentCreater(object):
 
     @m.db.atomic()
     def saveTournament(self, data):
-        print "UKLADAM"
-
-        print data['endDate']
         # Tournament
         tournamentId = m.Tournament.insert(
             caldTournamentId = data.get('caldTournamentId'),
@@ -264,30 +263,30 @@ class TournamentCreater(object):
         # TeamAtTournament
         for team in data['teams']:
             m.TeamAtTournament.insert(
-                team       = team['id'],
-                seeding    = team['seeding'],
-                tournament = tournamentId
+                teamId       = team['id'],
+                seeding      = team['seeding'],
+                tournamentId = tournamentId
                 ).execute()
 
         for match in data['matches']:
             
             # Identificators
             identificator, created = m.Identificator.get_or_create(
-                tournament    = tournamentId,
+                tournamentId  = tournamentId,
                 identificator = match['identificator']
                 )
 
             winnerNextStep = None
             if match['winnerNextStep'] is not None:
                 winnerNextStep, created = m.Identificator.get_or_create(
-                    tournament    = tournamentId,
+                    tournamentId  = tournamentId,
                     identificator = match['winnerNextStep']
                     )
 
             looserNextStep = None
             if match['looserNextStep'] is not None:
                 looserNextStep, created = m.Identificator.get_or_create(
-                    tournament    = tournamentId,
+                    tournamentId  = tournamentId,
                     identificator = match['looserNextStep']
                     )
 
@@ -297,11 +296,11 @@ class TournamentCreater(object):
 
             # Match
             matchId = m.Match.insert(
-                tournament = tournamentId,
-                identificator = identificator.id,
+                tournamentId = tournamentId,
+                identificatorId = identificator.id,
                 terminated = False,
-                looserNextStep = looserNextStep,
-                winnerNextStep = winnerNextStep,
+                looserNextStepId = looserNextStep,
+                winnerNextStepId = winnerNextStep,
                 **match
                 ).execute()
 
