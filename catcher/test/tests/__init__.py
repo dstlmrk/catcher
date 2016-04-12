@@ -3,3 +3,4 @@ from team import *
 from club import *
 from division import *
 from player import *
+from match import *

@@ -58,6 +58,7 @@ INSERT INTO `test_catcher`.`player`
 (8   , "Josef"    , "Hón"     , NULL      , 90      , NULL     , NULL     , 1        ),
 (9   , "Bohumil"  , "Novák"   , NULL      , 10      , NULL     , NULL     , 1        ),
 (10  , "Václav"   , "Vencl"   , NULL      , 13      , NULL     , NULL     , 1        ),
+(11  , "Jan"      , "Krátký"  , NULL      , 11      , NULL     , NULL     , 2        ),
 (12  , "Petr"     , "Šmejkal" , NULL      , 25      , NULL     , NULL     , 2        ),
 (13  , "Miroslav" , "Egg"     , NULL      , 36      , NULL     , NULL     , 2        ),
 (14  , "Vladimír" , "Šimovec" , NULL      , NULL    , NULL     , NULL     , 2        ),
