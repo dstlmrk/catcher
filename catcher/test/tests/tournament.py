@@ -96,6 +96,7 @@ class TournamentTestCase(TestCase):
             headers = {"Content-Type": "application/json"},
             body    = body
             )
+        self.assertEqual(self.srmock.status, HTTP_201)
         return response
 
     def createRosters(self, tournamentId):
@@ -109,7 +110,33 @@ class TournamentTestCase(TestCase):
                     headers = {"Content-Type": "application/json"},
                     body    = {"playerId": playerId,"teamId": teamId}
                     )
+                self.assertEqual(self.srmock.status, HTTP_201)
                 playerId += 1
+
+    def getMatchId(self, tournamentId):
+        match = models.Match.select().where(
+            models.Match.tournamentId == tournamentId
+            )[0]
+        return match.id
+
+    def readyTournament(self, tournamentId):
+        response = self.request(
+            method  = 'PUT',
+            path    = ('/api/tournament/%s' % tournamentId),
+            headers = {"Content-Type": "application/json"},
+            body    = {"ready": True}
+            )
+        self.assertEqual(self.srmock.status, HTTP_200)
+
+    def activeMatch(self, matchId):
+        response = self.request(
+            method  = 'PUT',
+            path    = ('/api/match/%s' % matchId),
+            headers = {"Content-Type": "application/json"},
+            body    = {"active": True}
+            )
+        self.assertEqual(self.srmock.status, HTTP_200)
+
 
 class Tournaments(TournamentTestCase):
 
@@ -346,6 +373,7 @@ class TournamentPlayers(TournamentTestCase):
     
     def testGet1(self):
         newTournament = self.createTournament()
+        self.readyTournament(newTournament['id'])
         self.createRosters(newTournament['id'])
         players = len(models.PlayerAtTournament.select().where(
             models.PlayerAtTournament.tournamentId ==  newTournament['id']
@@ -360,6 +388,7 @@ class TournamentPlayers(TournamentTestCase):
     def testGet2(self):
         teamId = 1
         newTournament = self.createTournament()
+        self.readyTournament(newTournament['id'])
         self.createRosters(newTournament['id'])
         players = len(models.PlayerAtTournament.select().where(
             models.PlayerAtTournament.tournamentId ==  newTournament['id'],
@@ -376,6 +405,7 @@ class TournamentPlayers(TournamentTestCase):
 
     def testPost(self):
         newTournament = self.createTournament()
+        self.readyTournament(newTournament['id'])
         response = self.request(
             method  = 'POST',
             path    = ('/api/tournament/%s/players' % (newTournament['id'])),
@@ -395,6 +425,7 @@ class TournamentPlayers(TournamentTestCase):
     def testDelete(self):
         '''create player and delete him'''
         newTournament = self.createTournament()
+        self.readyTournament(newTournament['id'])
         response = self.request(
             method  = 'POST',
             path    = ('/api/tournament/%s/players' % (newTournament['id'])),

@@ -73,6 +73,7 @@ class Database(object):
             name = table[0]
             models.db.execute_sql("DELETE FROM `" + name + "`")
         models.db.execute_sql("SET foreign_key_checks = 1")
+        logging.debug("Tables are cleaned")
 
 class Result(object):
 
