@@ -9,6 +9,8 @@ import datetime
 from playhouse.shortcuts import model_to_dict
 import logging
 
+import peewee
+
 class PeeweeConnection(object):
 
     def process_request(self, req, resp):
@@ -103,7 +105,10 @@ class JSONTranslator(object):
             return obj.isoformat()
         if isinstance(obj, set):
             return list(obj)
-        if isinstance(obj, models.MySQLModel):
+        if isinstance(obj, peewee.Model):
             return model_to_dict(obj)
-        logging.warning("Converter doesn't know how convert data")
+        if isinstance(obj, models.MySQLModel):
+            # TODO: I don't understand this, because it doesn't work
+            return model_to_dict(obj)
+        logging.warning("Converter doesn't know how convert data (%s [%s])" % (obj, type(obj)))
         return None

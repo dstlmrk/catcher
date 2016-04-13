@@ -23,7 +23,6 @@ def connectDatabase():
             )
         logging.debug("Connected Catcher database")
     else:
-        print "----------------------------------------------------------"
         db = peewee.MySQLDatabase(
                      config.testDb['name'],
             user   = config.testDb['user'],
@@ -31,7 +30,6 @@ def connectDatabase():
             host   = config.testDb['host']
             )
 
-        print config.testDb['name'], config.testDb['user'], config.testDb['passwd'], config.testDb['host']
-        logging.debug("Connected test database")
+        logging.debug("Connected test database %s" % config.testDb['name'])
 
     return db

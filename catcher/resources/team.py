@@ -35,10 +35,8 @@ class Teams(Collection):
     
     def on_get(self, req, resp):
         teams = Teams.getTeams()
-
         collection = {
-            'count'   : len(teams),
+            'count' : len(teams),
             'teams' : teams
         }
-
         req.context['result'] = collection

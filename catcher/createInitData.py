@@ -196,12 +196,12 @@ payload = "{\"playerId\":21,\"teamId\":4}"
 response = requests.request("POST", url, data=payload, headers=headers)
 
 # active tournament ---------------------------------------------------------------
-url = host + str("/api/tournament/" + tournamentId)
-payload = '{"active":true}'
-headers = {'content-type': "application/json"}
-response = requests.request("PUT", url, data=payload, headers=headers)
-if response.status_code != 200:
-    print("Tournaji nebyl nastaven priznak 'active'")
+# url = host + str("/api/tournament/" + tournamentId)
+# payload = '{"active":true}'
+# headers = {'content-type': "application/json"}
+# response = requests.request("PUT", url, data=payload, headers=headers)
+# if response.status_code != 200:
+#     print("Tournaji nebyl nastaven priznak 'active'")
 
 # active match --------------------------------------------------------------------
 url = host + str("/api/match/1")
@@ -228,4 +228,3 @@ if response.status_code != 201:
     print("Zapasu nebyl pridan bod")
 
 # --------------------------------------------------------------------------------- 
-# add points ----------------------------------------------------------------------
