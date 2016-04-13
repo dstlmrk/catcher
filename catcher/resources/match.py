@@ -8,78 +8,74 @@ import falcon
 
 class Match(Item):
 
+    def activeMatch(self, matchId):
+        
+        match = m.Match.get(id=matchId)
+        match.homeScore = 0
+        match.awayScore = 0
+        match.save()
+
+        # fill in tables with players per match 
+        homeTeamPlayers = m.PlayerAtTournament.select().where(
+                m.PlayerAtTournament.tournamentId == match.tournamentId,
+                m.PlayerAtTournament.teamId       == match.homeTeamId
+            )
+        for player in homeTeamPlayers:
+            m.PlayerAtMatch.insert(
+                matchId  = matchId,
+                playerId = player.playerId
+                ).execute()
+        awayTeamPlayers = m.PlayerAtTournament.select().where(
+                m.PlayerAtTournament.tournamentId == match.tournamentId,
+                m.PlayerAtTournament.teamId       == match.awayTeamId
+            )
+        for player in awayTeamPlayers:
+            m.PlayerAtMatch.insert(
+                matchId  = matchId,
+                playerId = player.playerId
+                ).execute()
+
+    def on_get(self, req, resp, id):
+        req.context['result'] = Queries.getMatches(matchId=id)[0]
+
     def on_put(self, req, resp, id):
+        data = req.context['data']
+        match = m.Match.get(id=id)
         super(Match, self).on_put(req, resp, id,
             ['active', 'fieldId', 'startTime', 'endTime', 'terminated', 'description']
             )
-        req.context['result'] = Queries.getMatches(matchId = id)
+        
+        edited = False
+        if match.active is False and data.get('active') is True:
+            self.activeMatch(id)
+            edited = True
 
-class MatchPoints(object):
+        if edited:
+            resp.status = falcon.HTTP_200 
 
-    def getPoints(self, matchId, order = None):
-        '''returns all points from the match'''
-        whereOrder = "" if order is None else ("AND point.order = %s" % order) 
-        q = ("SELECT match_id, point.order, assist_player_id, score_player_id,"
-             " home_score, away_score, home_point, callahan FROM point"
-             " WHERE match_id = %s %s ORDER BY point.order DESC;"
-             % (matchId, whereOrder))
-        qr = m.db.execute_sql(q)
-        points = []
-        for row in qr:
-            points.append({
-                'matchId'       : row[0],       
-                'order'         : row[1],
-                'assistPlayerId': row[2],
-                'scorePlayerId' : row[3],
-                'homeScore'     : row[4],
-                'awayScore'     : row[5],
-                'homePoint'     : row[6],
-                'callahan'      : row[7]
-                })
-        return points
+        req.context['result'] = Queries.getMatches(matchId = id)[0]
 
-    def getPlayersTeamId(self, tournamentId, teamId):
-        '''returns one number'''
-        q = ("SELECT team_id FROM player_at_tournament"
-             " WHERE tournament_id = %s AND player_id = %s;"
-             % (tournamentId, teamId)
-             )
-        return m.db.execute_sql(q).fetchone()[0]
-    
-    def getMatch(self, matchId):
-        '''returns triple'''
-        q = ("SELECT home_team_id, away_team_id, active"
-             " FROM catcher.match WHERE id = %s;"
-             % (matchId)
-             )
-        return m.db.execute_sql(q).fetchone()
 
-    def getLastPoint(self, matchId):
-        '''returns tripe'''
-        q = ("SELECT point.order, home_score, away_score"
-             " FROM point WHERE match_id = %s ORDER BY point.order DESC LIMIT 1;"
-             % (matchId)
-             )
-        return m.db.execute_sql(q).fetchone()
+class Point(object):
 
     def checkPlayers(self, tournamentId, teamId, assistPlayerId, scorePlayerId, callahan):
         if not callahan and assistPlayerId:
             if assistPlayerId == scorePlayerId:
                 raise ValueError("Assisting player and scoring player is the one")
             # assisting player
-            hisTeamId = self.getPlayersTeamId(tournamentId, assistPlayerId)
+            hisTeamId = Queries.getPlayersTeamId(tournamentId, assistPlayerId)
             if hisTeamId != teamId:
                 raise ValueError("Team %s hasn't player %s" % (teamId, assistPlayerId))
 
         if scorePlayerId is not None:
             # scoring player
-            hisTeamId = self.getPlayersTeamId(tournamentId, scorePlayerId)
+            hisTeamId = Queries.getPlayersTeamId(tournamentId, scorePlayerId)
             if hisTeamId != teamId:
                 raise ValueError("Team %s hasn't player %s" % (teamId, scorePlayerId))
         return True
 
-    def updateMatchScore(self, matchId, forHome, inc = 1):
-        if forHome:
+    def updateMatchScore(self, matchId, homePoint, inc = 1):
+        if homePoint:
             m.Match.update(
                     homeScore = (m.Match.homeScore + inc)
                 ).where(
@@ -98,55 +94,74 @@ class MatchPoints(object):
                     scores = (m.PlayerAtMatch.scores + inc),
                     total  = (m.PlayerAtMatch.total + inc)
                 ).where(
-                    m.PlayerAtMatch.player == playerId,
-                    m.PlayerAtMatch.match  == matchId
+                    m.PlayerAtMatch.playerId == playerId,
+                    m.PlayerAtMatch.matchId  == matchId
                 ).execute()
+
+            m.PlayerAtTournament.update(
+                    scores = (m.PlayerAtTournament.scores + inc),
+                    total  = (m.PlayerAtTournament.total + inc)
+                ).where(
+                    m.PlayerAtTournament.playerId == playerId,
+                    m.PlayerAtTournament.tournamentId  == tournamentId
+                ).execute()
+
         elif state == 'A':
             m.PlayerAtMatch.update(
                     assists = (m.PlayerAtMatch.assists + inc),
                     total   = (m.PlayerAtMatch.total + inc)
                 ).where(
-                    m.PlayerAtMatch.player == playerId,
-                    m.PlayerAtMatch.match == matchId
+                    m.PlayerAtMatch.playerId == playerId,
+                    m.PlayerAtMatch.matchId  == matchId
+                ).execute()
+
+            m.PlayerAtTournament.update(
+                    assists = (m.PlayerAtTournament.assists + inc),
+                    total   = (m.PlayerAtTournament.total + inc)
+                ).where(
+                    m.PlayerAtTournament.playerId == playerId,
+                    m.PlayerAtTournament.tournamentId  == tournamentId
                 ).execute()
 
 
-        # TODO: zapocitat celkove statistiky na hrace, ne jenom na zapas
+class MatchPoints(Point):
 
-
-    def on_get(self, req, resp, id, matchId):
-        match = Queries.getMatches(id, matchId)[0]
-        match['points'] = self.getPoints(matchId)
+    def on_get(self, req, resp, id):
+        match = Queries.getMatches(matchId=id)[0]
+        match['points'] = Queries.getPoints(id)
         req.context['result'] = match
 
-    def on_post(self, req, resp, id, matchId):
+    def on_post(self, req, resp, id):
         data           = req.context['data']
         assistPlayerId = data.get('assistPlayerId')
         scorePlayerId  = data.get('scorePlayerId')
         callahan       = data.get('callahan', False)
         homePoint      = bool(data['homePoint'])
+        match          = m.Match.get(id=id)
+        tournament     = m.Tournament.get(id=match.tournamentId)
 
-        homeTeamId, awayTeamId, active = self.getMatch(matchId)
+        if not tournament.ready:
+            raise ValueError("Tournament isn't ready")
 
-        if not active:
+        if not match.active:
             raise ValueError("Match isn't active")
 
-        if homePoint:
-            teamId = homeTeamId
-        else:
-            teamId = awayTeamId
+        teamId = match.homeTeamId if homePoint else match.awayTeamId
 
-        self.checkPlayers(id, teamId, assistPlayerId, scorePlayerId, callahan)
-
+        self.checkPlayers(match.tournamentId, teamId, assistPlayerId, scorePlayerId, callahan)
         with m.db.transaction():
 
             if not callahan:
                 if assistPlayerId:
-                    self.updatePlayerStatistic(id, assistPlayerId, matchId, 'A')
-                if scorePlayerId:
-                    self.updatePlayerStatistic(id, scorePlayerId, matchId, 'S')
+                    self.updatePlayerStatistic(
+                        match.tournamentId, assistPlayerId, match.id, 'A'
+                        )
+            if scorePlayerId:
+                self.updatePlayerStatistic(
+                    match.tournamentId, scorePlayerId, match.id, 'S'
+                    )
 
-            order, homeScore, awayScore = self.getLastPoint(matchId)
+            order, homeScore, awayScore = Queries.getLastPoint(match.id)
             
             order += 1
             
@@ -157,7 +172,7 @@ class MatchPoints(object):
 
             m.Point.insert(
                     homePoint      = homePoint,
-                    matchId        = matchId,    
+                    matchId        = match.id,    
                     order          = order,
                     assistPlayerId = assistPlayerId if not callahan else None,
                     scorePlayerId  = scorePlayerId if not callahan else None,
@@ -166,77 +181,80 @@ class MatchPoints(object):
                     callahan       = callahan
                 ).execute()
 
-            self.updateMatchScore(matchId, homePoint)
+            self.updateMatchScore(match.id, homePoint)
 
-            point = m.Point.get(matchId=matchId, order=order)
+            point = m.Point.get(matchId=match.id, order=order)
 
         req.context['result'] = point
         resp.status = falcon.HTTP_201
 
-    def on_put(self, req, resp, id, matchId):
+    def on_delete(self, req, resp, id):
+        match          = m.Match.get(id=id)
+        # TODO: unite this two queries
+        order, homeScore, awayScore = Queries.getLastPoint(match.id)
+        point = Queries.getPoints(match.id, order)[0]
+        
+        assistPlayerId = point['assistPlayer']['id']
+        scorePlayerId  = point['scorePlayer']['id']
+
+        with m.db.transaction():
+            # delete from match table
+            self.updateMatchScore(match.id, point['homePoint'], (-1))
+            # delete players statistics
+            if assistPlayerId:
+                self.updatePlayerStatistic(match.tournamentId, assistPlayerId, match.id, 'A', (-1))
+            if scorePlayerId:
+                self.updatePlayerStatistic(match.tournamentId, scorePlayerId, match.id, 'S', (-1))
+            # delete point
+            m.Point.delete().where(
+                    m.Point.matchId == match.id,
+                    m.Point.order == order
+                ).execute()
+
+class MatchPoint(Point):
+
+    def on_put(self, req, resp, id, order):
+        
         editableCols   = ['assistPlayerId', 'scorePlayerId', 'callahan']
+        match          = m.Match.get(id=id)
+        point          = m.Point.get(matchId=match.id, order=order)
         data           = req.context['data']
-        order          = data['order']
-        point          = self.getPoints(matchId, order)[0]
-        assistPlayerId = point['assistPlayerId']
-        scorePlayerId  = point['scorePlayerId']
-        callahan       = data['callahan']
+        assistPlayerId = data.get('assistPlayerId')
+        scorePlayerId  = data.get('scorePlayerId')
+        callahan       = data.get('callahan', False)
 
-        homeTeamId, awayTeamId, active = self.getMatch(point['matchId'])
+        teamId = match.homeTeamId if point.homePoint else match.awayTeamId
 
-        if point['homePoint']:
-            teamId = homeTeamId
-        else:
-            teamId = awayTeamId
-
-        self.checkPlayers(id, teamId, assistPlayerId, scorePlayerId, callahan)
+        self.checkPlayers(match.tournamentId, teamId, assistPlayerId, scorePlayerId, callahan)
 
         params = None
         qr     = None
         if editableCols is not None:
             params = { key : data[key] for key in data if key in editableCols}
+            if callahan and 'assistPlayerId' in params:
+                del params['assistPlayerId']
 
         with m.db.transaction():
             # delete players statistics, if they are changed
-            newAssistPlayerId = data.get('assistPlayerId')
-            if assistPlayerId != newAssistPlayerId:
-                self.updatePlayerStatistic(id, assistPlayerId, matchId, 'A', (-1))
-                self.updatePlayerStatistic(id, newAssistPlayerId, matchId, 'A', 1)
-            newScorePlayerId = data.get('scorePlayerId')
-            if scorePlayerId != newScorePlayerId:
-                self.updatePlayerStatistic(id, scorePlayerId, matchId, 'S', (-1))
-                self.updatePlayerStatistic(id, scorePlayerId, matchId, 'S', 1)
+            if callahan:
+                self.updatePlayerStatistic(match.tournamentId, point.assistPlayerId, match.id, 'A', (-1))
+
+            if assistPlayerId and point.assistPlayerId != assistPlayerId and not callahan:
+                self.updatePlayerStatistic(match.tournamentId, point.assistPlayerId, match.id, 'A', (-1))
+                self.updatePlayerStatistic(match.tournamentId, assistPlayerId, match.id, 'A', 1)
+        
+            if scorePlayerId and point.scorePlayerId != scorePlayerId:
+                self.updatePlayerStatistic(match.tournamentId, point.scorePlayerId, match.id, 'S', (-1))
+                self.updatePlayerStatistic(match.tournamentId, scorePlayerId, match.id, 'S', 1)
 
             if params:
                 qr = m.Point.update(**params).where(
-                        m.Point.matchId == matchId,
+                        m.Point.matchId == match.id,
                         m.Point.order == order
                     ).execute()
 
         req.context['result'] = m.Point.select().where(
-                m.Point.matchId == matchId,
+                m.Point.matchId == match.id,
                 m.Point.order == order
             ).get()
         resp.status = falcon.HTTP_200 if qr else falcon.HTTP_304
-
-    def on_delete(self, req, resp, id, matchId):
-        # TODO: unite this two queries
-        order, homeScore, awayScore = self.getLastPoint(matchId)
-        point = self.getPoints(matchId, order)[0]
-        
-        assistPlayerId = point['assistPlayerId']
-        scorePlayerId  = point['scorePlayerId']
-
-        with m.db.transaction():
-            # delete from match table
-            self.updateMatchScore(matchId, point['homePoint'], (-1))
-            # delete players statistics
-            if assistPlayerId:
-                self.updatePlayerStatistic(id, assistPlayerId, matchId, 'A', (-1))
-            if scorePlayerId:
-                self.updatePlayerStatistic(id, scorePlayerId, matchId, 'S', (-1))
-            # delete point
-            m.Point.delete().where(
-                    m.Point.matchId == matchId,
-                    m.Point.order == order
-                ).execute()

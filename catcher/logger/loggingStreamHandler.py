@@ -135,8 +135,11 @@ class ColorizingStreamHandler(logging.StreamHandler):
 
     def format(self, record):
         message = logging.StreamHandler.format(self, record)
-        
+
         # my format
+        # print "filename", record.filename
+        # print "pathname", record.pathname
+        message = (record.module + "." + record.funcName + ": " + message)
         message = self.myFormat(message, record.levelname)
 
         if self.is_tty:

@@ -174,7 +174,7 @@ class ClubsAndPlayers(ImportFile):
                     caldId    = caldId,
                     lastname  = lastname,
                     firstname = firstname,
-                    club      = clubId
+                    clubId    = clubId
                     ).execute()
             except m.pw.IntegrityError as ex:
                 print clubId, caldId, lastname, firstname

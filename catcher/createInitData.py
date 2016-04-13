@@ -4,12 +4,12 @@
 import models
 import requests
 import json
+from catcher import config
 
-models.db.connect()
-
-local  = "http://localhost:8080"
-server = "http://catcher.zlutazimnice.cz"
-host   = local
+# local  = "http://localhost:8080"
+# server = "http://catcher.zlutazimnice.cz"
+host   = config.app['host']
+print "HOST", host
 
 # create 10 teams --------------------------------------------------------------------
 
@@ -50,8 +50,8 @@ tournament = '''{
     "country": "CZE",
     "startDate": "2016-04-01",
     "endDate": "2016-04-01",
-    "division": 1,
-    "caldTournament": null,
+    "divisionId": 1,
+    "caldTournamentId": null,
     "teams": [
         {
             "id": 1,
@@ -80,7 +80,7 @@ tournament = '''{
     "groups": [],
     "matches": [
         {
-            "field": 1,
+            "fieldId": 1,
             "startTime": "2016-04-01T09:00:00",
             "endTime": "2016-04-01T09:29:00",
             "homeSeed": 1,
@@ -93,7 +93,7 @@ tournament = '''{
             "description": null
         },
         {
-            "field": 1,
+            "fieldId": 1,
             "startTime": "2016-04-01T09:30:00",
             "endTime": "2016-04-01T09:59:00",
             "homeSeed": 2,
@@ -106,7 +106,7 @@ tournament = '''{
             "description": null
         },
         {
-            "field": 1,
+            "fieldId": 1,
             "startTime": "2016-04-01T10:00:00",
             "endTime": "2016-04-01T10:29:00",
             "homeSeed": null,
@@ -119,7 +119,7 @@ tournament = '''{
             "description": null
         },
         {
-            "field": 1,
+            "fieldId": 1,
             "startTime": "2016-04-01T10:30:00",
             "endTime": "2016-04-01T10:59:00",
             "homeSeed": null,
@@ -195,7 +195,7 @@ response = requests.request("POST", url, data=payload, headers=headers)
 payload = "{\"playerId\":21,\"teamId\":4}"
 response = requests.request("POST", url, data=payload, headers=headers)
 
-# active tournament --------------------------------------------------------------------
+# active tournament ---------------------------------------------------------------
 url = host + str("/api/tournament/" + tournamentId)
 payload = '{"active":true}'
 headers = {'content-type': "application/json"}
@@ -204,9 +204,28 @@ if response.status_code != 200:
     print("Tournaji nebyl nastaven priznak 'active'")
 
 # active match --------------------------------------------------------------------
-url = host + str("/api/tournament/" + tournamentId + "/matches")
-payload = '{"active":true, "matchId": 1, "description": "Semifinale 1"}'
+url = host + str("/api/match/1")
+payload = '{"active":true, "description": "Semifinale 1"}'
 headers = {'content-type': "application/json"}
 response = requests.request("PUT", url, data=payload, headers=headers)
 if response.status_code != 200:
     print("Zapasu nebyl nastaven priznak 'active'")
+
+# add points ----------------------------------------------------------------------
+url = host + str("/api/match/1/points")
+headers = {'content-type': "application/json"}
+payload = "{\"assistPlayerId\": 1, \"scorePlayerId\": 2, \"homePoint\": true }"
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = '{"assistPlayerId": 16, "scorePlayerId":   17, "homePoint": false                   }'
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = '{                      "scorePlayerId":   17, "homePoint": false, "callahan": true }'
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = '{"assistPlayerId":  2, "scorePlayerId":    3, "homePoint": true                    }'
+response = requests.request("POST", url, data=payload, headers=headers)
+payload = '{"assistPlayerId": 18, "scorePlayerId": null, "homePoint": false                   }'
+response = requests.request("POST", url, data=payload, headers=headers)
+if response.status_code != 201:
+    print("Zapasu nebyl pridan bod")
+
+# --------------------------------------------------------------------------------- 
+# add points ----------------------------------------------------------------------

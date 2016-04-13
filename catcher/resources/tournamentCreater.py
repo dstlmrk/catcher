@@ -252,7 +252,6 @@ class TournamentCreater(object):
             startDate        = data['startDate'],
             endDate          = data['endDate'],
             teams            = len(data['teams']),
-            active           = False,
             terminated       = False
             ).execute()
 

@@ -25,7 +25,8 @@ class Tournament(Item):
             where(m.TeamAtTournament.tournamentId == id).dicts()
 
         if len(teams) != tournament.teams:
-            raise Exception(
+            logging.error("Tournament has different number of teams")
+            raise RuntimeError(
                 "Tournament has different number of teams"
                 " in contrast to TeamAtTournament" % matchId
                 )
@@ -60,6 +61,7 @@ class Tournament(Item):
 
     @m.db.atomic()    
     def terminateTournament(self, id):
+        ''''''
         logging.warning("Tournament.terminateTournament() neni implementovano")
 
     def on_put(self, req, resp, id):
@@ -68,7 +70,7 @@ class Tournament(Item):
         tournament = m.Tournament.select(m.Tournament).where(m.Tournament.id==id).get()
 
         super(Tournament, self).on_put(req, resp, id,
-            ['active', 'name', 'startDate', 'endDate', 'city', 'country', 'caldTournamentId']
+            ['name', 'startDate', 'endDate', 'city', 'country', 'caldTournamentId']
             )
 
         edited = False
@@ -170,6 +172,9 @@ class TournamentPlayers(object):
         req.context['result'] = collection
 
     def on_post(self, req, resp, id):
+        tournament = m.Tournament.get(id=id)
+        if not tournament.ready:
+            raise ValueError("Tournament is not ready")
         newPlayer, created = m.PlayerAtTournament.create_or_get(
             tournamentId = int(id),
             teamId       = req.context['data']['teamId'],

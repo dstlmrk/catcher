@@ -111,7 +111,6 @@ class Tournament(MySQLModel):
     startDate        = pw.DateTimeField(db_column='start_date')
     endDate          = pw.DateTimeField(db_column='end_date')
     teams            = pw.IntegerField()
-    active           = pw.BooleanField()
     ready            = pw.BooleanField()
     terminated       = pw.BooleanField()
 # -------------------------------------------------------------------------------------
@@ -238,12 +237,11 @@ class PlayerAtMatch(MySQLModel):
     matchId    = pw.IntegerField(db_column='match_id')
     playerId   = pw.IntegerField(db_column='player_id')
     scores     = pw.IntegerField()
-    teamId     = pw.IntegerField(db_column='team_id')
     total      = pw.IntegerField()
     
     class Meta:
         primary_key = False
-        # db_table = 'player_at_match'
+        db_table = 'player_at_match'
 # -------------------------------------------------------------------------------------
 class Point(MySQLModel):
     homePoint      = pw.BooleanField(db_column='home_point')

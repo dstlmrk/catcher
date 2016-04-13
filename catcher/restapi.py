@@ -1,14 +1,13 @@
 #!/usr/bin/python
 # coding=utf-8
 
+import logger
 import falcon
 from api import errors
 from api import middleware
 import resources as r
 import models as m
 import peewee as pw
-
-import logger
 
 '''
 falcon.API instances are callable WSGI apps
@@ -52,6 +51,8 @@ api.add_route('/api/tournament/{id}/groups', r.TournamentGroups())
 
 api.add_route('/api/match/{id}', r.Match(m.Match))
 api.add_route('/api/match/{id}/points', r.MatchPoints())
+
+api.add_route('/api/match/{id}/point/{order}', r.MatchPoint())
 
 
 # api.add_route('/api/tournament/{id}/spirit', r.Spirit())
@@ -99,7 +100,7 @@ api.add_route('/api/match/{id}/points', r.MatchPoints())
 # ukonci turnaj a zverejni celkove statistiky spiritu
 
 # errors
-api.add_error_handler(Exception, errors.InternalServerError)
+api.add_error_handler(RuntimeError, errors.InternalServerError)
 api.add_error_handler(TypeError, errors.BadRequest)
 api.add_error_handler(KeyError, errors.BadRequest)
 api.add_error_handler(ValueError, errors.BadRequest)

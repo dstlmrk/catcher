@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # coding=utf-8
 
-# from catcher import api
 from catcher.api.resource import Collection, Item
 from catcher import models as m
 import peewee as pw

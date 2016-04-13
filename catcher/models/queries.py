@@ -6,8 +6,52 @@ from catcher import models as m
 class Queries(object):
 
     @staticmethod
+    def getPoints(matchId, order = None):
+        '''returns all points from the match'''
+        whereOrder = "" if order is None else ("AND point.order = %s" % order) 
+        q = ("SELECT match_id, point.order, assist_player_id, score_player_id,"
+             " home_score, away_score, home_point, callahan,"
+             " ap.firstname, ap.lastname, sp.firstname, sp.lastname"
+             " FROM point LEFT OUTER JOIN player AS ap ON ap.id = point.assist_player_id"
+             " LEFT OUTER JOIN player AS sp ON sp.id = point.score_player_id"
+             " WHERE match_id = %s %s ORDER BY point.order DESC;"
+             % (matchId, whereOrder))
+
+        qr = m.db.execute_sql(q)
+        points = []
+        for row in qr:
+            points.append({
+                'matchId'      : row[0],       
+                'order'        : row[1],
+                'assistPlayer' : {
+                    'id'       : row[2],
+                    'firstname': row[8],
+                    'lastname' : row[9]
+                },
+                'scorePlayer'  : {
+                    'id'       : row[3],
+                    'firstname': row[10],
+                    'lastname' : row[11]
+                },
+                'homeScore'    : row[4],
+                'awayScore'    : row[5],
+                'homePoint'    : row[6],
+                'callahan'     : row[7]
+                })
+        return points
+
+    @staticmethod
+    def getLastPoint(matchId):
+        '''returns tripe'''
+        q = ("SELECT point.order, home_score, away_score"
+             " FROM point WHERE match_id = %s ORDER BY point.order DESC LIMIT 1;"
+             % (matchId)
+             )
+        qr =  m.db.execute_sql(q).fetchone()
+        return qr if qr else (0, 0, 0)
+
+    @staticmethod
     def getMatches(tournamentId = None, matchId = None, fieldId = None, date = None, active = None, terminated = None):
-        
         whereTournament = "" if tournamentId is None else ("AND match.tournament_id = %s" % tournamentId)
         whereMatch      = "" if matchId is None else ("AND match.id = %s" % matchId) 
         whereField      = "" if fieldId is None else ("AND field.id = %s" % fieldId) 
@@ -144,3 +188,12 @@ class Queries(object):
                 'seeding'   : row[5]
                 })
         return teams
+
+    @staticmethod
+    def getPlayersTeamId(tournamentId, teamId):
+        '''returns one number'''
+        q = ("SELECT team_id FROM player_at_tournament"
+             " WHERE tournament_id = %s AND player_id = %s;"
+             % (tournamentId, teamId)
+             )
+        return m.db.execute_sql(q).fetchone()[0]
