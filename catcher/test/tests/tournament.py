@@ -5,7 +5,6 @@ from testCase import TestCase
 from falcon import HTTP_200, HTTP_201, HTTP_304, HTTP_400
 from catcher import models
 from datetime import datetime
-import logging
 
 class TournamentTestCase(TestCase):
 
@@ -152,7 +151,6 @@ class Tournaments(TournamentTestCase):
             "divisionId": 1,
             "caldTournamentId": None,
             "teams": 4,
-            "active": False,
             "ready": False,
             "terminated": False
             }
@@ -286,7 +284,6 @@ class Tournament(TournamentTestCase):
         self.assertEqual(response['country'], tournament.country)
         self.assertEqual(response['teams'], tournament.teams)
         self.assertEqual(response['caldTournamentId'], tournament.caldTournamentId)
-        self.assertEqual(response['active'], tournament.active)
         self.assertEqual(response['ready'], tournament.ready)
         self.assertEqual(response['terminated'], tournament.terminated)
         self.assertEqual(
