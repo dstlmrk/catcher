@@ -6,14 +6,34 @@ from catcher import models as m
 from catcher.models.queries import Queries
 import falcon
 
+import logging
+
 class Match(Item):
+
+    @staticmethod
+    def updateStanding(tournamentId, teamId, standing):
+        m.Standing.update(teamId = teamId).where(
+            m.Standing.Standing == standing,
+            m.Standing.tournamentId == tournamentId
+            ).execute()
+
+    @staticmethod
+    def addTeamInNextStep(tournamentId, teamId, idId):
+        identificator = m.Identificator.get(id = idId)
+
+        if identificator.matchId:
+            logging.warning("4: Tym bude hrat %s" % identificator.identificator)
+            # doplnim do dalsiho zapasu
+        else:
+            logging.warning(
+                "4: Tym pokracuje do skupiny %s"
+                % identificator.identificator
+                )
+            # TODO: continue in group
 
     def activeMatch(self, matchId):
         
         match = m.Match.get(id=matchId)
-        match.homeScore = 0
-        match.awayScore = 0
-        match.save()
 
         # fill in tables with players per match 
         homeTeamPlayers = m.PlayerAtTournament.select().where(
@@ -35,6 +55,68 @@ class Match(Item):
                 playerId = player.playerId
                 ).execute()
 
+        match.homeScore = 0
+        match.awayScore = 0
+        match.active = True
+        match.save()
+
+    def terminateMatch(self, matchId):
+        logging.warning("1: Ukoncuji zapas")
+
+        match = m.Match.get(id=matchId)
+
+        # if match has next step, there have to be winner (playoff)
+        if match.looserFinalStanding or match.winnerFinalStanding \
+        or match.winnerNextStepId or match.looserNextStepId:
+            if match.homeScore > match.awayScore:
+                # home team is winner
+                logging.warning("2: Vyhral domaci tym")
+
+            elif match.homeScore < match.awayScore:
+
+                # away team is winner
+                logging.warning("2: Vyhral hostujici tym")
+
+                if match.winnerFinalStanding:
+                    logging.warning(
+                        "3: Tym rovnou konci v turnaji na %s. miste" 
+                        % match.winnerFinalStanding
+                        )
+                    Match.updateStanding(
+                        match.tournamentId,
+                        match.awayTeamId,
+                        match.winnerFinalStanding
+                        )
+                if match.winnerNextStepId:
+                    logging.warning(
+                        "3: Tym postupuje do dalsiho zapasu (%s)"
+                        % match.winnerNextStepId
+                        )
+                    Match.addTeamInNextStep(
+                        match.tournamentId,
+                        match.awayTeamId,
+                        match.winnerNextStepId
+                        )
+
+                    # nezapomenout na porazeneho
+                    
+                    # napsat metodu, ktera automaticky priradi tym, mozna by se to dalo
+                    # pouzit z active tournament
+                pass
+            
+
+            else:
+                raise ValueError("Match have to have the one winner")
+                
+
+        raise RuntimeError("Terminate match is not implemented")
+
+        # ukonci zapas, dovoli odevzdavat spirita a dosadi vitezny tym do dalsiho kola
+
+
+        match.terminated = True
+        match.save()
+
     def on_get(self, req, resp, id):
         req.context['result'] = Queries.getMatches(matchId=id)[0]
 
@@ -42,12 +124,16 @@ class Match(Item):
         data = req.context['data']
         match = m.Match.get(id=id)
         super(Match, self).on_put(req, resp, id,
-            ['active', 'fieldId', 'startTime', 'endTime', 'terminated', 'description']
+            ['fieldId', 'startTime', 'endTime', 'description']
             )
         
         edited = False
-        if match.active is False and data.get('active') is True:
+        if not match.active and data.get('active'):
             self.activeMatch(id)
+            edited = True
+
+        if match.active and not match.terminated and data.get('terminated'):
+            self.terminateMatch(id)
             edited = True
 
         if edited:

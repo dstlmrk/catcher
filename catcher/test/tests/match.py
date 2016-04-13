@@ -33,8 +33,28 @@ class Match(TournamentTestCase):
         # TODO: testovat, pokud bude zmena atributu active neco delat
         # TODO: testovat doplneni hracu do tabulek player_at_match
 
-    def testPutTerminate(self):
-        pass
+    # def testPutTerminate(self):
+    #     newTournament = self.createTournament()
+    #     tournamentId = newTournament['id']
+    #     # ready tournament
+    #     self.readyTournament(tournamentId)
+    #     self.createRosters(tournamentId)
+    #     # get one id match
+    #     matchId = self.getMatchId(tournamentId)
+    #     # active match
+    #     self.activeMatch(matchId)
+    #     # play some points
+    #     self.playFirstFivePoints(matchId)
+
+    #     response = self.request(
+    #         method  = 'PUT',
+    #         path    = ('/api/match/%s' % matchId),
+    #         headers = {"Content-Type": "application/json"},
+    #         body    = {"terminated": True}
+    #         )
+    #     self.assertEqual(self.srmock.status, HTTP_200)
+
+
         # TODO: testovat, pokud bude zmena atributu terminate neco delat
 
     def testPut1(self):
@@ -64,63 +84,6 @@ class Match(TournamentTestCase):
         self.assertEqual(self.srmock.status, HTTP_400)
 
 class MatchPoints(TournamentTestCase):
-
-    def playFirstFivePoints(self, matchId):
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {
-                "assistPlayerId": 1,   
-                "scorePlayerId": 2,
-                "homePoint": True
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {
-                "assistPlayerId": 16,   
-                "scorePlayerId": 17,
-                "homePoint": False
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {  
-                "scorePlayerId": 17,
-                "homePoint": False,
-                "callahan": True
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {
-                "assistPlayerId": 2,   
-                "scorePlayerId": 3,
-                "homePoint": True
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {
-                "assistPlayerId": 18,   
-                "scorePlayerId": None,
-                "homePoint": False
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
     
     def testGet(self):
         '''this test is based on init dataset!'''

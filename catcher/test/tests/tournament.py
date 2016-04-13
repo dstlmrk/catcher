@@ -136,6 +136,62 @@ class TournamentTestCase(TestCase):
             )
         self.assertEqual(self.srmock.status, HTTP_200)
 
+    def playFirstFivePoints(self, matchId):
+        response = self.request(
+            method  = 'POST',
+            path    = ('/api/match/%s/points' % matchId),
+            headers = {"Content-Type": "application/json"},
+            body    = {
+                "assistPlayerId": 1,   
+                "scorePlayerId": 2,
+                "homePoint": True
+                }
+            )
+        self.assertEqual(self.srmock.status, HTTP_201)
+        response = self.request(
+            method  = 'POST',
+            path    = ('/api/match/%s/points' % matchId),
+            headers = {"Content-Type": "application/json"},
+            body    = {
+                "assistPlayerId": 16,   
+                "scorePlayerId": 17,
+                "homePoint": False
+                }
+            )
+        self.assertEqual(self.srmock.status, HTTP_201)
+        response = self.request(
+            method  = 'POST',
+            path    = ('/api/match/%s/points' % matchId),
+            headers = {"Content-Type": "application/json"},
+            body    = {  
+                "scorePlayerId": 17,
+                "homePoint": False,
+                "callahan": True
+                }
+            )
+        self.assertEqual(self.srmock.status, HTTP_201)
+        response = self.request(
+            method  = 'POST',
+            path    = ('/api/match/%s/points' % matchId),
+            headers = {"Content-Type": "application/json"},
+            body    = {
+                "assistPlayerId": 2,   
+                "scorePlayerId": 3,
+                "homePoint": True
+                }
+            )
+        self.assertEqual(self.srmock.status, HTTP_201)
+        response = self.request(
+            method  = 'POST',
+            path    = ('/api/match/%s/points' % matchId),
+            headers = {"Content-Type": "application/json"},
+            body    = {
+                "assistPlayerId": 18,   
+                "scorePlayerId": None,
+                "homePoint": False
+                }
+            )
+        self.assertEqual(self.srmock.status, HTTP_201)
 
 class Tournaments(TournamentTestCase):
 
