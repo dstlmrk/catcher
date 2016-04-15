@@ -1082,7 +1082,8 @@ Host: catcher.zlutazimnice.cz
 PUT /api/tournament/1/teams HTTP/1.1
 Host: catcher.zlutazimnice.cz
 Content-Type: application/json
-</pre><pre>
+</pre>
+                        <pre>
 {
  "seeding": 2,   
  "teamId": 3
@@ -1229,24 +1230,12 @@ Content-Type: application/json
                         </h3>
                      </div>
                      <div class="col-md-6" align="right">
-                        <strong>Hráči oddílu</strong>
+                        <strong>Skupiny</strong>
                      </div>
                   </div>
                </div>
                <div id="tournamentGroups" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     <div>
-                        <h3>GET - Seznam všech turnajů</h3>
-                        <span class="label label-default">public</span>
-                        <span class="label label-default">organizer</span>
-                        <span class="label label-default">admin</span>
-                        <p>
-                        <h3>POST - Vytvoření nového turnaje</h3>
-                        <span class="label label-default">organizer</span>
-                        <span class="label label-default">admin</span>
-                        <p>
-                        <p>Požadavek je nejprve důkladně zkontrolován, zda je hratelný a neobsahuje chyby, a pak je uložen do databáze. Po vytvoření je nutné turnaj aktivovat, tzn. nastavit příznak <code>active</code> na hodnotu <code>true</code>.</p>
-                     </div>
                   </div>
                </div>
             </div>
@@ -1257,7 +1246,7 @@ Content-Type: application/json
                      <div class="col-md-6">
                         <h3 class="panel-title">
                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentSpirit" aria-expanded="false" aria-controls="tournamentSpirit">
-                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/spirit</strong>
+                           <strong>/tournament/{id}/spirit</strong>
                            </a>
                         </h3>
                      </div>
@@ -1268,108 +1257,41 @@ Content-Type: application/json
                </div>
                <div id="tournamentSpirit" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     <h3>GET - Získá hodnocení SOTG</h3>
+                     <h3>GET - Získá kolekci průměrných hodnocení SOTG</h3>
                      <span class="label label-info">public</span>
-                     <span class="label label-info">team</span>
+                     <span class="label label-info">club</span>
                      <span class="label label-default">organizer</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Díky dvěma parametrům lze získat kterékoliv hodnocení Spirit of the Game. Turnaj však musí mít příznak <code>terminated</code>. Bez něj jsou výsledky veřejné pouze pro roli <span class="label label-default">organizer</span>. Ke svým odevzdaným hodnocením má vždy přístup role <span class="label label-default">team</span>.</p>
-                     <h5>Parametry</h5>
-                     <table class="table table-sm">
-                        <tbody>
-                           <tr>
-                              <td><code>matchId</code></td>
-                              <td><code>int</code></td>
-                              <td>Zmenší výslednou množinu na údaje jednoho zápasu.</td>
-                           </tr>
-                           <tr>
-                              <td><code>teamId</code></td>
-                              <td><code>int</code></td>
-                              <td>Zmenší výslednou množinu na údaje jednoho zápasu.</td>
-                           </tr>
-                        </tbody>
-                     </table>
-                     <h3>POST - Udělí SOTG</h3>
-                     <span class="label label-default">team</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <p>Hodnocení Spirit of the Game může <span class="label label-default">team</span> udělit jinému týmu pouze za předpokladu, že s ním odehrál zápas. Hodnocení všem zápasům může zadávat i <span class="label label-default">organizer</span>.</p>
-                     <h5>Tělo požadavku</h5>
-                     <table class="table table-sm">
-                        <tbody>
-                           <tr>
-                              <td><code>matchId</code></td>
-                              <td><code>int</code></td>
-                              <td>ID týmu, jenž má být ohodnocen.</td>
-                           </tr>
-                           <tr>
-                              <td><code>teamId</code></td>
-                              <td><code>int</code></td>
-                              <td>ID zápasu, kterého se hodnocení týká.</td>
-                           </tr>
-                           <tr>
-                              <td><code>comment</code></td>
-                              <td><code>string</code></td>
-                              <td>Hodnocení SOTG: komentář.</td>
-                           </tr>
-                           <tr>
-                              <td><code>rules</code></td>
-                              <td><code>int</code></td>
-                              <td>Hodnocení SOTG: znalost pravidel.</td>
-                           </tr>
-                           <tr>
-                              <td><code>fouls</code></td>
-                              <td><code>int</code></td>
-                              <td>Hodnocení SOTG: fauly a tělesný kontakt.</td>
-                           </tr>
-                           <tr>
-                              <td><code>fair</code></td>
-                              <td><code>int</code></td>
-                              <td>Hodnocení SOTG: férové smýšlení.</td>
-                           </tr>
-                           <tr>
-                              <td><code>positive</code></td>
-                              <td><code>int</code></td>
-                              <td>Hodnocení SOTG: pozitivní přístup.</td>
-                           </tr>
-                           <tr>
-                              <td><code>communication</code></td>
-                              <td><code>int</code></td>
-                              <td>Hodnocení SOTG: komunikace.</td>
-                           </tr>
-                        </tbody>
-                     </table>
+                     <p>Turnaj musí mít příznak <code>terminated</code>. Bez něj jsou výsledky veřejné pouze pro roli <span class="label label-default">organizer</span>. Ke svým odevzdaným hodnocením má vždy přístup role <span class="label label-default">club</span>.</p>
+                     <p>Díky parametru <code>teamId</code> lze získat hodnocení jednoho konkrétního týmu.</p>
                      <h5>Požadavek</h5>
                      <pre>
-POST /api/tournament/1/teams HTTP/1.1
+GET /api/tournament/1/spirit?teamId=1 HTTP/1.1
 Host: catcher.zlutazimnice.cz
-Content-Type: application/json
 </pre>
-                     <pre>
-{
-  "matchId": 2,   
-  "teamId": 3,
-  "comment": "Game was very agresive, but fair",
-  "rules": 3
-  "fouls": 1
-  "fair": 4
-  "positive": 2
-  "communication": 2
-}</pre>
                      <h5>Odpověď</h5>
-                     <pre>HTTP/1.1 201 Created</pre>
+                     <pre>HTTP/1.1 200 OK</pre>
                      <pre>
 {
-  UNFINISHED
+  "count": 1,
+  "spirits": [{
+    "foulsGiven": 2.0,
+    "fair": 4.0,
+    "totalGiven": 10.0,
+    "matches": 2,
+    "communication": 2.0,
+    "communicationGiven": 2.0,
+    "rulesGiven": 2.0,
+    "fairGiven": 2.0,
+    "fouls": 1.0,
+    "teamId": 1,
+    "rules": 3.0,
+    "positiveGiven": 2.0,
+    "total": 12.0,
+    "positive": 2.0
+  }]
 }</pre>
-                     <h3>PUT - Upraví hodnocení SOTG</h3>
-                     <span class="label label-default">team</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <p>Platí stejné podmínky jako u metody POST. Měnit hodnocení SOTG nelze po ukončení turnaje (příznak <code>terminated</code>).</p>
                   </div>
                </div>
             </div>
@@ -1535,15 +1457,14 @@ Content-Type: application/json
                      <span class="label label-default">admin</span>
                      <p>
                      <p>Vrátí informace o zápase a kolekci všech již odehraných bodů (seřazené sestupně).</p>
-
                      <h5>Požadavek</h5>
-                        <pre>
+                     <pre>
 GET /api/tournament/1/match/1/points HTTP/1.1
 Host: catcher.zlutazimnice.cz
 </pre>
-<h5>Odpověď</h5>
-                        <pre>HTTP/1.1 200 OK</pre>
-<pre>{
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 200 OK</pre>
+                     <pre>{
   "description": "Semifinale 1",
   "homeTeam": {
     "score": 16,
@@ -1702,6 +1623,179 @@ Host: catcher.zlutazimnice.cz
 </pre>
                      <h5>Odpověď</h5>
                      <pre>HTTP/1.1 200 OK</pre>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#matchSpirit" aria-expanded="false" aria-controls="matchSpirit">
+                           <strong>/match/{id}/spirit</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Spirit of the Game</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="matchSpirit" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Hodnocení SOTG</h3>
+                     <span class="label label-default">public</span>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Získá informace o zápase a hodnocení Spirit of the Game.</p>
+                     <h5>Požadavek</h5>
+                     <pre>
+GET /api/match/8/spirit HTTP/1.1
+Host: catcher.zlutazimnice.cz
+</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 201 Created</pre>
+                     <pre>
+{
+  "terminated": 1,
+  "description": "Finale",
+  "field": {
+    "id": 1,
+    "name": "Main field"
+  },
+  "homeTeam": {
+    "score": 2,
+    "seed": null,
+    "id": 4,
+    "name": "FC Ostrava A",
+    "spirit": {
+      "comment": "Game was very agresive, but fair",
+      "fair": 4,
+      "fos": 1,
+      "positive": 2,
+      "res": 3,
+      "commication": 2,
+      "total": 12
+    }
+  },
+  "winner": {
+    "nextStep": null,
+    "finalStanding": 1
+  },
+  "awayTeam": {
+    "score": 3,
+    "seed": null,
+    "id": 3,
+    "name": "FC Plzeň A",
+    "spirit": {
+      "comment": "",
+      "fair": 2,
+      "fos": 2,
+      "positive": 2,
+      "res": 2,
+      "commication": 2,
+      "total": 10
+    }
+  },
+  "time": {
+    "start": "2016-04-01 10:30:00",
+    "end": "2016-04-01 10:59:00"
+  },
+  "active": 1,
+  "identificator": "FIN",
+  "id": 8,
+  "looser": {
+    "nextStep": null,
+    "finalStanding": 2
+  }
+}</pre>
+                     <h3>POST - Udělí SOTG</h3>
+                     <span class="label label-default">club</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Hodnocení Spirit of the Game může <span class="label label-default">club</span> udělit jinému týmu pouze za předpokladu, že s ním odehrál zápas. Hodnocení všem zápasům může zadávat i <span class="label label-default">organizer</span>.</p>
+                     <h5>Tělo požadavku</h5>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>matchId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID týmu, jenž má být ohodnocen</td>
+                           </tr>
+                           <tr>
+                              <td><code>comment</code></td>
+                              <td><code>string</code></td>
+                              <td>hodnocení SOTG: komentář</td>
+                           </tr>
+                           <tr>
+                              <td><code>rules</code></td>
+                              <td><code>int</code></td>
+                              <td>hodnocení SOTG: znalost pravidel</td>
+                           </tr>
+                           <tr>
+                              <td><code>fouls</code></td>
+                              <td><code>int</code></td>
+                              <td>hodnocení SOTG: fauly a tělesný kontakt</td>
+                           </tr>
+                           <tr>
+                              <td><code>fair</code></td>
+                              <td><code>int</code></td>
+                              <td>hodnocení SOTG: férové smýšlení</td>
+                           </tr>
+                           <tr>
+                              <td><code>positive</code></td>
+                              <td><code>int</code></td>
+                              <td>hodnocení SOTG: pozitivní přístup</td>
+                           </tr>
+                           <tr>
+                              <td><code>communication</code></td>
+                              <td><code>int</code></td>
+                              <td>hodnocení SOTG: komunikace</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h5>Požadavek</h5>
+                     <pre>
+POST /api/match/8/spirit HTTP/1.1
+Host: catcher.zlutazimnice.cz
+Content-Type: application/json
+</pre>
+                     <pre>
+{
+  "teamId": 3,
+  "comment": "Game was very agresive, but fair",
+  "rules": 3
+  "fouls": 1
+  "fair": 4
+  "positive": 2
+  "communication": 2
+}</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 201 Created</pre>
+                     <pre>
+{
+  "comment": "Game was very agresive, but fair",
+  "fair": 4,
+  "fouls": 1,
+  "communication": 2,
+  "matchId": 8,
+  "givingTeamId": 4,
+  "rules": 3,
+  "teamId": 3,
+  "positive": 2,
+  "total": 12
+}</pre>
+                     <h3>PUT - Upraví hodnocení SOTG</h3>
+                     <span class="label label-default">team</span>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Požadavek smaže původní hodnocení a nahradí jej novým. Tělo požadavku odpovídá požadavku POST.</p>
+                     <p>Upravovat hodnocení SOTG nelze po ukončení turnaje (příznak <code>terminated</code>).</p>
                   </div>
                </div>
             </div>
