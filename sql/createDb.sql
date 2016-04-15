@@ -337,6 +337,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`match` (
   INDEX `fk_match_tournament_has_identificator1_idx` (`identificator_id` ASC),
   INDEX `fk_match_tournament_has_identificator2_idx` (`winner_next_step` ASC),
   INDEX `fk_match_tournament_has_identificator3_idx` (`looser_next_step` ASC),
+  UNIQUE INDEX `identificator_UNIQUE` (`identificator_id` ASC, `tournament_id` ASC),
   CONSTRAINT `fk_game_tournament1`
     FOREIGN KEY (`tournament_id`)
     REFERENCES `catcher`.`tournament` (`id`)
@@ -443,14 +444,14 @@ ENGINE = InnoDB;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `catcher`.`team_spirit_at_match`
+-- Table `catcher`.`spirit`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `catcher`.`team_spirit_at_match` ;
+DROP TABLE IF EXISTS `catcher`.`spirit` ;
 
 SHOW WARNINGS;
-CREATE TABLE IF NOT EXISTS `catcher`.`team_spirit_at_match` (
+CREATE TABLE IF NOT EXISTS `catcher`.`spirit` (
   `match_id` INT NOT NULL,
-  `receiving_team_id` INT NOT NULL,
+  `team_id` INT NOT NULL,
   `giving_team_id` INT NOT NULL,
   `comment` VARCHAR(255) NULL,
   `rules` TINYINT NOT NULL,
@@ -459,9 +460,9 @@ CREATE TABLE IF NOT EXISTS `catcher`.`team_spirit_at_match` (
   `positive` TINYINT NOT NULL,
   `communication` TINYINT NOT NULL,
   `total` TINYINT NOT NULL,
-  PRIMARY KEY (`match_id`, `receiving_team_id`),
+  PRIMARY KEY (`match_id`, `team_id`),
   INDEX `fk_match_spirit_match1_idx` (`match_id` ASC),
-  INDEX `fk_team_spirit_at_match_team1_idx` (`receiving_team_id` ASC),
+  INDEX `fk_team_spirit_at_match_team1_idx` (`team_id` ASC),
   INDEX `fk_team_spirit_at_match_team2_idx` (`giving_team_id` ASC),
   CONSTRAINT `fk_match_spirit_match1`
     FOREIGN KEY (`match_id`)
@@ -469,7 +470,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`team_spirit_at_match` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_team_spirit_at_match_team1`
-    FOREIGN KEY (`receiving_team_id`)
+    FOREIGN KEY (`team_id`)
     REFERENCES `catcher`.`team` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
@@ -483,27 +484,28 @@ ENGINE = InnoDB;
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `catcher`.`team_spirit_at_tournament`
+-- Table `catcher`.`spirit_avg`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `catcher`.`team_spirit_at_tournament` ;
+DROP TABLE IF EXISTS `catcher`.`spirit_avg` ;
 
 SHOW WARNINGS;
-CREATE TABLE IF NOT EXISTS `catcher`.`team_spirit_at_tournament` (
+CREATE TABLE IF NOT EXISTS `catcher`.`spirit_avg` (
   `tournament_id` INT NOT NULL,
   `team_id` INT NOT NULL,
-  `rules_avg` FLOAT NULL,
-  `rules_avg_given` FLOAT NULL,
-  `fouls_avg` FLOAT NULL,
-  `fouls_avg_given` FLOAT NULL,
-  `fair_avg` FLOAT NULL,
-  `fair_avg_given` FLOAT NULL,
-  `positive_avg` FLOAT NULL,
-  `positive_avg_given` FLOAT NULL,
-  `communition_avg` FLOAT NULL,
-  `communition_avg_given` FLOAT NULL,
-  `total_avg` FLOAT NULL,
-  `total_avg_given` FLOAT NULL,
+  `rules` FLOAT NOT NULL DEFAULT 0,
+  `rules_given` FLOAT NOT NULL DEFAULT 0,
+  `fouls` FLOAT NOT NULL DEFAULT 0,
+  `fouls_given` FLOAT NOT NULL DEFAULT 0,
+  `fair` FLOAT NOT NULL DEFAULT 0,
+  `fair_given` FLOAT NOT NULL DEFAULT 0,
+  `positive` FLOAT NOT NULL DEFAULT 0,
+  `positive_given` FLOAT NOT NULL DEFAULT 0,
+  `communication` FLOAT NOT NULL DEFAULT 0,
+  `communication_given` FLOAT NOT NULL DEFAULT 0,
+  `total` FLOAT NOT NULL DEFAULT 0,
+  `total_given` FLOAT NOT NULL DEFAULT 0,
   `matches` SMALLINT NOT NULL DEFAULT 0,
+  `matches_given` SMALLINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`tournament_id`, `team_id`),
   INDEX `fk_team_spirit_tournament_team1_idx` (`tournament_id` ASC, `team_id` ASC),
   CONSTRAINT `fk_team_spirit_tournament_team1`

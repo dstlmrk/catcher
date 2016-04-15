@@ -14,15 +14,14 @@ class Tournament(Item):
 
     @m.db.atomic()
     def prepareTournament(self, id):
-        tournament = m.Tournament.\
-            select(m.Tournament.teams, m.Tournament.ready).\
-            where(m.Tournament.id == id).get()
+        tournament = m.Tournament.get(id=id)
 
         if tournament.ready:
             raise ValueError("Tournament %s is already ready" % id)
 
-        teams = m.TeamAtTournament.select().\
-            where(m.TeamAtTournament.tournamentId == id).dicts()
+        teams = m.TeamAtTournament.select().where(
+            m.TeamAtTournament.tournamentId == id
+            )
 
         if len(teams) != tournament.teams:
             logging.error("Tournament has different number of teams")
@@ -37,32 +36,42 @@ class Tournament(Item):
         # Standing
         for x in range(1, len(teams)+1):
              m.Standing.insert(
-                tournamentId = id,
-                standing = x
+                    tournamentId = id,
+                    standing = x
                 ).execute()
 
-        # Matches
-        teamsAdSeeding = {}
+        # Matches and Spirit overalls
+        seedings = {}
         for team in teams:
-            teamsAdSeeding[team['seeding']] = team['teamId']
+            seedings[team.seeding] = team.teamId
+            m.SpiritAvg.insert(
+                    teamId              = team.teamId,
+                    tournamentId        = tournament.id
+                ).execute()
 
-        matches = m.Match.select().\
-            where(
+        matches = m.Match.select().where(
                 m.Match.tournamentId == 1 and \
                 (m.Match.homeSeed != None or m.Match.awaySeed != None) 
-                )
+            )
 
         for match in matches:
             m.Match.update(
-                homeTeamId = teamsAdSeeding[match.homeSeed],
-                awayTeamId = teamsAdSeeding[match.awaySeed]
-                ).\
-                where(m.Match.id == match.id).execute()
+                    homeTeamId = seedings[match.homeSeed],
+                    awayTeamId = seedings[match.awaySeed]
+                ).where(
+                    m.Match.id == match.id
+                ).execute()
+
+
+    # vyplnit tabulky se spiritem na nuly
+
 
     @m.db.atomic()    
     def terminateTournament(self, id):
         ''''''
         logging.warning("Tournament.terminateTournament() neni implementovano")
+
+        # musi zkontrolovat, zda byl odevzdan spirit a pak musi spirita zverejnit
 
     def on_put(self, req, resp, id):
         requestBody = req.context['data']
@@ -93,7 +102,6 @@ class Tournaments(Collection):
         createdTurnament = tournamentCreater.createTournament(req, resp)
         req.context['result'] = createdTurnament 
         resp.status = falcon.HTTP_201
-
 
 class TournamentStandings(object):
 

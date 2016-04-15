@@ -47,12 +47,20 @@ api.add_route('/api/tournament/{id}/standings', r.TournamentStandings())
 api.add_route('/api/tournament/{id}/players', r.TournamentPlayers())
 api.add_route('/api/tournament/{id}/teams', r.TournamentTeams())
 api.add_route('/api/tournament/{id}/matches', r.TournamentMatches())
-api.add_route('/api/tournament/{id}/groups', r.TournamentGroups())
+
+# TODO: vsechny spirity, vrati kolekci
+api.add_route('/api/tournament/{id}/spirit', r.Spirits())
+# spirity ze zapasu, odevzdani spiritu, uprava
+api.add_route('/api/match/{id}/spirit', r.Spirit())
+
 
 api.add_route('/api/match/{id}', r.Match(m.Match))
 api.add_route('/api/match/{id}/points', r.MatchPoints())
-
 api.add_route('/api/match/{id}/point/{order}', r.MatchPoint())
+
+# not implemented
+api.add_route('/api/tournament/{id}/groups', r.TournamentGroups())
+
 
 
 # api.add_route('/api/tournament/{id}/spirit', r.Spirit())
@@ -119,3 +127,5 @@ api.add_error_handler(m.Identificator.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.Match.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.Standing.DoesNotExist, errors.NotFound)
 api.add_error_handler(m.PlayerAtTournament.DoesNotExist, errors.NotFound)
+# api.add_error_handler(m.Spirit.DoesNotExist, errors.NotFound)
+# api.add_error_handler(m.SpiritAvg.DoesNotExist, errors.NotFound)

@@ -1,197 +1,10 @@
 #!/usr/bin/python
 # coding=utf-8
 
-from testCase import TestCase
+from testCase import TournamentTestCase
 from falcon import HTTP_200, HTTP_201, HTTP_304, HTTP_400
 from catcher import models
 from datetime import datetime
-
-class TournamentTestCase(TestCase):
-
-    def createTournament(self):
-        '''this method is used by tests for creating test tournament'''
-        body = {
-            "name": "PFL 2016",
-            "city": "Prague",
-            "country": "CZE",
-            "startDate": "2016-04-01",
-            "endDate": "2016-04-01",
-            "divisionId": 1,
-            "caldTournamentId": None,
-            "teams": [{
-                "id": 1,
-                "seeding": 1
-            }, {
-                "id": 2,
-                "seeding": 2
-            }, {
-                "id": 3,
-                "seeding": 3
-            }, {
-                "id": 4,
-                "seeding": 4
-            }],
-            "fieldsCount": 1,
-            "fields": [{
-                "id": 1,
-                "name": "Main field"
-            }],
-            "groups": [
-
-            ],
-            "matches": [{
-                "fieldId": 1,
-                "startTime": "2016-04-01T09:00:00",
-                "endTime": "2016-04-01T09:29:00",
-                "homeSeed": 1,
-                "awaySeed": 4,
-                "looserNextStep": "3RD",
-                "winnerNextStep": "FIN",
-                "looserFinalStanding": None,
-                "winnerFinalStanding": None,
-                "identificator": "SE1",
-                "description": None
-            }, {
-                "fieldId": 1,
-                "startTime": "2016-04-01T09:30:00",
-                "endTime": "2016-04-01T09:59:00",
-                "homeSeed": 2,
-                "awaySeed": 3,
-                "looserNextStep": "3RD",
-                "winnerNextStep": "FIN",
-                "looserFinalStanding": None,
-                "winnerFinalStanding": None,
-                "identificator": "SE2",
-                "description": None
-            }, {
-                "fieldId": 1,
-                "startTime": "2016-04-01T10:00:00",
-                "endTime": "2016-04-01T10:29:00",
-                "homeSeed": None,
-                "awaySeed": None,
-                "looserNextStep": None,
-                "winnerNextStep": None,
-                "looserFinalStanding": 4,
-                "winnerFinalStanding": 3,
-                "identificator": "3RD",
-                "description": None
-            }, {
-                "fieldId": 1,
-                "startTime": "2016-04-01T10:30:00",
-                "endTime": "2016-04-01T10:59:00",
-                "homeSeed": None,
-                "awaySeed": None,
-                "looserNextStep": None,
-                "winnerNextStep": None,
-                "looserFinalStanding": 2,
-                "winnerFinalStanding": 1,
-                "identificator": "FIN",
-                "description": "Finale"
-            }]
-        }
-        response = self.request(
-            method  = 'POST',
-            path    = '/api/tournaments',
-            headers = {"Content-Type": "application/json"},
-            body    = body
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
-        return response
-
-    def createRosters(self, tournamentId):
-        '''this method is used by tests for creating rosters (5 player for 4 teams)'''
-        playerId = 1
-        for teamId in range(1,5):
-            for i in range(0,5):
-                self.request(
-                    method  = 'POST',
-                    path    = ('/api/tournament/%s/players' % (tournamentId)),
-                    headers = {"Content-Type": "application/json"},
-                    body    = {"playerId": playerId,"teamId": teamId}
-                    )
-                self.assertEqual(self.srmock.status, HTTP_201)
-                playerId += 1
-
-    def getMatchId(self, tournamentId):
-        match = models.Match.select().where(
-            models.Match.tournamentId == tournamentId
-            )[0]
-        return match.id
-
-    def readyTournament(self, tournamentId):
-        response = self.request(
-            method  = 'PUT',
-            path    = ('/api/tournament/%s' % tournamentId),
-            headers = {"Content-Type": "application/json"},
-            body    = {"ready": True}
-            )
-        self.assertEqual(self.srmock.status, HTTP_200)
-
-    def activeMatch(self, matchId):
-        response = self.request(
-            method  = 'PUT',
-            path    = ('/api/match/%s' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {"active": True}
-            )
-        self.assertEqual(self.srmock.status, HTTP_200)
-
-    def playFirstFivePoints(self, matchId):
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {
-                "assistPlayerId": 1,   
-                "scorePlayerId": 2,
-                "homePoint": True
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {
-                "assistPlayerId": 16,   
-                "scorePlayerId": 17,
-                "homePoint": False
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {  
-                "scorePlayerId": 17,
-                "homePoint": False,
-                "callahan": True
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {
-                "assistPlayerId": 2,   
-                "scorePlayerId": 3,
-                "homePoint": True
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
-        response = self.request(
-            method  = 'POST',
-            path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
-            body    = {
-                "assistPlayerId": 18,   
-                "scorePlayerId": None,
-                "homePoint": False
-                }
-            )
-        self.assertEqual(self.srmock.status, HTTP_201)
 
 class Tournaments(TournamentTestCase):
 
@@ -390,20 +203,39 @@ class Tournament(TournamentTestCase):
 
     def testPutReady(self):
         newTournament = self.createTournament()
+        tournamentId = newTournament['id']
         body = {"ready": True}
         response = self.request(
             method  = 'PUT',
-            path    = ('/api/tournament/%s' % newTournament['id']),
+            path    = ('/api/tournament/%s' % tournamentId),
             headers = {"Content-Type": "application/json"},
             body    = body
             )
         self.assertEqual(self.srmock.status, HTTP_200)
         standings = len(models.Standing.select().where(
-            models.Standing.tournamentId == newTournament['id'])
+            models.Standing.tournamentId == tournamentId)
             )
         self.assertEqual(standings, newTournament['teams'])
         # TODO: check, if teams are in matches
 
+        team = models.TeamAtTournament.select().where(
+                models.TeamAtTournament.tournamentId == tournamentId
+            )[0]
+        spiritAvg = models.SpiritAvg.get(tournamentId=tournamentId, teamId=team.teamId)
+        self.assertEqual(0, spiritAvg.matches)
+        self.assertEqual(0, spiritAvg.communication)
+        self.assertEqual(0, spiritAvg.communicationGiven)
+        self.assertEqual(0, spiritAvg.fair)
+        self.assertEqual(0, spiritAvg.fairGiven)
+        self.assertEqual(0, spiritAvg.fouls)
+        self.assertEqual(0, spiritAvg.foulsGiven)
+        self.assertEqual(0, spiritAvg.positive)
+        self.assertEqual(0, spiritAvg.positiveGiven)
+        self.assertEqual(0, spiritAvg.rules)
+        self.assertEqual(0, spiritAvg.rulesGiven)
+        self.assertEqual(0, spiritAvg.total)
+        self.assertEqual(0, spiritAvg.totalGiven)
+    
     def testTerminate(self):
         newTournament = self.createTournament()
         body = {"terminated": True}
@@ -415,7 +247,7 @@ class Tournament(TournamentTestCase):
             )
         self.assertEqual(self.srmock.status, HTTP_200)
         # TODO: this test is not completed, because terminate is not implemented
-
+    
 class TournamentStandings(TournamentTestCase):
 
     def testGet(self):

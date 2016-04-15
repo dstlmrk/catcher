@@ -33,29 +33,26 @@ class Match(TournamentTestCase):
         # TODO: testovat, pokud bude zmena atributu active neco delat
         # TODO: testovat doplneni hracu do tabulek player_at_match
 
-    # def testPutTerminate(self):
-    #     newTournament = self.createTournament()
-    #     tournamentId = newTournament['id']
-    #     # ready tournament
-    #     self.readyTournament(tournamentId)
-    #     self.createRosters(tournamentId)
-    #     # get one id match
-    #     matchId = self.getMatchId(tournamentId)
-    #     # active match
-    #     self.activeMatch(matchId)
-    #     # play some points
-    #     self.playFirstFivePoints(matchId)
+    def testPutTerminate(self):
+        newTournament = self.createTournament()
+        tournamentId = newTournament['id']
+        # ready tournament
+        self.readyTournament(tournamentId)
+        self.createRosters(tournamentId)
+        # play all matches on tournament
+        self.playMatches(tournamentId)
 
-    #     response = self.request(
-    #         method  = 'PUT',
-    #         path    = ('/api/match/%s' % matchId),
-    #         headers = {"Content-Type": "application/json"},
-    #         body    = {"terminated": True}
-    #         )
-    #     self.assertEqual(self.srmock.status, HTTP_200)
-
-
-        # TODO: testovat, pokud bude zmena atributu terminate neco delat
+        # check standings
+        standings = models.Standing.select().where(
+            models.Standing.tournamentId == tournamentId
+            ).order_by(
+            models.Standing.standing.asc()
+            )
+        self.assertEqual(len(standings), 4)
+        self.assertEqual(standings[0].teamId, 3)
+        self.assertEqual(standings[1].teamId, 4)
+        self.assertEqual(standings[2].teamId, 2)
+        self.assertEqual(standings[3].teamId, 1)
 
     def testPut1(self):
         newTournament = self.createTournament()

@@ -70,8 +70,7 @@ class Player(MySQLModel):
 #     player       = pw.ForeignKeyField(Player)
 #     caldRelation = pw.BooleanField(db_column='cald_relation')
 
-#     class Meta:
-#         primary_key = pw.CompositeKey('club', 'player') 
+#     primary_key = pw.CompositeKey('club', 'player') 
 #         db_table = 'club_has_player'
 #         indexes = (
 #             (('cald_relation', 'player'), True),
@@ -255,3 +254,41 @@ class Point(MySQLModel):
 
     class Meta:
         primary_key = False
+# -------------------------------------------------------------------------------------
+class Spirit(MySQLModel):
+    matchId         = pw.IntegerField(db_column='match_id')
+    teamId          = pw.IntegerField(db_column='team_id')
+    givingTeamId    = pw.IntegerField(db_column='giving_team_id')
+    communication   = pw.IntegerField()
+    fair            = pw.IntegerField()
+    fouls           = pw.IntegerField()
+    positive        = pw.IntegerField()
+    rules           = pw.IntegerField()
+    total           = pw.IntegerField()
+    comment         = pw.CharField()
+
+    class Meta:
+        # primary_key = False
+        primary_key = pw.CompositeKey('matchId', 'teamId') 
+# -------------------------------------------------------------------------------------
+class SpiritAvg(MySQLModel):
+    teamId             = pw.IntegerField(db_column='team_id')
+    tournamentId       = pw.IntegerField(db_column='tournament_id')
+    matches            = pw.IntegerField()
+    matchesGiven       = pw.IntegerField(db_column='matches_given')
+    communication      = pw.FloatField()
+    communicationGiven = pw.FloatField(db_column='communication_given')
+    fair               = pw.FloatField()
+    fairGiven          = pw.FloatField(db_column='fair_given')
+    fouls              = pw.FloatField()
+    foulsGiven         = pw.FloatField(db_column='fouls_given')
+    positive           = pw.FloatField()
+    positiveGiven      = pw.FloatField(db_column='positive_given')
+    rules              = pw.FloatField()
+    rulesGiven         = pw.FloatField(db_column='rules_given')
+    total              = pw.FloatField()
+    totalGiven         = pw.FloatField(db_column='total_given')
+
+    class Meta:
+        primary_key = pw.CompositeKey('teamId', 'tournamentId') 
+        db_table = 'spirit_avg'

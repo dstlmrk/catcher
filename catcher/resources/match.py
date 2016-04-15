@@ -13,24 +13,36 @@ class Match(Item):
     @staticmethod
     def updateStanding(tournamentId, teamId, standing):
         m.Standing.update(teamId = teamId).where(
-            m.Standing.Standing == standing,
+            m.Standing.standing == standing,
             m.Standing.tournamentId == tournamentId
             ).execute()
 
     @staticmethod
     def addTeamInNextStep(tournamentId, teamId, idId):
         identificator = m.Identificator.get(id = idId)
+        match = m.Match.get(tournamentId=tournamentId, identificatorId=idId)
 
         if identificator.matchId:
-            logging.warning("4: Tym bude hrat %s" % identificator.identificator)
+            logging.info("4: Saving team in match %s" % identificator.identificator)
             # doplnim do dalsiho zapasu
+            if match.homeTeamId is None:
+                logging.info("5: Team will play as home")
+                match.homeTeamId = teamId
+            elif match.awayTeamId is None:
+                logging.info("5: Team will play as away")
+                match.awayTeamId = teamId
+            else:
+                raise RuntimeError("In the match %s want to be more than two teams" % idId)
         else:
-            logging.warning(
-                "4: Tym pokracuje do skupiny %s"
+            logging.info(
+                "4: Saving team in group %s"
                 % identificator.identificator
                 )
             # TODO: continue in group
 
+        match.save()
+
+    @m.db.atomic()
     def activeMatch(self, matchId):
         
         match = m.Match.get(id=matchId)
@@ -55,13 +67,16 @@ class Match(Item):
                 playerId = player.playerId
                 ).execute()
 
+        # TODO: vsem hracum pridelat jednicku v total PlayerAtTournament a otestovat
+
         match.homeScore = 0
         match.awayScore = 0
         match.active = True
         match.save()
 
+    @m.db.atomic()
     def terminateMatch(self, matchId):
-        logging.warning("1: Ukoncuji zapas")
+        logging.info("1: Match %s is in terminating" % matchId)
 
         match = m.Match.get(id=matchId)
 
@@ -69,53 +84,45 @@ class Match(Item):
         if match.looserFinalStanding or match.winnerFinalStanding \
         or match.winnerNextStepId or match.looserNextStepId:
             if match.homeScore > match.awayScore:
-                # home team is winner
-                logging.warning("2: Vyhral domaci tym")
-
+                logging.info("2: Home team won: %s vs %s" % (match.homeTeamId, match.awayTeamId))
+                winnerTeamId = match.homeTeamId
+                looserTeamid = match.awayTeamId
             elif match.homeScore < match.awayScore:
-
-                # away team is winner
-                logging.warning("2: Vyhral hostujici tym")
-
-                if match.winnerFinalStanding:
-                    logging.warning(
-                        "3: Tym rovnou konci v turnaji na %s. miste" 
-                        % match.winnerFinalStanding
-                        )
-                    Match.updateStanding(
-                        match.tournamentId,
-                        match.awayTeamId,
-                        match.winnerFinalStanding
-                        )
-                if match.winnerNextStepId:
-                    logging.warning(
-                        "3: Tym postupuje do dalsiho zapasu (%s)"
-                        % match.winnerNextStepId
-                        )
-                    Match.addTeamInNextStep(
-                        match.tournamentId,
-                        match.awayTeamId,
-                        match.winnerNextStepId
-                        )
-
-                    # nezapomenout na porazeneho
-                    
-                    # napsat metodu, ktera automaticky priradi tym, mozna by se to dalo
-                    # pouzit z active tournament
-                pass
-            
-
+                logging.info("2: Away team won: %s vs %s" % (match.homeTeamId, match.awayTeamId))
+                winnerTeamId = match.awayTeamId
+                looserTeamid = match.homeTeamId
             else:
                 raise ValueError("Match have to have the one winner")
-                
 
-        raise RuntimeError("Terminate match is not implemented")
+            if match.winnerFinalStanding:
+                logging.info("3: Winner ends on %s. place" % match.winnerFinalStanding)
+                Match.updateStanding(match.tournamentId, winnerTeamId, match.winnerFinalStanding)
+            if match.winnerNextStepId:
+                identificator = m.Identificator.get(id = match.winnerNextStepId)
+                logging.info(
+                    "3: Winner's next match is %s (%s)" 
+                    % (identificator.matchId, identificator.identificator)
+                    )
+                Match.addTeamInNextStep(match.tournamentId, winnerTeamId, match.winnerNextStepId)
 
-        # ukonci zapas, dovoli odevzdavat spirita a dosadi vitezny tym do dalsiho kola
-
+            if match.looserFinalStanding:
+                logging.info("3: Looser ends on %s. place" % match.looserFinalStanding)
+                Match.updateStanding(match.tournamentId, looserTeamid, match.looserFinalStanding)
+            if match.looserNextStepId:
+                identificator = m.Identificator.get(id = match.looserNextStepId)
+                logging.info(
+                    "3: Looser's next match is %s (%s)" 
+                    % (identificator.matchId, identificator.identificator)
+                    )
+                Match.addTeamInNextStep(match.tournamentId, looserTeamid, match.looserNextStepId)
+        else:
+            pass
+            # TODO: Match hasn't next step, so it's in a group probably.
+            # I can identify group by idendificator. 
 
         match.terminated = True
         match.save()
+        # now is allowed consigning Spirit of the Game
 
     def on_get(self, req, resp, id):
         req.context['result'] = Queries.getMatches(matchId=id)[0]
