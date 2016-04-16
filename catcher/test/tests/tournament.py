@@ -247,12 +247,6 @@ class Tournament(TournamentTestCase):
             )
         self.assertEqual(self.srmock.status, HTTP_200)
         # TODO: this test is not completed, because terminate is not implemented
-    
-class TournamentStandings(TournamentTestCase):
-
-    def testGet(self):
-        '''if all teams are correctly filled in standings before and after terminate tournament'''
-        # TODO: not complete
 
 class TournamentPlayers(TournamentTestCase):
     

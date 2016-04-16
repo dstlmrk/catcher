@@ -43,69 +43,19 @@ api.add_route('/api/teams', r.Teams(m.Team))
 
 api.add_route('/api/tournaments', r.Tournaments(m.Tournament))
 api.add_route('/api/tournament/{id}', r.Tournament(m.Tournament))
-api.add_route('/api/tournament/{id}/standings', r.TournamentStandings())
+api.add_route('/api/tournament/{id}/standings', r.Standings())
 api.add_route('/api/tournament/{id}/players', r.TournamentPlayers())
 api.add_route('/api/tournament/{id}/teams', r.TournamentTeams())
 api.add_route('/api/tournament/{id}/matches', r.TournamentMatches())
-
-# TODO: vsechny spirity, vrati kolekci
 api.add_route('/api/tournament/{id}/spirit', r.Spirits())
-# spirity ze zapasu, odevzdani spiritu, uprava
-api.add_route('/api/match/{id}/spirit', r.Spirit())
-
 
 api.add_route('/api/match/{id}', r.Match(m.Match))
 api.add_route('/api/match/{id}/points', r.MatchPoints())
 api.add_route('/api/match/{id}/point/{order}', r.MatchPoint())
+api.add_route('/api/match/{id}/spirit', r.Spirit())
 
 # not implemented
 api.add_route('/api/tournament/{id}/groups', r.TournamentGroups())
-
-
-
-# api.add_route('/api/tournament/{id}/spirit', r.Spirit())
-
-# # informace o konkretnim turnaji
-# api.add_route('/api/tournament/{id}', r.Tournament(m.Tournament, []))
-# vytvori kompletni turnaj
-# api.add_route('/api/tournaments/create', r.CreateTournament())
-# ativuje turnaj
-# api.add_route('/api/tournament/{id}/active', r.ActiveTournament())
-# # u aktivnich nebo jiz skoncenych turnaju vrati poradi na turnaji
-# api.add_route('/api/tournament/{id}/standings', r.TournamentStandings())
-# # vrati seznam tymu na turnaji
-# api.add_route('/api/tournament/{id}/teams', r.TournamentTeams())
-# # vrati seznam hracu v tymu
-# api.add_route('/api/tournament/{id}/teams/players', r.TournamentTeamsAndPlayers())
-# # vrati seznam hracu v tymu
-# api.add_route('/api/tournament/{id}/team/{teamId}/players', r.TournamentTeamAndPlayers())
-# # vrati seznam hracu na turnaji
-# api.add_route('/api/tournament/{id}/players', r.TournamentPlayers())
-# # vrati seznam zapasu na turnaji
-# api.add_route('/api/tournament/{id}/matches', r.TournamentMatches())
-# # vrati seznam zapasu na turnaji
-# api.add_route('/api/tournament/{id}/match/{matchId}', r.TournamentMatch())
-# # slouzi pro pridavani hracu do soupisky
-# api.add_route('/api/tournament/{id}/rosters/', r.Rosters())
-
-# # informace o zapase
-# api.add_route('/api/match/{id}', r.Match(m.Match,[]))
-# # ukonci zapas (TODO: spocitaji se celkove statistiky hracu)
-# api.add_route('/api/match/{id}/terminate', r.TerminateMatch)
-# # seznam vsech zapasu
-# api.add_route('/api/matches', r.Matches(m.Match))
-
-# # TODO: zkusit dovymyslet ostatni api
-
-# # vytvori v zapase novy bod, automaticky spocita aktualni skore - GET, POST
-# api.add_route('/api/match/{id}/points', None) # parametrem muze byt asistujici a skorujici
-# # upravi bod, PUT, DELETE (musi se vymyslet order)
-# api.add_route('/api/match/{id}/point/{order}', None)
-
-# # zadat spirit
-# api.add_route('/api/match/{id}/spirit', None)
-
-# ukonci turnaj a zverejni celkove statistiky spiritu
 
 # errors
 api.add_error_handler(RuntimeError, errors.InternalServerError)

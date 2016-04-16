@@ -903,7 +903,50 @@ Content-Type: application/json
                      <span class="label label-default">organizer</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Získá výsledné pořadí týmů na turnaji včetně pořadí týmů a jejich hodnocení v kategorii SOTG.</p>
+                     <p>Získá výsledné pořadí týmů na turnaji včetně pořadí týmů a jejich průměrná hodnocení v kategorii SOTG (u turnajů s příznakem <code>terminated</code>, jinak je hodnocení SOTG viditelné pouze pro roli <span class="label label-default">organizer</span>).</p>
+                     <p>Výsledky jsou seřazené podle celkového pořadí (u SOTG podle sloupce <code>total</code>).</p>
+                     <h5>Požadavek</h5>
+                     <pre>
+GET /api/tournament/1/standings HTTP/1.1
+Host: catcher.zlutazimnice.cz
+</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 200 OK</pre>
+                     <pre>
+{
+  "teams": 4,
+  "standings": [{
+    "standing": 1,
+    "teamId": 3
+  }, {
+    "standing": 2,
+    "teamId": 4
+  }, {
+    "standing": 3,
+    "teamId": 2
+  }, {
+    "standing": 4,
+    "teamId": 1
+  }],
+  "spirits": [{
+    "foulsGiven": 2.0,
+    "fair": 4.0,
+    "totalGiven": 10.0,
+    "matches": 2,
+    "communication": 2.0,
+    "communicationGiven": 2.0,
+    "rulesGiven": 2.0,
+    "fairGiven": 2.0,
+    "fouls": 1.0,
+    "teamId": 1,
+    "rules": 3.0,
+    "positiveGiven": 2.0,
+    "total": 12.0,
+    "positive": 2.0
+  }, ...
+  ]
+}
+</pre>
                   </div>
                </div>
             </div>

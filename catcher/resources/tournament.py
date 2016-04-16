@@ -70,7 +70,9 @@ class Tournament(Item):
     def terminateTournament(self, id):
         ''''''
         logging.warning("Tournament.terminateTournament() neni implementovano")
-
+        tournament = m.Tournament.get(id=id)
+        tournament.terminated = True
+        tournament.save()
         # musi zkontrolovat, zda byl odevzdan spirit a pak musi spirita zverejnit
 
     def on_put(self, req, resp, id):
@@ -102,23 +104,6 @@ class Tournaments(Collection):
         createdTurnament = tournamentCreater.createTournament(req, resp)
         req.context['result'] = createdTurnament 
         resp.status = falcon.HTTP_201
-
-class TournamentStandings(object):
-
-    def on_get(self, req, resp, id):
-        tournament = m.Tournament.select(m.Tournament.ready, m.Tournament.terminated).where(m.Tournament.id==id).get()
-        if not tournament.ready and not tournament.terminated:
-            raise ValueError("Tournament hasn't any standings")
-        qr = m.Standing.select().where(m.Standing.tournament==id)
-        standings = []
-        for standing in qr:
-            standings.append(standing.json)
-        collection = {
-            'teams'     : len(standings),
-            'standings' : standings,
-            'spirit'    : "UNFINISHED"
-            }
-        req.context['result'] = collection
 
 class TournamentTeams(object):
 

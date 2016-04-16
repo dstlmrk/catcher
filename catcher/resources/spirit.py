@@ -220,7 +220,7 @@ class Spirit(object):
         return spirit, created
 
     def on_get(self, req, resp, id):
-        # napsat get pro nejake souhrne hodnoceni
+        # TODO: pouze, pokud jde o organizatora
         match = Queries.getMatches(matchId=id)[0]
         homeSpirit = None
         awaySpirit = None
