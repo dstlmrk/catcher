@@ -76,7 +76,7 @@ class Tournament(Item):
         # musi zkontrolovat, zda byl odevzdan spirit a pak musi spirita zverejnit
 
     def on_put(self, req, resp, id):
-        requestBody = req.context['data']
+        data = req.context['data']
 
         tournament = m.Tournament.select(m.Tournament).where(m.Tournament.id==id).get()
 
@@ -85,11 +85,11 @@ class Tournament(Item):
             )
 
         edited = False
-        if tournament.ready is False and requestBody.get('ready') is True:
+        if tournament.ready is False and data.get('ready') is True:
             self.prepareTournament(id)
             edited = True
 
-        if tournament.terminated is False and requestBody.get('terminated') is True:
+        if tournament.terminated is False and data.get('terminated') is True:
             self.terminateTournament(id)
             edited = True
 

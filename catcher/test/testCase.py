@@ -14,13 +14,13 @@ from catcher import models
 # TODO: in new Falcon version use TestCase instead TestBase
 class TestCase(falcon.testing.TestBase):
 
-    @classmethod
-    def setUpClass(cls):
-        Database.fill()
+    # @classmethod
+    # def setUpClass(cls):
+    #     Database.fill()
 
-    @classmethod
-    def tearDownClass(cls):
-        Database.clean()
+    # @classmethod
+    # def tearDownClass(cls):
+    #     Database.clean()
 
     def request(self, method, path, headers = None, body = None, decode = 'utf-8', queryString = None):
 
@@ -37,9 +37,14 @@ class TestCase(falcon.testing.TestBase):
             )
         return json.loads(response) if response else None
 
-    # it's called before each test
-    def before(self):
+    def setUp(self):
+        super(TestCase, self).setUp()
+        Database.fill()
         self.api = restapi.api
+
+    def tearDown(self):
+        super(TestCase, self).tearDown()
+        Database.clean()
 
 class TournamentTestCase(TestCase):
 

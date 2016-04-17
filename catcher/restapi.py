@@ -5,7 +5,7 @@ import logger
 import falcon
 from api import errors
 from api import middleware
-import resources as r
+import resources
 import models as m
 import peewee as pw
 
@@ -20,7 +20,7 @@ api = falcon.API(
     middleware = [
         middleware.Crossdomain(),
         middleware.PeeweeConnection(),
-        # middleware.Authorization(),
+        middleware.Authorization(),
         middleware.RequireJSON(),
         middleware.JSONTranslator(),
         ]
@@ -28,34 +28,41 @@ api = falcon.API(
 
 # resources are represented by long-lived class instances
 # TODO: editable cols presunout nekam, kde je muzu upravovat zaroven i pro testy
-api.add_route('/api/club/{id}', r.Club(m.Club))
-api.add_route('/api/club/{id}/players', r.ClubPlayers())
-api.add_route('/api/club/{id}/teams', r.ClubTeams())
-api.add_route('/api/clubs', r.Clubs(m.Club))
+api.add_route('/api/club/{id}',  resources.Club(m.Club))
+api.add_route('/api/club/{id}/players',  resources.ClubPlayers())
+api.add_route('/api/club/{id}/teams',  resources.ClubTeams())
+api.add_route('/api/clubs',  resources.Clubs(m.Club))
 
-api.add_route('/api/player/{id}', r.Player(m.Player))
-api.add_route('/api/players', r.Players(m.Player))
+api.add_route('/api/player/{id}',  resources.Player(m.Player))
+api.add_route('/api/players',  resources.Players(m.Player))
 
-api.add_route('/api/divisions', r.Divisions(m.Division))
+api.add_route('/api/divisions',  resources.Divisions(m.Division))
 
-api.add_route('/api/team/{id}', r.Team(m.Team))
-api.add_route('/api/teams', r.Teams(m.Team))
+api.add_route('/api/team/{id}',  resources.Team(m.Team))
+api.add_route('/api/teams',  resources.Teams(m.Team))
 
-api.add_route('/api/tournaments', r.Tournaments(m.Tournament))
-api.add_route('/api/tournament/{id}', r.Tournament(m.Tournament))
-api.add_route('/api/tournament/{id}/standings', r.Standings())
-api.add_route('/api/tournament/{id}/players', r.TournamentPlayers())
-api.add_route('/api/tournament/{id}/teams', r.TournamentTeams())
-api.add_route('/api/tournament/{id}/matches', r.TournamentMatches())
-api.add_route('/api/tournament/{id}/spirit', r.Spirits())
+api.add_route('/api/tournaments',  resources.Tournaments(m.Tournament))
+api.add_route('/api/tournament/{id}',  resources.Tournament(m.Tournament))
+api.add_route('/api/tournament/{id}/standings',  resources.Standings())
+api.add_route('/api/tournament/{id}/players',  resources.TournamentPlayers())
+api.add_route('/api/tournament/{id}/teams',  resources.TournamentTeams())
+api.add_route('/api/tournament/{id}/matches',  resources.TournamentMatches())
+api.add_route('/api/tournament/{id}/spirit',  resources.Spirits())
 
-api.add_route('/api/match/{id}', r.Match(m.Match))
-api.add_route('/api/match/{id}/points', r.MatchPoints())
-api.add_route('/api/match/{id}/point/{order}', r.MatchPoint())
-api.add_route('/api/match/{id}/spirit', r.Spirit())
+api.add_route('/api/match/{id}',  resources.Match(m.Match))
+api.add_route('/api/match/{id}/points',  resources.MatchPoints())
+api.add_route('/api/match/{id}/point/{order}',  resources.MatchPoint())
+api.add_route('/api/match/{id}/spirit',  resources.Spirit())
+
+# TODO: otestovat
+api.add_route("/api/users", resources.Users())
+api.add_route("/api/user/{id}", resources.User())
+
+api.add_route("/api/login", resources.Login())
+api.add_route("/api/forgottenPassword/{email}", resources.ForgottenPassword())
 
 # not implemented
-api.add_route('/api/tournament/{id}/groups', r.TournamentGroups())
+api.add_route('/api/tournament/{id}/groups',  resources.TournamentGroups())
 
 # errors
 api.add_error_handler(RuntimeError, errors.InternalServerError)

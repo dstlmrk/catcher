@@ -49,108 +49,169 @@
                   <div class="row">
                      <div class="col-md-6">
                         <h3 class="panel-title">
-                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#users" aria-expanded="false" aria-controls="users">
-                           <strong><span class="label label-danger">UNFINISHED</span> /users</strong>
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#login" aria-expanded="false" aria-controls="login">
+                           <strong>/login</strong>
                            </a>
                         </h3>
                      </div>
                      <div class="col-md-6" align="right">
-                        <strong>Uživatelé</strong>
+                        <strong>Přihlášení</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="login" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                        <h3>POST - Přihlášení</h3>
+                        <span class="label label-default">public</span>
+                        <p>
+                        <p>Po úspěšném přihlášení jsou vráceny uživatelská data včetně přístupového tokenu pro následující požadavky. Platnost tokenu je prozatím nekonečná.</p>
+                        <h4>Popis polí požadavku</h4>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>email*</code></td>
+                                 <td><code>string</code></td>
+                                 <td>email</td>
+                              </tr>
+                              <tr>
+                                 <td><code>password*</code></td>
+                                 <td><code>string</code></td>
+                                 <td>heslo</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                        <h4>Popis polí úspěšné odpovědi</h4>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>apiKey</code></td>
+                                 <td><code>string</code></td>
+                                 <td>přístupový token s omezenou platností (prozatím nekonečná)</td>
+                              </tr>
+                              <tr>
+                                 <td><code>email</code></td>
+                                 <td><code>string</code></td>
+                                 <td>email</td>
+                              </tr>
+                              <tr>
+                                 <td><code>role</code></td>
+                                 <td><code>string</code></td>
+                                 <td>role</td>
+                              </tr>
+                              <tr>
+                                 <td><code>createdAt</code></td>
+                                 <td><code>timestamp</code></td>
+                                 <td>čas vytvoření uživatele</td>
+                              </tr>
+                              <tr>
+                                 <td><code>clubId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>v případě klubového účtu je vráceno ID klubu</td>
+                              </tr>
+                              <tr>
+                                 <td><code>password</code></td>
+                                 <td><code>null</code></td>
+                                 <td></td>
+                              </tr>
+                           </tbody>
+                        </table>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#users" aria-expanded="false" aria-controls="users">
+                           <strong>/users</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Registrace nového uživatele</strong>
                      </div>
                   </div>
                </div>
                <div id="users" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     <div>
-                        <h3>GET - Seznam všech uživatelů</h3>
+                        <h3>POST - Registrace nového uživatele</h3>
                         <span class="label label-default">public</span>
+                        <p>
+                        <p>Kdokoliv může vytvořit nový účet s rolí <strong>organizer</strong>. Administrátor má navíc možnost vytvořit oddílový účet.</p>
+                        <h4>Popis polí požadavku</h4>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>email*</code></td>
+                                 <td><code>string</code></td>
+                                 <td>email</td>
+                              </tr>
+                              <tr>
+                                 <td><code>password*</code></td>
+                                 <td><code>string</code></td>
+                                 <td>heslo (minimálně 5 znaků)</td>
+                              </tr>
+                              <tr>
+                                 <td><code>role*</code></td>
+                                 <td><code>string</code></td>
+                                 <td>role</td>
+                              </tr>
+                              <tr>
+                                 <td><code>clubId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID oddílu</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#user" aria-expanded="false" aria-controls="user">
+                           <strong>/user/{id}</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Úprava uživatele</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="user" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                        <h3>PUT - Úprava uživatele</h3>
+                        <span class="label label-default">club</span>
                         <span class="label label-default">organizer</span>
                         <span class="label label-default">admin</span>
                         <p>
-                        <h5>Parametry</h5>
-                        <table class="table table-sm">
-                           <tbody>
-                              <tr>
-                                 <td><code>userId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>ID uživatele.</td>
-                              </tr>
-                              <tr>
-                                 <td><code>teamId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>ID týmu.</td>
-                              </tr>
-                              <tr>
-                                 <td><code>roleId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>ID role.</td>
-                              </tr>
-                           </tbody>
-                        </table>
-                        <h3>POST - Vytvoření nového uživatele</h3>
-                        <span class="label label-info">public</span>
-                        <span class="label label-default">admin</span>
-                        <p>
-                        <p>Kdokoliv může vytvořit nový účet s rolí <span class="label label-default">organizer</span>. Administrátor má navíc možnost vytvořit účet s rolí <span class="label label-default">club</span> (váže se na konkrétní oddíl).
-                           může vytvářet jak organi Požadavek je nejprve důkladně zkontrolován, zda je hratelný a neobsahuje chyby, a pak je uložen do databáze. Po vytvoření je nutné turnaj aktivovat, tzn. nastavit příznak <code>active</code> na hodnotu <code>true</code>.
-                        </p>
+                        <p>Slouží pro úpravu přihlašovacích údajů.</p>
                         <h5>Tělo požadavku</h5>
                         <table class="table table-sm">
                            <tbody>
                               <tr>
-                                 <td><code>nickname</code></td>
-                                 <td><code>string</code></td>
-                                 <td>Přezdívka uživatele.</td>
-                              </tr>
-                              <tr>
                                  <td><code>email</code></td>
                                  <td><code>string</code></td>
-                                 <td>Email uživatele</td>
+                                 <td>email</td>
                               </tr>
                               <tr>
-                                 <td><code>password</code></td>
+                                 <td><code>oldPassword</code></td>
                                  <td><code>string</code></td>
-                                 <td>Heslo uživatele</td>
+                                 <td>staré heslo</td>
                               </tr>
                               <tr>
-                                 <td><code>roleId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>ID roleD).</td>
+                                 <td><code>newPassword</code></td>
+                                 <td><code>string</code></td>
+                                 <td>nové heslo</td>
                               </tr>
                            </tbody>
                         </table>
-                        <h3>PUT - Úprava uživatele</h3>
-                        <span class="label label-info">team</span>
-                        <span class="label label-info">organizer</span>
-                        <span class="label label-default">admin</span>
-                        <p>
-                        <p>Pouze administrátor může upravovat údaje všech uživatelů. Svůj účet mohou upravovat role <span class="label label-info">team</span> a <span class="label label-info">organizer</span>.</p>
-                        <h5>Tělo požadavku</h5>
-                        <table class="table table-sm">
-                           <tbody>
-                              <tr>
-                                 <td><code>nickname</code></td>
-                                 <td><code>string</code></td>
-                                 <td>První hrací den turnaje (ve formátu YYYY-MM-DD).</td>
-                              </tr>
-                              <tr>
-                                 <td><code>email</code></td>
-                                 <td><code>string</code></td>
-                                 <td>Poslední hrací den turnaje (ve formátu YYYY-MM-DD).</td>
-                              </tr>
-                              <tr>
-                                 <td><code>password</code></td>
-                                 <td><code>string</code></td>
-                                 <td>První hrací den turnaje (ve formátu YYYY-MM-DD).</td>
-                              </tr>
-                              <tr>
-                                 <td><code>roleId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>První hrací den turnaje (ve formátu YYYY-MM-DD).</td>
-                              </tr>
-                           </tbody>
-                        </table>
-                     </div>
                   </div>
                </div>
             </div>

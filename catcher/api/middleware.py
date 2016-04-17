@@ -8,6 +8,7 @@ from catcher import models
 import datetime
 from playhouse.shortcuts import model_to_dict
 import logging
+from catcher.models import User, NullUser
 
 import peewee
 
@@ -26,44 +27,29 @@ class Crossdomain(object):
         resp.set_header('Access-Control-Allow-Origin', '*')
 
 class Authorization(object):
-    pass
-    # def process_request(self, req, resp):
-    #     token = req.get_header('X-Auth-Token')
-    #     project = req.get_header('X-Project-ID')
 
-    #     if token is None:
-    #         description = ('Please provide an auth token '
-    #                        'as part of the request.')
-
-    #         raise falcon.HTTPUnauthorized('Auth token required',
-    #                                       description,
-    #                                       href='http://docs.example.com/auth')
-
-    #     if not self._token_is_valid(token, project):
-    #         description = ('The provided auth token is not valid. '
-    #                        'Please request a new token and try again.')
-
-    #         raise falcon.HTTPUnauthorized('Authentication required',
-    #                                       description,
-    #                                       href='http://docs.example.com/auth',
-    #                                       scheme='Token; UUID')
-
-    # def _token_is_valid(self, token, project):
-    #     return True  # Suuuuuure it's valid...
+    def process_request(self, req, resp):
+        user = NullUser()
+        try:
+            if req.auth:
+                user = User.get(apiKey=req.auth)
+        except User.DoesNotExist:
+            pass
+        req.context["user"] = user
 
 class RequireJSON(object):
 
     def process_request(self, req, resp):
         if not req.client_accepts_json:
             raise falcon.HTTPNotAcceptable(
-                'This API only supports responses encoded as JSON.',
-                href='http://docs.examples.com/api/json')
+                'This API only supports responses encoded as JSON.'
+                )
 
         if req.method in ('POST', 'PUT'):
-            if 'application/json' not in req.content_type:
+            if not req.content_type or 'application/json' not in req.content_type:
                 raise falcon.HTTPUnsupportedMediaType(
-                    'This API only supports requests encoded as JSON.',
-                    href='http://docs.examples.com/api/json')
+                    'This API only supports requests encoded as JSON.'
+                    )
 
 class JSONTranslator(object):
 
@@ -92,13 +78,9 @@ class JSONTranslator(object):
                 )
 
     def process_response(self, req, resp, resource):
-        # vysledky neukladam do req.context, protoze do body se muzou davat jeste jine veci
         if 'result' not in req.context:
             return
-        # TODO: zjistit, co vsechno obaluje do dvojtych uvozovek
-        # print "RESULT BEFORE JSON DUMP = " + str(req.context['result'])
         resp.body = json.dumps(req.context['result'], default = self.converter)
-        # print "RESULT AFTER JSON DUMP = " + str(resp.body)
 
     def converter(self, obj):
         if isinstance(obj, datetime.time) or isinstance(obj, datetime.date) or isinstance(obj, datetime.datetime):

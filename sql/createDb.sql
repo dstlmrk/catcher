@@ -7,44 +7,6 @@ SHOW WARNINGS;
 USE `catcher` ;
 
 -- -----------------------------------------------------
--- Table `catcher`.`user`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `catcher`.`user` ;
-
-SHOW WARNINGS;
-CREATE TABLE IF NOT EXISTS `catcher`.`user` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `nickname` VARCHAR(45) NULL,
-  `email` VARCHAR(90) NOT NULL,
-  `password` VARCHAR(45) NOT NULL,
-  `created_at` TIMESTAMP NULL,
-  `last_login_at` TIMESTAMP NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
-
-SHOW WARNINGS;
-
--- -----------------------------------------------------
--- Table `catcher`.`role`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `catcher`.`role` ;
-
-SHOW WARNINGS;
-CREATE TABLE IF NOT EXISTS `catcher`.`role` (
-  `role` VARCHAR(45) NOT NULL,
-  `user_id` INT NOT NULL,
-  INDEX `fk_role_user1_idx` (`user_id` ASC),
-  PRIMARY KEY (`role`),
-  CONSTRAINT `fk_role_user1`
-    FOREIGN KEY (`user_id`)
-    REFERENCES `catcher`.`user` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-SHOW WARNINGS;
-
--- -----------------------------------------------------
 -- Table `catcher`.`club`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `catcher`.`club` ;
@@ -61,11 +23,50 @@ CREATE TABLE IF NOT EXISTS `catcher`.`club` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `shortcut_UNIQUE` (`shortcut` ASC),
   UNIQUE INDEX `name_UNIQUE` (`name` ASC),
-  INDEX `fk_club_user1_idx` (`user_id` ASC),
-  UNIQUE INDEX `cald_id_UNIQUE` (`cald_id` ASC),
-  CONSTRAINT `fk_club_user1`
-    FOREIGN KEY (`user_id`)
-    REFERENCES `catcher`.`user` (`id`)
+  UNIQUE INDEX `cald_id_UNIQUE` (`cald_id` ASC))
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `catcher`.`role`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `catcher`.`role` ;
+
+SHOW WARNINGS;
+CREATE TABLE IF NOT EXISTS `catcher`.`role` (
+  `role` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`role`))
+ENGINE = InnoDB;
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `catcher`.`user`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `catcher`.`user` ;
+
+SHOW WARNINGS;
+CREATE TABLE IF NOT EXISTS `catcher`.`user` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(255) NOT NULL,
+  `password` CHAR(64) NOT NULL,
+  `api_key` CHAR(32) NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `role` VARCHAR(45) NOT NULL,
+  `club_id` INT NULL COMMENT 'obousmerna vazba, abych nemusel neustale joinovat',
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `api_key_UNIQUE` (`api_key` ASC),
+  INDEX `fk_user_club1_idx` (`club_id` ASC),
+  INDEX `fk_user_role1_idx` (`role` ASC),
+  CONSTRAINT `fk_user_club1`
+    FOREIGN KEY (`club_id`)
+    REFERENCES `catcher`.`club` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_user_role1`
+    FOREIGN KEY (`role`)
+    REFERENCES `catcher`.`role` (`role`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -635,12 +636,12 @@ COMMENT = 'Tabulka se vyplni na konci turnaje (nebo muze klidne i postu /* comme
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `catcher`.`user_has_tournament`
+-- Table `catcher`.`organizer_has_tournament`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `catcher`.`user_has_tournament` ;
+DROP TABLE IF EXISTS `catcher`.`organizer_has_tournament` ;
 
 SHOW WARNINGS;
-CREATE TABLE IF NOT EXISTS `catcher`.`user_has_tournament` (
+CREATE TABLE IF NOT EXISTS `catcher`.`organizer_has_tournament` (
   `user_id` INT NOT NULL,
   `tournament_id` INT NOT NULL,
   PRIMARY KEY (`user_id`, `tournament_id`),
@@ -663,6 +664,31 @@ SHOW WARNINGS;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- Data for table `catcher`.`role`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `catcher`;
+INSERT INTO `catcher`.`role` (`role`) VALUES ('admin');
+INSERT INTO `catcher`.`role` (`role`) VALUES ('public');
+INSERT INTO `catcher`.`role` (`role`) VALUES ('club');
+INSERT INTO `catcher`.`role` (`role`) VALUES ('organizer');
+
+COMMIT;
+
+
+-- -----------------------------------------------------
+-- Data for table `catcher`.`user`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `catcher`;
+INSERT INTO `catcher`.`user` (`id`, `email`, `password`, `api_key`, `created_at`, `role`, `club_id`) VALUES (1, 'veselj43@fit.cvut.cz', 'x', 'W1x8UmkV5RWCZOXuRmcqqnrt6qQNnjnr', '', 'admin', NULL);
+INSERT INTO `catcher`.`user` (`id`, `email`, `password`, `api_key`, `created_at`, `role`, `club_id`) VALUES (2, 'dstlmrk@gmail.com', 'x', 'nVFrrUXJSAXmTPp9lvZZLEyjiRVUydIg', '', 'admin', NULL);
+INSERT INTO `catcher`.`user` (`id`, `email`, `password`, `api_key`, `created_at`, `role`, `club_id`) VALUES (3, 'list@zlutazimnice.cz', 'x', 'M7mz4BwcdwR8QmfdKJw2w3PJj3j2YZlB', '', 'club', NULL);
+
+COMMIT;
+
 
 -- -----------------------------------------------------
 -- Data for table `catcher`.`division`

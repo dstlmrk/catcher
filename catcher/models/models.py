@@ -33,15 +33,35 @@ class MySQLModel(pw.Model):
 class Division(MySQLModel):
     division = pw.CharField()
 # -------------------------------------------------------------------------------------
+class UserHasRole(MySQLModel):
+    userId = pw.IntegerField(db_column='user_id') 
+    role   = pw.CharField()
+
+    class Meta:
+        db_table = 'user_has_role'
+        primary_key = False
+# -------------------------------------------------------------------------------------
 class User(MySQLModel):
     email       = pw.CharField()
     password    = pw.CharField()
     createdAt   = pw.DateTimeField(db_column='created_at')
-    lastLoginAt = pw.DateTimeField(db_column='last_login_at')
-    nickname    = pw.CharField()
+    apiKey      = pw.CharField(db_column='api_key')
+    role        = pw.CharField()
+    clubId      = pw.IntegerField(db_column='club_id')
+
+    @staticmethod
+    def login(email, password):
+        return User.get(email = email, password = password)
 
     def prepared(self):
         self.password = None
+# -------------------------------------------------------------------------------------
+class Role(MySQLModel):
+    role = pw.CharField()
+# -------------------------------------------------------------------------------------
+class NullUser(object):
+    role = None
+    apiKey = None
 # -------------------------------------------------------------------------------------
 class Club(MySQLModel):
     # id       = pw.PrimaryKeyField()

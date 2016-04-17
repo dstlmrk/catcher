@@ -2,8 +2,33 @@
 # coding=utf-8
 
 from catcher import models as m
+from playhouse.shortcuts import model_to_dict
 
 class Queries(object):
+
+    @staticmethod
+    def getClubs(clubId = None):
+        whereClub = "" if clubId is None else (" WHERE club.id = %s" % clubId)
+        q = ("SELECT club.id, club.cald_id, club.name, club.shortcut, club.city, club.country," +
+             " user.created_at"
+             " FROM club LEFT OUTER JOIN user ON user.id = club.user_id %s"
+             % (whereClub))
+        qr = m.db.execute_sql(q)
+        clubs = []
+        for row in qr:
+            user = None
+            if row[6] is not None:
+                user = {'createdAt'   : row[6]}
+            clubs.append({
+                'id'      : row[0],
+                'caldId'  : row[1],
+                'name'    : row[2],
+                'shortcut': row[3],
+                'city'    : row[4],
+                'country' : row[5],
+                'user'    : user
+                })
+        return clubs
 
     @staticmethod
     def getPoints(matchId, order = None):
