@@ -59,7 +59,7 @@ api.add_route("/api/users", resources.Users())
 api.add_route("/api/user/{id}", resources.User())
 
 api.add_route("/api/login", resources.Login())
-api.add_route("/api/forgottenPassword/{email}", resources.ForgottenPassword())
+api.add_route("/api/forgottenPassword", resources.ForgottenPassword())
 
 # not implemented
 api.add_route('/api/tournament/{id}/groups',  resources.TournamentGroups())

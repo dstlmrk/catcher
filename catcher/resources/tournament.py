@@ -4,6 +4,8 @@
 from catcher.api.resource import Collection, Item
 from catcher import models as m
 from catcher.resources.tournamentCreater import TournamentCreater
+from catcher.models.queries import Queries
+from catcher.api.privileges import Privilege
 import falcon
 import logging
 import datetime
@@ -62,22 +64,35 @@ class Tournament(Item):
                     m.Match.id == match.id
                 ).execute()
 
-
-    # vyplnit tabulky se spiritem na nuly
-
-
     @m.db.atomic()    
     def terminateTournament(self, id):
-        ''''''
-        logging.warning("Tournament.terminateTournament() neni implementovano")
+        '''terminate tournament'''
         tournament = m.Tournament.get(id=id)
+
+        standings = m.Standing.select().where(m.Standing.tournamentId==tournament.id)
+        for standing in standings:
+            if standing.teamId is None:
+                raise falcon.HTTPBadRequest(
+                    "Tournanent can't be terminated",
+                    "All standings aren't known. Probably some matches are still active."
+                    )
+
+        matches = Queries.getMatches(tournamentId=tournament.id)
+        for match in matches:
+            if match['homeTeam']['spirit'] is None or match['awayTeam']['spirit'] is None:
+                raise falcon.HTTPBadRequest(
+                    "Tournanent can't be terminated",
+                    ("Spirit from match %s is still missing" % match['identificator'])
+                    )
+
         tournament.terminated = True
         tournament.save()
-        # musi zkontrolovat, zda byl odevzdan spirit a pak musi spirita zverejnit
 
+    falcon.before(Privilege(["organizer", "admin"]))
     def on_put(self, req, resp, id):
+        Privilege.checkOrganizer(req.context['user'], int(id))
+        
         data = req.context['data']
-
         tournament = m.Tournament.select(m.Tournament).where(m.Tournament.id==id).get()
 
         super(Tournament, self).on_put(req, resp, id,
@@ -98,10 +113,25 @@ class Tournament(Item):
 
 
 class Tournaments(Collection):
+
+    def on_get(self, req, resp):
+        tournaments = Queries.getTournaments(
+            req.params.get('country'),
+            req.params.get('divisionId'),
+            req.get_param_as_bool('active'),
+            req.get_param_as_bool('terminated')
+            )
+
+        collection = {
+            'count'      : len(tournaments),
+            'tournaments': tournaments
+        }
+        req.context['result'] = collection
     
+    @falcon.before(Privilege(["organizer", "admin"]))
     def on_post(self, req, resp):
         tournamentCreater = TournamentCreater()
-        createdTurnament = tournamentCreater.createTournament(req, resp)
+        createdTurnament = tournamentCreater.createTournament(req, resp, req.context['user'])
         req.context['result'] = createdTurnament 
         resp.status = falcon.HTTP_201
 
@@ -143,8 +173,8 @@ class TournamentMatches(object):
             req.params.get('matchId'),
             req.params.get('fieldId'),
             req.params.get('date'),
-            req.params.get('active'),
-            req.params.get('terminated')
+            req.get_param_as_bool('active'),
+            req.get_param_as_bool('terminated')
             )
         collection = {
             'count'  : len(matches),

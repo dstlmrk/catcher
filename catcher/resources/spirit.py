@@ -12,12 +12,19 @@ from playhouse.shortcuts import model_to_dict
 
 class Sotg(object):
 
+    @staticmethod
+    def checkValue(value):
+        if value is None or 0 <= value <= 4:
+            return value
+        else:
+            raise falcon.HTTPBadRequest("Invalid spirit", "Incorrect values")
+
     def __init__(self, fair = None, communication = None, fouls = None, positive = None, rules = None):
-        self.fair          = fair
-        self.communication = communication
-        self.fouls         = fouls
-        self.positive      = positive
-        self.rules         = rules
+        self.fair          = Sotg.checkValue(fair)
+        self.communication = Sotg.checkValue(communication)
+        self.fouls         = Sotg.checkValue(fouls)
+        self.positive      = Sotg.checkValue(positive)
+        self.rules         = Sotg.checkValue(rules)
         self.total = None if fair is None else (fair + communication + fouls + positive + rules)
 
 class Spirits(object):

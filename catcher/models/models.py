@@ -53,15 +53,27 @@ class User(MySQLModel):
     def login(email, password):
         return User.get(email = email, password = password)
 
-    def prepared(self):
-        self.password = None
+    # def prepared(self):
+    #     self.password = None
 # -------------------------------------------------------------------------------------
 class Role(MySQLModel):
     role = pw.CharField()
+    
+    class Meta:
+        primary_key = False
 # -------------------------------------------------------------------------------------
 class NullUser(object):
-    role = None
+    role   = None
     apiKey = None
+    clubId = None
+# -------------------------------------------------------------------------------------
+class OrganizerHasTournament(MySQLModel):
+    userId = pw.IntegerField(db_column='user_id')
+    tournamentId = pw.IntegerField(db_column='tournament_id')
+
+    class Meta:
+        db_table = 'organizer_has_tournament'
+        primary_key = pw.CompositeKey('userId', 'tournamentId')
 # -------------------------------------------------------------------------------------
 class Club(MySQLModel):
     # id       = pw.PrimaryKeyField()

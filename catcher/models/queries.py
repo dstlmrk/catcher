@@ -7,6 +7,42 @@ from playhouse.shortcuts import model_to_dict
 class Queries(object):
 
     @staticmethod
+    def getTournaments(country=None, divisionId=None, active=None, terminated=None):
+        whereActive = "" if active is None else (
+            "AND (tournament.start_date %s CURDATE() %s tournament.end_date %s CURDATE())"
+            )
+        if active == True:
+            whereActive = whereActive % ("<=", "AND", ">=")
+        elif active == False:
+            whereActive = whereActive % (">=", "OR", "<=")
+        whereTerminated = "" if terminated is None else (
+            "AND tournament.terminated = %s" % terminated
+            )
+        whereDivision = "" if divisionId is None else ("AND division_id = %s" % divisionId)
+        whereCountry = "" if country is None else ("AND country = %s" % country)
+        q = ("SELECT id, division_id, teams, tournament.ready, tournament.terminated,"
+             " name, start_date, end_date, city, country, cald_tournament_id "
+             " FROM tournament WHERE 1=1 %s %s %s %s;" 
+             % (whereCountry, whereDivision, whereActive, whereTerminated))
+        qr = m.db.execute_sql(q)
+        tournaments = []
+        for row in qr:
+            tournaments.append({
+                'id'              : row[0],
+                'divisionId'      : row[1],
+                'teams'           : row[2],
+                'ready'           : row[3],
+                'terminated'      : row[4],
+                'name'            : row[5],
+                'startDate'       : row[6],
+                'endDate'         : row[7],
+                'city'            : row[8],
+                'country'         : row[9],
+                'caldTournamentId': row[10]
+                })
+        return tournaments
+
+    @staticmethod
     def getClubs(clubId = None):
         whereClub = "" if clubId is None else (" WHERE club.id = %s" % clubId)
         q = ("SELECT club.id, club.cald_id, club.name, club.shortcut, club.city, club.country," +

@@ -2,6 +2,7 @@
 # coding=utf-8
 
 import falcon
+from catcher import models as m
 
 class Privilege(object):
     
@@ -16,7 +17,36 @@ class Privilege(object):
 
     def __call__(self, req, resp, resource, params):
         if not self.evaluate(req, resp, resource, params):
-            raise falcon.HTTPUnauthorized(
+            Privilege.raise401()
+
+    @staticmethod
+    def checkUser(loggedUser, userId):
+        if loggedUser.id != userId:
+            Privilege.raise401()
+
+    @staticmethod
+    def checkClub(loggedUser, clubId):
+        if clubId is None:
+            return
+        if loggedUser.role == "club" and loggedUser.clubId != clubId:
+            Privilege.raise401()
+
+    @staticmethod
+    def checkOrganizer(loggedUser, tournamentId):
+        if tournamentId is None:
+            return
+        if loggedUser.role == "organizer":
+            try:
+                m.OrganizerHasTournament.get(
+                    userId = loggedUser.id,
+                    tournamentId = tournamentId
+                    )
+            except m.OrganizerHasTournament.DoesNotExist:
+                Privilege.raise401()
+
+    @classmethod
+    def raise401(cls):
+        raise falcon.HTTPUnauthorized(
                 "Authentication Required",
                 ("This server could not verify that "
                 "you are authorized to access the document requested.")

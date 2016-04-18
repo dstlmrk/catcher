@@ -308,12 +308,20 @@ class TournamentCreater(object):
                 where(m.Identificator.id == identificator.id).\
                 execute()
 
+        # Organizer has table
+        if data['user'].role == "organizer":
+            m.OrganizerHasTournament.insert(
+                    userId = data['user'].id,
+                    tournamentId = tournamentId
+                ).execute()
+
         return tournamentId
 
     # method get is used, where value can be null
-    def createTournament(self, req, resp):
+    def createTournament(self, req, resp, user):
         data = req.context['data']
 
+        data['user'] = user
         # load term and check it
         startDate = self.getTimestamp(data['startDate'])
         endDate   = self.getTimestamp(data['endDate'])

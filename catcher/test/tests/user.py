@@ -2,15 +2,79 @@
 # coding=utf-8
 
 from testCase import TestCase
-from falcon import HTTP_200, HTTP_201, HTTP_400
+from falcon import HTTP_200, HTTP_201, HTTP_400, HTTP_401
 from catcher import models
 
 class User(TestCase):
-    pass
-    # def testPut(self):
-        # ''''''
-        # self.assertEqual(response, expectedResponse)
-        # self.assertEqual(self.srmock.status, HTTP_201)
+
+    def before(self):
+        models.Role(role="organizer").save()
+        models.Role(role="admin").save()
+        models.Role(role="club").save()
+        models.User(
+            email    = "test@test.cz",
+            password = "heslo1",
+            apiKey   = "#apiKey",
+            role     = "organizer"
+            ).save()
+
+    def testPut1(self):
+        '''edit email and password'''
+        user = models.User.get(apiKey="#apiKey")
+        response = self.request(
+            method  = 'PUT',
+            path    = ('/api/user/%s' % user.id),
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey"
+                },
+            body    = {
+                "email"   : "test2@test.cz",
+                "oldPassword": "heslo1",
+                "newPassword": "heslo2"
+                }
+            )
+
+        self.assertEqual(response['id'], user.id)
+        self.assertEqual(response['email'], "test2@test.cz")
+        self.assertEqual(response['password'], "heslo2")
+        self.assertEqual(self.srmock.status, HTTP_200)
+
+    def testPut2(self):
+        '''edit email and password'''
+        user = models.User.get(apiKey="#apiKey")
+        response = self.request(
+            method  = 'PUT',
+            path    = ('/api/user/%s' % user.id),
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey"
+                },
+            body    = {
+                "email"   : "test2@test.cz",
+                "newPassword": "heslo2"
+                }
+            )
+
+        self.assertEqual(self.srmock.status, HTTP_400)
+
+    def testPut3(self):
+        '''edit email and password by invalid user'''
+        user = models.User.get(apiKey="#apiKey")
+        response = self.request(
+            method  = 'PUT',
+            path    = ('/api/user/%s' % (user.id + 1)),
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey"
+                },
+            body    = {
+                "email"   : "test2@test.cz",
+                "newPassword": "heslo2"
+                }
+            )
+
+        self.assertEqual(self.srmock.status, HTTP_401)
 
 
 class Users(TestCase):
@@ -50,7 +114,10 @@ class Users(TestCase):
         response = self.request(
             method  = 'POST',
             path    = '/api/users',
-            headers = {"Content-Type": "application/json", "Authorization": "#apiKey"},
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey"
+                },
             body    = {
                 "email"   : "test@test.cz",
                 "password": "heslo1",

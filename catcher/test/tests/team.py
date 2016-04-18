@@ -23,7 +23,10 @@ class Teams(TestCase):
             "degree": "A",
             "divisionId": 2
             }
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey1"
+            }
         response = self.request(
             method  = 'POST',
             path    = '/api/teams',
@@ -49,7 +52,10 @@ class Teams(TestCase):
             "degree": "A",
             "divisionId": 2
             }
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey1"
+            }
         response = self.request(
             method  = 'POST',
             path    = '/api/teams',
@@ -88,7 +94,10 @@ class Team(TestCase):
           "divisionId": 4
         }
         
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey1"
+            }
         
         response = self.request(
             method  = 'PUT',
@@ -105,7 +114,10 @@ class Team(TestCase):
         club = models.Team.select().where(models.Team.id == 15).get()
         response = self.request(
             method  = 'DELETE',
-            path    = '/api/team/15'
+            path    = '/api/team/15',
+            headers = {
+                "Authorization": "#apiKey1"
+                }
             )
         self.assertEqual(self.srmock.status, HTTP_200)
         with self.assertRaises(models.Team.DoesNotExist):

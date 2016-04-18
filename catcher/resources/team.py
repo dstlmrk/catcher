@@ -4,14 +4,22 @@
 from catcher.api.resource import Collection, Item
 from playhouse.shortcuts import model_to_dict
 from catcher import models as m
+from catcher.api.privileges import Privilege
+import falcon
 
 class Team(Item):
     
+    @falcon.before(Privilege(["club", "admin"]))
     def on_put(self, req, resp, id):
+        Privilege.checkClub(req.context['user'], m.Team.get(id=id).clubId)
         super(Team, self).on_put(req, resp, id, ['divisionId', 'degree'])
     
     def on_get(self, req, resp, id):
         req.context['result'] = Teams.getTeams(id)[0]
+
+    @falcon.before(Privilege(["admin"]))
+    def on_delete(self, req, resp, id):
+        super(Team, self).on_delete(req, resp, id)
 
 class Teams(Collection):
 
@@ -40,3 +48,8 @@ class Teams(Collection):
             'teams' : teams
         }
         req.context['result'] = collection
+
+    @falcon.before(Privilege(["club", "admin"]))
+    def on_post(self, req, resp):
+        Privilege.checkClub(req.context['user'], req.context['data'].get('clubId'))
+        super(Teams, self).on_post(req, resp)

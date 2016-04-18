@@ -2,7 +2,7 @@
 # coding=utf-8
 
 from testCase import TestCase
-from falcon import HTTP_200, HTTP_201, HTTP_400
+from falcon import HTTP_200, HTTP_201, HTTP_400, HTTP_401
 from catcher import models
 
 class Clubs(TestCase):
@@ -17,7 +17,10 @@ class Clubs(TestCase):
           "shortcut": "BEG",
           "user": None
         }
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey1"
+            }
         response = self.request(
             method  = 'POST',
             path    = '/api/clubs',
@@ -50,7 +53,10 @@ class Clubs(TestCase):
           "user": null
         }
         '''
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey1"
+            }
         response = self.request(
             method  = 'POST',
             path    = '/api/clubs',
@@ -87,15 +93,18 @@ class Club(TestCase):
         self.assertEqual(response['shortcut'], club.shortcut)
         self.assertEqual(self.srmock.status, HTTP_200)
 
-    def testPut(self):
-        '''change shortcut, city and country'''
+    def testPut1(self):
+        '''change shortcut, city and country by admin'''
         body = {
           "city": "Mohelnice",
           "country": "CZE",
           "shortcut": "MOH"
         }
         
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey1"
+            }
         
         response = self.request(
             method  = 'PUT',
@@ -109,11 +118,61 @@ class Club(TestCase):
         self.assertEqual(response['country'], "CZE")
         self.assertEqual(response['shortcut'], "MOH")
 
+    def testPut2(self):
+        '''change shortcut, city and country by club'''
+        body = {
+          "city": "Mohelnice",
+          "country": "CZE",
+          "shortcut": "MOH"
+        }
+        
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey2"
+            }
+        
+        response = self.request(
+            method  = 'PUT',
+            path    = '/api/club/1',
+            headers = headers,
+            body    = body
+            )
+
+        self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(response['city'], "Mohelnice")
+        self.assertEqual(response['country'], "CZE")
+        self.assertEqual(response['shortcut'], "MOH")
+
+    def testPut3(self):
+        '''change shortcut, city and country by invalid club'''
+        body = {
+          "city": "Mohelnice",
+          "country": "CZE",
+          "shortcut": "MOH"
+        }
+        
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey2"
+            }
+        
+        response = self.request(
+            method  = 'PUT',
+            path    = '/api/club/2',
+            headers = headers,
+            body    = body
+            )
+
+        self.assertEqual(self.srmock.status, HTTP_401)
+
     def testDelete(self):
         club = models.Club.select().where(models.Club.id == 12).get()
         response = self.request(
             method  = 'DELETE',
-            path    = '/api/club/12'
+            path    = '/api/club/12',
+            headers = {
+                "Authorization": "#apiKey1"
+                }
             )
         self.assertEqual(self.srmock.status, HTTP_200)
         with self.assertRaises(models.Club.DoesNotExist):

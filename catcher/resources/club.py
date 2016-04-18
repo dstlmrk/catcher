@@ -5,7 +5,7 @@ from catcher.api.resource import Collection, Item
 from catcher import models as m
 import peewee as pw
 from catcher.models.queries import Queries
-from catcher.api.privileges import *
+from catcher.api.privileges import Privilege
 import falcon
 
 class Club(Item):
@@ -13,10 +13,15 @@ class Club(Item):
     def on_get(self, req, resp, id):
         req.context['result'] = Queries.getClubs(id)[0]
 
-    # @falcon.before(Privilege(["club","admin"]))
+    @falcon.before(Privilege(["club", "admin"]))
     def on_put(self, req, resp, id):
+        Privilege.checkClub(req.context['user'], int(id))
         super(Club, self).on_put(req, resp, id, ['shortcut', 'city', 'country'])
         req.context['result'] = Queries.getClubs(id)[0]
+
+    @falcon.before(Privilege(["admin"]))
+    def on_delete(self, req, resp, id):
+        super(Club, self).on_delete(req, resp, id)
 
 class Clubs(Collection):
 
@@ -27,6 +32,10 @@ class Clubs(Collection):
             'clubs' : clubs
         }
         req.context['result'] = collection
+
+    @falcon.before(Privilege(["admin"]))
+    def on_post(self, req, resp):
+        super(Clubs, self).on_post(req, resp)
 
 class ClubPlayers():
 

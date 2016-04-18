@@ -4,6 +4,11 @@
 from catcher import models as m
 from catcher.api.privileges import *
 import falcon
+import smtplib
+import random
+import string
+import logging
+from catcher import config
 
 class Login(object):
 
@@ -19,70 +24,34 @@ class Login(object):
 
 class ForgottenPassword(object):
 
-    @falcon.before(Privilege("admin"))
     def on_post(self, req, resp):
         '''send new password'''
-        pass
+        email = req.params['email']
+        print email
+        try:
+            user = m.User.get(email=email)
+        except m.User.DoesNotExist:
+            raise ValueError("User with email %s doesn't exist" % email)
 
+        newPassword = ''.join(
+            random.choice(string.ascii_uppercase + string.digits) for x in range(8)
+            )
+        
+        msg = ("Hello,\n\nnew password for your account is %s. Please change it immediately.\n\n"
+            "Catcher\n\nThis e-mail was generated automatically. Any reply will not be processed."
+            % newPassword)
 
-# TODO: napsat tridu pro obnoveni hesla (poslat email s novym heslem asi)
+        fromAddr = 'noreply.catcher@gmail.com'
+        toAddrs  = email
 
-# PERFMORMIO -------------------------
-
-# class ForgottenPassword(Resource):
-#     MEM_KEY = "forgottenPassword_%s"
-#     EXPIRE = 600
-
-#     def on_post(self, req, resp):
-#         """
-#         odesle email s odkazem pro zmenu hesla
-#         """
-#         req.context['result'] = {}
-#         user = models.AdminUser.byEmail(req.context['data']['email'])
-#         hash = uuid.uuid4().hex
-#         assert config.memcache.set(self.MEM_KEY % hash, user.id, self.EXPIRE)
-#         notification.sendResetPassword(user, hash, req)
-
-# class ResetPassword(Resource):
-#     def on_post(self, req, resp):
-#         """
-#         nastavi nove heslo
-#         """
-#         memcache = config.memcache
-#         key = ForgottenPassword.MEM_KEY % req.context['data']['hash']
-#         userId = memcache.get(key)
-#         if not userId:
-#             raise falcon.HTTPForbidden(
-#                 "Forbidden",
-#                 "Reset password hash is invalid"
-#             )
-#         memcache.delete(key)
-#         user = models.AdminUser.get(userId)
-#         user.password = req.context['data']['password']
-
-# import hashlib
-
-# class AdminUser(SQLModel):
-#     class sqlmeta:
-#         fromDatabase = True
-
-#     apiKey = StringCol(unique=True, default=lambda: uuid.uuid4().get_hex())
-#     salt = "J2e$w^b!j(k_v"
-#     agencies = RelatedJoin("Agency", intermediateTable="agency_has_admin_user")
-#     campaigns = RelatedJoin("Campaign", intermediateTable="campaign_has_admin_user")
-#     clients = RelatedJoin("Client", intermediateTable="client_has_admin_user")
-
-
-#     def _getPasswordHash(self, email, password):
-#         return hashlib.sha256("%s:%s:%s" % (email, password, AdminUser.salt)).hexdigest()
-
-#     @staticmethod
-#     def login(email, password):
-#         return AdminUser.selectBy(
-#             email = email,
-#             password = password,
-#             deleted = 0
-#         ).getOne()
-
-#     def set_password(self, value):
-#         return self._getPasswordHash(self.email, value)
+        try:
+            server = smtplib.SMTP('smtp.gmail.com:587')
+            server.starttls()
+            server.login(config.email['username'], config.email['password'])
+            server.sendmail(fromAddr, toAddrs, msg)
+            server.quit()
+            user.password = newPassword
+            user.save()
+        except:
+            logging.error("Reset password for %s wasn't successful" % email)
+            falcon.HTTPInternalServerError(title, description, **kwargs)

@@ -38,15 +38,44 @@ class TestCase(falcon.testing.TestBase):
         return json.loads(response) if response else None
 
     def setUp(self):
-        super(TestCase, self).setUp()
         Database.fill()
+        super(TestCase, self).setUp()
         self.api = restapi.api
+
+        models.Role(role="organizer").save()
+        models.Role(role="admin").save()
+        models.Role(role="club").save()
+        models.User(
+            email    = "test1@test.cz",
+            password = "heslo1",
+            apiKey   = "#apiKey1",
+            role     = "admin"
+            ).save()
+        models.User(
+            email    = "test2@test.cz",
+            password = "heslo2",
+            apiKey   = "#apiKey2",
+            role     = "club",
+            clubId   = 1
+            ).save()
+        models.User(
+            email    = "test3@test.cz",
+            password = "heslo3",
+            apiKey   = "#apiKey3",
+            role     = "organizer"
+            ).save()
+
 
     def tearDown(self):
         super(TestCase, self).tearDown()
         Database.clean()
 
 class TournamentTestCase(TestCase):
+
+    headers = {
+        "Content-Type" : "application/json",
+        "Authorization": "#apiKey3"
+    }
 
     def createTournament(self):
         '''this method is used by tests for creating test tournament'''
@@ -132,7 +161,7 @@ class TournamentTestCase(TestCase):
         response = self.request(
             method  = 'POST',
             path    = '/api/tournaments',
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = body
             )
         self.assertEqual(self.srmock.status, HTTP_201)

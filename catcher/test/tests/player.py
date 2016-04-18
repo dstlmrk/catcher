@@ -18,7 +18,10 @@ class Players(TestCase):
           "clubId": 1
         }
         
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey1"
+            }
         response = self.request(
             method  = 'POST',
             path    = '/api/players',
@@ -51,7 +54,10 @@ class Players(TestCase):
           "caldId": None,
           "clubId": 1
         }
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey1"
+            }
         response = self.request(
             method  = 'POST',
             path    = '/api/players',
@@ -97,7 +103,10 @@ class Player(TestCase):
           "number": 99
         }
         
-        headers = {"Content-Type": "application/json"}
+        headers = {
+            "Content-Type" : "application/json",
+            "Authorization": "#apiKey1"
+            }
         
         response = self.request(
             method  = 'PUT',
@@ -116,7 +125,10 @@ class Player(TestCase):
         player = models.Player.select().where(models.Player.id == 2).get()
         response = self.request(
             method  = 'DELETE',
-            path    = '/api/player/2'
+            path    = '/api/player/2',
+            headers = {
+                "Authorization": "#apiKey1"
+                }
             )
         self.assertEqual(self.srmock.status, HTTP_200)
         with self.assertRaises(models.Player.DoesNotExist):
