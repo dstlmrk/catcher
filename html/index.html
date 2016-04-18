@@ -22,15 +22,12 @@
             <h1>Catcher API 2.0</h1>
             <p class="lead">Popis a dokumentace skórovacího systému pro soutěže v Ultimate Frisbee</p>
          </div>
-         <div class="alert alert-dismissible alert-warning">
-            <h4>Upozornění!</h4>
-            <p>Nejedná se o stabilní verzi. Aplikace je ještě ve vývoji.</p>
-         </div>
          <div class="panel panel-default">
             <div class="panel-body">
                <h4>Autentizace a autorizace</h4>
-               <p>Uživatel se přihlašuje ...</p>
-               <small>Pod titulkem každého požadavku je seznam všech rolí, které mají právo požadavek zavolat. Ne všechny role mají však u nekterých požadavků všechny jeho možnosti. U role s omezením je použito <span class="label label-info">modré</span> odlišení.</small>
+               <p>Uživatel se přihlašuje svým emailem a heslem. Po přihlášení je mu sdělen přístupový token, kterým lze přistupovat až do vypršení jeho platnosti.</p>
+               <p>Každý zdroj a jeho požadavky mají rozdílná oprávnění. U každého požadavku je tak zobrazen seznam rolí, které mají právo požadavek volat.</p>
+               <small>Uživatelé s rolí <strong>club</strong> a <strong>organizer</strong> můžou upravovat pouze vlastní zdroje.</small>
             </div>
          </div>
          <div class="panel panel-default">
@@ -38,6 +35,7 @@
                <h4>Formáty komunikace</h4>
                <p>Jediným podporovaným formátem je <strong>JSON</strong>. V dané hlavičce úvádějte MIME type <code>application/json</code>.</p>
                <p>U typů <code>datetime</code> a <code>timestamp</code> jsou vyžadována data ve formátu <code>YYYY-MM-DD</code>, respektive <code>YYYY-MM-DDTHH:MM:SS</code>.</p>
+               <p>Hvězdička u popisů znamená povinnost být součastí požadavku.</p>
             </div>
          </div>
          <hr>
@@ -61,60 +59,95 @@
                </div>
                <div id="login" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                        <h3>POST - Přihlášení</h3>
-                        <span class="label label-default">public</span>
-                        <p>
-                        <p>Po úspěšném přihlášení jsou vráceny uživatelská data včetně přístupového tokenu pro následující požadavky. Platnost tokenu je prozatím nekonečná.</p>
-                        <h4>Popis polí požadavku</h4>
-                        <table class="table table-sm">
-                           <tbody>
-                              <tr>
-                                 <td><code>email*</code></td>
-                                 <td><code>string</code></td>
-                                 <td>email</td>
-                              </tr>
-                              <tr>
-                                 <td><code>password*</code></td>
-                                 <td><code>string</code></td>
-                                 <td>heslo</td>
-                              </tr>
-                           </tbody>
-                        </table>
-                        <h4>Popis polí úspěšné odpovědi</h4>
-                        <table class="table table-sm">
-                           <tbody>
-                              <tr>
-                                 <td><code>apiKey</code></td>
-                                 <td><code>string</code></td>
-                                 <td>přístupový token s omezenou platností (prozatím nekonečná)</td>
-                              </tr>
-                              <tr>
-                                 <td><code>email</code></td>
-                                 <td><code>string</code></td>
-                                 <td>email</td>
-                              </tr>
-                              <tr>
-                                 <td><code>role</code></td>
-                                 <td><code>string</code></td>
-                                 <td>role</td>
-                              </tr>
-                              <tr>
-                                 <td><code>createdAt</code></td>
-                                 <td><code>timestamp</code></td>
-                                 <td>čas vytvoření uživatele</td>
-                              </tr>
-                              <tr>
-                                 <td><code>clubId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>v případě klubového účtu je vráceno ID klubu</td>
-                              </tr>
-                              <tr>
-                                 <td><code>password</code></td>
-                                 <td><code>null</code></td>
-                                 <td></td>
-                              </tr>
-                           </tbody>
-                        </table>
+                     <h3>POST - Přihlášení</h3>
+                     <span class="label label-default">public</span>
+                     <p>
+                     <p>Po úspěšném přihlášení jsou vráceny uživatelská data včetně přístupového tokenu pro následující požadavky. Platnost tokenu je prozatím nekonečná.</p>
+                     <h4>Popis polí požadavku</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>email*</code></td>
+                              <td><code>string</code></td>
+                              <td>email</td>
+                           </tr>
+                           <tr>
+                              <td><code>password*</code></td>
+                              <td><code>string</code></td>
+                              <td>heslo</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h4>Popis polí úspěšné odpovědi</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>apiKey</code></td>
+                              <td><code>string</code></td>
+                              <td>přístupový token s omezenou platností (prozatím nekonečná)</td>
+                           </tr>
+                           <tr>
+                              <td><code>email</code></td>
+                              <td><code>string</code></td>
+                              <td>email</td>
+                           </tr>
+                           <tr>
+                              <td><code>password</code></td>
+                              <td><code>string</code></td>
+                              <td>heslo</td>
+                           </tr>
+                           <tr>
+                              <td><code>role</code></td>
+                              <td><code>string</code></td>
+                              <td>role</td>
+                           </tr>
+                           <tr>
+                              <td><code>createdAt</code></td>
+                              <td><code>timestamp</code></td>
+                              <td>čas vytvoření uživatele</td>
+                           </tr>
+                           <tr>
+                              <td><code>clubId</code></td>
+                              <td><code>int</code></td>
+                              <td>v případě klubového účtu je vráceno ID klubu</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#forgottenPassword" aria-expanded="false" aria-controls="forgottenPassword">
+                           <strong>/forgottenPassword</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Zapomenuté heslo</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="forgottenPassword" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>POST - Reset hesla</h3>
+                     <span class="label label-default">public</span>
+                     <p>
+                     <p>Catcher odešle na email uživatele nové heslo.</p>
+                     <h4>Popis parametrů požadavku</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>email*</code></td>
+                              <td><code>string</code></td>
+                              <td>email</td>
+                           </tr>
+                        </tbody>
+                     </table>
                   </div>
                </div>
             </div>
@@ -136,35 +169,35 @@
                </div>
                <div id="users" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                        <h3>POST - Registrace nového uživatele</h3>
-                        <span class="label label-default">public</span>
-                        <p>
-                        <p>Kdokoliv může vytvořit nový účet s rolí <strong>organizer</strong>. Administrátor má navíc možnost vytvořit oddílový účet.</p>
-                        <h4>Popis polí požadavku</h4>
-                        <table class="table table-sm">
-                           <tbody>
-                              <tr>
-                                 <td><code>email*</code></td>
-                                 <td><code>string</code></td>
-                                 <td>email</td>
-                              </tr>
-                              <tr>
-                                 <td><code>password*</code></td>
-                                 <td><code>string</code></td>
-                                 <td>heslo (minimálně 5 znaků)</td>
-                              </tr>
-                              <tr>
-                                 <td><code>role*</code></td>
-                                 <td><code>string</code></td>
-                                 <td>role</td>
-                              </tr>
-                              <tr>
-                                 <td><code>clubId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>ID oddílu</td>
-                              </tr>
-                           </tbody>
-                        </table>
+                     <h3>POST - Registrace nového uživatele</h3>
+                     <span class="label label-default">public</span>
+                     <p>
+                     <p>Kdokoliv může vytvořit nový účet s rolí <strong>organizer</strong>. Administrátor má navíc možnost vytvořit oddílový účet.</p>
+                     <h4>Popis polí požadavku</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>email*</code></td>
+                              <td><code>string</code></td>
+                              <td>email</td>
+                           </tr>
+                           <tr>
+                              <td><code>password*</code></td>
+                              <td><code>string</code></td>
+                              <td>heslo (minimálně 5 znaků)</td>
+                           </tr>
+                           <tr>
+                              <td><code>role*</code></td>
+                              <td><code>string</code></td>
+                              <td>role</td>
+                           </tr>
+                           <tr>
+                              <td><code>clubId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID oddílu</td>
+                           </tr>
+                        </tbody>
+                     </table>
                   </div>
                </div>
             </div>
@@ -186,32 +219,30 @@
                </div>
                <div id="user" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                        <h3>PUT - Úprava uživatele</h3>
-                        <span class="label label-default">club</span>
-                        <span class="label label-default">organizer</span>
-                        <span class="label label-default">admin</span>
-                        <p>
-                        <p>Slouží pro úpravu přihlašovacích údajů.</p>
-                        <h5>Tělo požadavku</h5>
-                        <table class="table table-sm">
-                           <tbody>
-                              <tr>
-                                 <td><code>email</code></td>
-                                 <td><code>string</code></td>
-                                 <td>email</td>
-                              </tr>
-                              <tr>
-                                 <td><code>oldPassword</code></td>
-                                 <td><code>string</code></td>
-                                 <td>staré heslo</td>
-                              </tr>
-                              <tr>
-                                 <td><code>newPassword</code></td>
-                                 <td><code>string</code></td>
-                                 <td>nové heslo</td>
-                              </tr>
-                           </tbody>
-                        </table>
+                     <h3>PUT - Úprava uživatele</h3>
+                     <span class="label label-default">logged user</span>
+                     <p>
+                     <p>Slouží pro úpravu přihlašovacích údajů.</p>
+                     <h4>Popis polí požadavku</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>email</code></td>
+                              <td><code>string</code></td>
+                              <td>email</td>
+                           </tr>
+                           <tr>
+                              <td><code>oldPassword</code></td>
+                              <td><code>string</code></td>
+                              <td>staré heslo</td>
+                           </tr>
+                           <tr>
+                              <td><code>newPassword</code></td>
+                              <td><code>string</code></td>
+                              <td>nové heslo</td>
+                           </tr>
+                        </tbody>
+                     </table>
                   </div>
                </div>
             </div>
@@ -235,12 +266,35 @@
                <div id="clubs" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
                      <!-- <span class="label label-success">GET</span> -->
-                     <h3>GET - Seznam všech oddílů</h3>
+                     <h3>GET - Kolekce všech oddílů</h3>
                      <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
                      <p>
+                     <h4>Popis některých polí úspěšné odpovědi</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>count</code></td>
+                              <td><code>int</code></td>
+                              <td>počet záznamů v kolekci</td>
+                           </tr>
+                           <tr>
+                              <td><code>clubs</code></td>
+                              <td><code>array</code></td>
+                              <td>kontejner s oddíly</td>
+                           </tr>
+                           <tr>
+                              <td><code>clubs.caldId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID klubu v ČALD databázi</td>
+                           </tr>
+                           <tr>
+                              <td><code>clubs.user</code></td>
+                              <td><code>array</code></td>
+                              <td>informace o uživateli, který spravuje daný oddíl</td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 GET /api/clubs HTTP/1.1
@@ -258,13 +312,7 @@ Host: catcher.zlutazimnice.cz
       "city": "Praha",
       "country": "CZE",
       "shortcut": "ZZ",
-      "user": {
-        "lastLoginAt": null,
-        "nickname": null,
-        "id": 1,
-        "createdAt": null,
-        "email": "test@zlutazimnice.cz"
-      },
+      "user": null,
       "id": 37
     },
     ...
@@ -274,7 +322,8 @@ Host: catcher.zlutazimnice.cz
                      <h3>POST - Vytvoření oddílu</h3>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Vytvoří nový oddíl.</p>
+                     <p>Vytvoří nový oddíl v databázi.</p>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 POST /api/clubs HTTP/1.1
@@ -327,10 +376,8 @@ Content-Type: application/json
                      <div>
                         <h3>GET - Informace o konkrétním oddílu</h3>
                         <span class="label label-default">public</span>
-                        <span class="label label-default">club</span>
-                        <span class="label label-default">organizer</span>
-                        <span class="label label-default">admin</span>
                         <p>
+                        <h4>Příklad</h4>
                         <h5>Požadavek</h5>
                         <pre>
 GET /api/club/37 HTTP/1.1
@@ -346,11 +393,7 @@ Host: catcher.zlutazimnice.cz
   "country": "CZE",
   "shortcut": "ZZ",
   "user": {
-    "lastLoginAt": null,
-    "nickname": null,
-    "id": 1,
-    "createdAt": null,
-    "email": "test@zlutazimnice.cz"
+    "lastLoginAt": "2016-04-18T14:54:02"
   },
   "id": 37
 }
@@ -358,10 +401,31 @@ Host: catcher.zlutazimnice.cz
                      </div>
                      <div>
                         <h3>PUT - Úprava oddílu</h3>
-                        <span class="label label-info">club</span>
+                        <span class="label label-default">club</span>
                         <span class="label label-default">admin</span>
                         <p>
-                        <p>Role <span class="label label-info">club</span> může upravovat pouze sloupce <code>shortcut</code>, <code>city</code> a <code>country</code> (ve formátu ISO 3166-1 alpha-3).</p>
+                        <h4>Popis polí požadavku</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>city</code></td>
+                              <td><code>string</code></td>
+                              <td>město</td>
+                           </tr>
+                           <tr>
+                              <td><code>country</code></td>
+                              <td><code>string</code></td>
+                              <td>název země ve formátu ISO 3166-1 alpha-3</td>
+                           </tr>
+                           <tr>
+                              <td><code>shortcut</code></td>
+                              <td><code>string</code></td>
+                              <td>libovolná unikátní zkratka v maximální délce tří znaků</td>
+                           </tr>
+                        </tbody>
+                     </table>
+
+                        <h4>Příklad</h4>
                         <h5>Požadavek</h5>
                         <pre>
 PUT /api/club/2 HTTP/1.1
@@ -383,6 +447,7 @@ Content-Type: application/json
                         <span class="label label-default">admin</span>
                         <p>
                         <p>Smaže vybraný oddíl z databáze.</p>
+                        <h4>Příklad</h4>
                         <h5>Požadavek</h5>
                         <pre>
 DELETE /api/club/2 HTTP/1.1
@@ -412,13 +477,10 @@ Host: catcher.zlutazimnice.cz
                </div>
                <div id="clubPlayers" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     <h3>GET - Seznam všech hráčů</h3>
+                     <h3>GET - Kolekce všech klubových hráčů</h3>
                      <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
                      <p>
-                     <p>Získá kolekci všech hráčů v oddíle seřazených sestupně podle hodnoty atributu <code>ranking</code>.</p>
+                     <p>Získá kolekci všechny hráčů v oddílu seřazených sestupně podle hodnoty atributu <code>ranking</code>.</p>
                   </div>
                </div>
             </div>
@@ -440,13 +502,10 @@ Host: catcher.zlutazimnice.cz
                </div>
                <div id="clubTeams" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     <h3>GET - Seznam všech týmů</h3>
+                     <h3>GET - Kolekce všech týmů</h3>
                      <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
                      <p>
-                     <p>Získá kolekci všech týmů, které spadají pod konkrétní oddíl.</p>
+                     <p>Získá kolekci všech týmů, které patří konkrétnímu oddílu.</p>
                   </div>
                </div>
             </div>
@@ -471,10 +530,8 @@ Host: catcher.zlutazimnice.cz
                   <div class="panel-body">
                      <h3>GET - Seznam všech hráčů</h3>
                      <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
                      <p>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 GET /api/players HTTP/1.1
@@ -501,10 +558,40 @@ Host: catcher.zlutazimnice.cz
 }
 </pre>
                      <h3>POST - Vytvoření hráče</h3>
-                     <span class="label label-info">club</span>
+                     <span class="label label-default">club</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Hráč vytvořený rolí <span class="label label-info">club</span> převezme automaticky ID jeho klubu.</p>
+                     <p>Vytvoří nového hráče v databázi.</p>
+                     <h4>Popis polí požadavku</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>firstname*</code></td>
+                              <td><code>string</code></td>
+                              <td>křestní jméno</td>
+                           </tr>
+                           <tr>
+                              <td><code>lastname*</code></td>
+                              <td><code>string</code></td>
+                              <td>příjmení</td>
+                           </tr>
+                           <tr>
+                              <td><code>nickname</code></td>
+                              <td><code>string</code></td>
+                              <td>přezdívka</td>
+                           </tr>
+                           <tr>
+                              <td><code>clubId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID klubu</td>
+                           </tr>
+                           <tr>
+                              <td><code>number</code></td>
+                              <td><code>int</code></td>
+                              <td>číslo dresu</td>
+                           </tr>
+                        </tbody>
+                     </table>
                   </div>
                </div>
             </div>
@@ -529,10 +616,8 @@ Host: catcher.zlutazimnice.cz
                      <div>
                         <h3>GET - Informace o konkrétním hráči</h3>
                         <span class="label label-default">public</span>
-                        <span class="label label-default">club</span>
-                        <span class="label label-default">organizer</span>
-                        <span class="label label-default">admin</span>
                         <p>
+                        <h4>Příklad</h4>
                         <h5>Požadavek</h5>
                         <pre>
 GET /api/player/1 HTTP/1.1
@@ -553,48 +638,48 @@ Host: catcher.zlutazimnice.cz</pre>
                      </div>
                      <div>
                         <h3>PUT - Úprava hráče</h3>
-                        <span class="label label-info">club</span>
+                        <span class="label label-default">club</span>
                         <span class="label label-default">admin</span>
                         <p>
-                        <p>Hráče může upravovat pouze účet s rolí <span class="label label-info">club</span>, kterému hráč náleží.</p>
-                        <p>Editovat lze <code>firstname</code>, <code>lastname</code>, <code>nickname</code> a <code>number</code>.</p>
+                        <h4>Popis polí požadavku</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>firstname</code></td>
+                              <td><code>string</code></td>
+                              <td>křestní jméno</td>
+                           </tr>
+                           <tr>
+                              <td><code>lastname</code></td>
+                              <td><code>string</code></td>
+                              <td>příjmení</td>
+                           </tr>
+                           <tr>
+                              <td><code>nickname</code></td>
+                              <td><code>string</code></td>
+                              <td>přezdívka</td>
+                           </tr>
+                           <tr>
+                              <td><code>clubId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID klubu</td>
+                           </tr>
+                           <tr>
+                              <td><code>number</code></td>
+                              <td><code>int</code></td>
+                              <td>číslo dresu</td>
+                           </tr>
+                        </tbody>
+                     </table>
                      </div>
                      <div>
                         <h3>DELETE - Smazání hráče</h3>
-                        <span class="label label-info">club</span>
+                        <!-- <span class="label label-default">club</span>
+                        Mohl by smazat hrace s historii. Data se zatim mazou FYZICKY. -->
                         <span class="label label-default">admin</span>
                         <p>
-                        <p>Hráče může smazat pouze účet s rolí <span class="label label-info">club</span>, kterému hráč náleží.</p>
+                        <p>Smaže hráče v databázi.</p>
                      </div>
-                  </div>
-               </div>
-            </div>
-            <hr>
-            <!-- ----------------------------------------------- -->
-            <div class="panel panel-default">
-               <div class="panel-heading" role="tab">
-                  <div class="row">
-                     <div class="col-md-6">
-                        <h3 class="panel-title">
-                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#divisions" aria-expanded="false" aria-controls="divisions">
-                           <strong>/divisions</strong>
-                           </a>
-                        </h3>
-                     </div>
-                     <div class="col-md-6" align="right">
-                        <strong>Divize</strong>
-                     </div>
-                  </div>
-               </div>
-               <div id="divisions" class="panel-collapse collapse" role="tabpanel">
-                  <div class="panel-body">
-                     <h3>GET - Kolekce všech divizí</h3>
-                     <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <p>Vrátí kolekci všech divizí.</p>
                   </div>
                </div>
             </div>
@@ -619,16 +704,31 @@ Host: catcher.zlutazimnice.cz</pre>
                   <div class="panel-body">
                      <h3>GET - Kolekce všech týmů</h3>
                      <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
                      <p>
                      <h3>POST - Vytvoření nového týmu</h3>
-                     <span class="label label-info">club</span>
-                     <span class="label label-info">organizer</span>
+                     <span class="label label-default">club</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Vytvářet nové týmy lze zpravidla pouze pod účtem s rolí <span class="label label-info">club</span>, který má právo vytvořit nový tým pod svým klubovým ID. Účet s rolí <span class="label label-info">organizer</span> může vytvářet týmy libovolně, avšak počet požadavků bude možná v budoucnosti omezen.</p>
+                     <h4>Popis polí požadavku</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>clubId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID klubu</td>
+                           </tr>
+                           <tr>
+                              <td><code>divisionId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID divize</td>
+                           </tr>
+                           <tr>
+                              <td><code>degree</code></td>
+                              <td><code>string</code></td>
+                              <td>jednopísmený identifikátor týmu (např. "A" jako A-tým)</td>
+                           </tr>
+                        </tbody>
+                     </table>
                   </div>
                </div>
             </div>
@@ -652,20 +752,42 @@ Host: catcher.zlutazimnice.cz</pre>
                   <div class="panel-body">
                      <h3>GET - Informace o konkrétním týmu</h3>
                      <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
                      <p>
                      <h3>PUT - Úprava týmu</h3>
-                     <span class="label label-info">club</span>
+                     <span class="label label-default">club</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Účet s rolí <span class="label label-info">club</span> má právo editovat pouze týmy s jeho klubovým ID. Navíc editovatelné jsou pouze atributy <code>divisionId</code> a <code>degree</code>.</p>
+                     <p>Editovatelné jsou pouze atributy <code>divisionId</code> a <code>degree</code>.</p>
                      <h3>DELETE - Smazání týmu</h3>
-                     <span class="label label-info">club</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Účet s rolí <span class="label label-info">club</span> má právo mazat pouze týmy s jeho klubovým ID.</p>
+                     <p>Smazání týmu z databáze.</p>
+                  </div>
+               </div>
+            </div>
+            <hr>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#divisions" aria-expanded="false" aria-controls="divisions">
+                           <strong>/divisions</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Divize</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="divisions" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Kolekce všech divizí</h3>
+                     <span class="label label-default">public</span>
+                     <p>
+                     <p>Vrátí kolekci všech divizí.</p>
                   </div>
                </div>
             </div>
@@ -677,7 +799,7 @@ Host: catcher.zlutazimnice.cz</pre>
                      <div class="col-md-6">
                         <h3 class="panel-title">
                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournaments" aria-expanded="false" aria-controls="tournaments">
-                           <strong>/tournaments</strong>
+                           <strong><span class="label label-danger">UNFINISHED</span> /tournaments</strong>
                            </a>
                         </h3>
                      </div>
@@ -690,58 +812,34 @@ Host: catcher.zlutazimnice.cz</pre>
                   <div class="panel-body">
                      <h3>GET - Kolekce všech turnajů</h3>
                      <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
                      <p>
                      <p>Získá kolekci všech turnajů. Díky parametrům lze výslednou množinu změnšit.</p>
-                     <h5><span class="label label-danger">UNFINISHED</span>  Parametry</h5>
+                     <h4>Popis parametrů požadavku</h4>
                      <table class="table">
                         <tbody>
                            <tr>
-                              <td><code>from</code></td>
-                              <td><code>datetime</code></td>
-                              <td>nepovinný</td>
-                              <td>Turnaj se odehrává po tomto datumu (ve formátu YYYY-MM-DD).</td>
-                           </tr>
-                           <tr>
-                              <td><code>to</code></td>
-                              <td><code>datetime</code></td>
-                              <td>nepovinný</td>
-                              <td>Turnaj se odehrává před tímto datumem (ve formátu YYYY-MM-DD).</td>
-                           </tr>
-                           <tr>
                               <td><code>country</code></td>
                               <td><code>string</code></td>
-                              <td>nepovinný</td>
-                              <td>Země, ve které se turnaj odehrává (ve formátu ISO 3166-1 alpha-3).</td>
+                              <td>název země, ve které se turnaj odehrává (ve formátu ISO 3166-1 alpha-3)</td>
                            </tr>
                            <tr>
                               <td><code>divisionId</code></td>
                               <td><code>int</code></td>
-                              <td>nepovinný</td>
-                              <td>ID divize.</td>
+                              <td>ID divize</td>
                            </tr>
                            <tr>
                               <td><code>active</code></td>
                               <td><code>boolean</code></td>
-                              <td>nepovinný</td>
-                              <td>Příznak turnaje, zda je aktivní.</td>
+                              <td>právě se odehrávající turnaje</td>
                            </tr>
                            <tr>
                               <td><code>terminated</code></td>
                               <td><code>boolean</code></td>
-                              <td>nepovinný</td>
-                              <td>Příznak turnaje, zda je ukončený.</td>
-                           </tr>
-                           <tr>
-                              <td><code>cald</code></td>
-                              <td><code>boolean</code></td>
-                              <td>nepovinný</td>
-                              <td>Příznak, zda jde o turnaj ČALD.</td>
+                              <td>ukončené turnaje</td>
                            </tr>
                         </tbody>
                      </table>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 GET /api/tournaments HTTP/1.1
@@ -779,8 +877,8 @@ Host: catcher.zlutazimnice.cz
                         <span class="label label-default">organizer</span>
                         <span class="label label-default">admin</span>
                         <p>
-                        <p>Požadavek je nejprve důkladně zkontrolován, zda je hratelný a neobsahuje chyby, a pak je uložen do databáze. Po vytvoření je nutné turnaj označit za připravený, tzn. nastavit příznak <code>ready</code> na hodnotu <code>true</code>.</p>
-                        <h5><span class="label label-danger">UNFINISHED</span> Tělo požadavku</h5>
+                        <p>Požadavek pro vytváření nových turnajů. Po vytvoření je nutné turnaj označit za připravený, tzn. nastavit příznak <code>ready</code> na hodnotu <code>true</code>.</p>
+                        <h4>Popis polí požadavku</h4>
                         <table class="table table-sm">
                            <tbody>
                               <tr>
@@ -795,7 +893,8 @@ Host: catcher.zlutazimnice.cz
                               </tr>
                            </tbody>
                         </table>
-                        <h5><span class="label label-warning">UNSTABLE</span> Požadavek</h5>
+                        <h4>Příklad</h4>
+                        <h5>Požadavek</h5>
                         <pre>
 POST /api/tournaments/ HTTP/1.1
 Host: catcher.zlutazimnice.cz
@@ -926,17 +1025,43 @@ Content-Type: application/json
                   <div class="panel-body">
                      <h3>GET - Informace o konkrétním turnaji</h3>
                      <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
                      <p>
                      <p>Získá základní informace o turnaji.</p>
                      <h3>PUT - Úprava turnaje</h3>
                      <span class="label label-default">organizer</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Nejdůležitejší úpravou je změna příznaku <code>ready</code>, <code>active</code> nebo <code>terminated</code> (<span class="label label-danger">UNFINISHED</span>) na <code>true</code>. První změnou dojde k přiřazení týmů na jejich místa podle nasazení a turnaj se považuje za připravený. Druhý příznak označí turnaj jako právě probíhající a třetí přiznak turnaj ukončí a zveřejní hodnocení SOTG všem uživatelům.</p>
-                     <p>Dále jsou editovatelné atributy <code>name</code>, <code>startDate</code>, <code>endDate</code>, <code>city</code>, <code>country</code>, <code>caldTournametId</code>.</p>
+                     <p>Nejdůležitejší úpravou je změna příznaků <code>ready</code> a <code>terminated</code> na <code>true</code>. První změnou dojde k přiřazení týmů na jejich místa podle nasazení a turnaj se považuje za připravený. Druhý příznak turnaj ukončí a zveřejní hodnocení SOTG všem uživatelům.</p>
+                     <h4>Popis polí požadavku</h4>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>name</code></td>
+                                 <td><code>string</code></td>
+                                 <td>jméno turnaje</td>
+                              </tr>
+                              <tr>
+                                 <td><code>startDate</code></td>
+                                 <td><code>datetime</code></td>
+                                 <td>první hrací den turnaje</td>
+                              </tr>
+                              <tr>
+                                 <td><code>endDate</code></td>
+                                 <td><code>datetime</code></td>
+                                 <td>poslední hrací den turnaje</td>
+                              </tr>
+                              <tr>
+                                 <td><code>city</code></td>
+                                 <td><code>string</code></td>
+                                 <td>město</td>
+                              </tr>
+                              <tr>
+                                 <td><code>country</code></td>
+                                 <td><code>string</code></td>
+                                 <td>název země ve formátu ISO 3166-1 alpha-3</td>
+                              </tr>
+                           </tbody>
+                        </table>
                   </div>
                </div>
             </div>
@@ -959,13 +1084,30 @@ Content-Type: application/json
                <div id="tournamentStandings" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
                      <h3>GET - Výsledné pořadí týmů včetně SOTG</h3>
-                     <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
+                     <span class="label label-default">public - limited</span>
                      <p>
-                     <p>Získá výsledné pořadí týmů na turnaji včetně pořadí týmů a jejich průměrná hodnocení v kategorii SOTG (u turnajů s příznakem <code>terminated</code>, jinak je hodnocení SOTG viditelné pouze pro roli <span class="label label-default">organizer</span>).</p>
-                     <p>Výsledky jsou seřazené podle celkového pořadí (u SOTG podle sloupce <code>total</code>).</p>
+                     <p>Získá výsledné pořadí týmů na turnaji včetně kategorie SOTG (pokud turnaj nemá příznak <code>terminated</code>, jsou výsledky viditelné pouze pro <stron>organizátora</stron>).</p>
+                     <h4>Popis polí úspěšné odpovědi</h4>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>teams</code></td>
+                              <td><code>int</code></td>
+                              <td>počet týmů na turnaji</td>
+                           </tr>
+                           <tr>
+                              <td><code>standings</code></td>
+                              <td><code>array</code></td>
+                              <td>pole s pořadím týmů na turnaji</td>
+                           </tr>
+                           <tr>
+                              <td><code>spirits</code></td>
+                              <td><code>array</code></td>
+                              <td>seřazené pole průměrných hodnocení SOTG dle atributu <code>total</code></td>
+                           </tr>
+                        </tbody>
+                     </table>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 GET /api/tournament/1/standings HTTP/1.1
@@ -1029,20 +1171,50 @@ Host: catcher.zlutazimnice.cz
                </div>
                <div id="tournamentPlayers" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     <h3>GET - Seznam hráčů</h3>
+                     <h3>GET - Kolekce hráčů</h3>
                      <span class="label label-default">public</span>
+                     <p>
+                     <p>Vrátí seznam hráčů, včetně jejich statistik. Výsledky jsou řazeny následujícími atributy sestupně: <code>total</code>, <code>scores</code> a <code>assists</code>.</p>
+                     <h4>Popis parametrů požadavku</h4>
+                     <table class="table">
+                        <tbody>
+                           <tr>
+                              <td><code>teamId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID týmu</td>
+                           </tr>
+                           <tr>
+                              <td><code>limit</code></td>
+                              <td><code>int</code></td>
+                              <td>maximální počet prvků v kolekci</td>
+                           </tr>
+                        </tbody>
+                     </table>
+
+
+                     <h3>POST - Přidání hráče k týmu</h3>
                      <span class="label label-default">club</span>
                      <span class="label label-default">organizer</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Vrátí seznam hráčů, včetně jejich statistik. Volitelnými parametry jsou <code>teamId</code> a <code>limit</code>, které zmenší výslednou množinu. Výsledky jsou řazeny následujícími atributy sestupně: <code>total</code>, <code>scores</code> a <code>assists</code>.</p>
-                     <h3>POST - Přidání hráče k týmu</h3>
-                     <span class="label label-info">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
-                     <p>
-                     <p>Vytváří vazbu mezi týmem a hráčem. Lze tak individuálně přídávat hráče na soupisku. Každý hráč smí být pouze na soupisce jednoho týmu.</p>
-                     <p>Účet s rolí <span class="label label-info">club</span> může přidávat hráče pouze týmům, které mají jeho klubové ID.</p>
+                     <p>Vytváří vazbu mezi týmem a hráčem. Lze tak individuálně přídávat hráče na soupisku (až v moment, kdy turnaj má příznak <code>ready</code>). Každý hráč smí být pouze na soupisce jednoho týmu.</p>
+                     <h4>Popis polí požadavku</h4>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>playerId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID hráče</td>
+                              </tr>
+                              <tr>
+                                 <td><code>teamId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID týmu</td>
+                              </tr>
+                           </tbody>
+                        </table>
+
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 POST /api/tournament/1/players HTTP/1.1
@@ -1068,12 +1240,12 @@ Content-Type: application/json
 }
 </pre>
                      <h3>DELETE - Smazání hráče z týmu</h3>
-                     <span class="label label-info">club</span>
+                     <span class="label label-default">club</span>
                      <span class="label label-default">organizer</span>
                      <span class="label label-default">admin</span>
                      <p>
                      <p>Lze smazat pouze takového hráče, jenž nemá žádný odehraný zápas.</p>
-                     <p>Účet s rolí <span class="label label-info">club</span> může mazat hráče pouze týmům, které mají jeho klubové ID.</p>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 DELETE /api/tournament/1/players HTTP/1.1
@@ -1109,13 +1281,10 @@ Content-Type: application/json
                <div id="tournamentTeams" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
                      <div>
-                        <h3>GET - Seznam týmů</h3>
+                        <h3>GET - Kolekce týmů na turnaji</h3>
                         <span class="label label-default">public</span>
-                        <span class="label label-default">team</span>
-                        <span class="label label-default">organizer</span>
-                        <span class="label label-default">admin</span>
                         <p>
-                        <p>Vrátí seznam týmů. V budoucnu včetně statistik (výhry, prohry, ...).</p>
+                        <p>Vrátí seznam všech týmů, které se účastní turnaje.</p>
                         <pre>
 PUT /api/tournament/1/teams HTTP/1.1
 Host: catcher.zlutazimnice.cz
@@ -1166,7 +1335,7 @@ Host: catcher.zlutazimnice.cz
                         <span class="label label-default">admin</span>
                         <p>
                         <p>Jestliže turnaj nemá příznak <code>ready</code>, lze stále přidávat nebo měnit kteréhokoliv účastníka turnaje.</p>
-                        <h5>Tělo požadavku</h5>
+                        <h4>Popis polí požadavku</h4>
                         <table class="table table-sm">
                            <tbody>
                               <tr>
@@ -1181,6 +1350,7 @@ Host: catcher.zlutazimnice.cz
                               </tr>
                            </tbody>
                         </table>
+                        <h4>Příklad</h4>
                         <h5>Požadavek</h5>
                         <pre>
 PUT /api/tournament/1/teams HTTP/1.1
@@ -1218,47 +1388,40 @@ Content-Type: application/json
                   <div class="panel-body">
                      <h3>GET - Kolekce zápasů</h3>
                      <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
                      <p>
                      <p>Vrátí seznam zápasů.</p>
-                     <h5>Parametry</h5>
+                     <h4>Parametry</h4>
                      <table class="table table-sm">
                         <tbody>
                            <tr>
                               <td><code>matchId</code></td>
                               <td><code>int</code></td>
-                              <td>nepovinný</td>
                               <td>ID zápasu</td>
                            </tr>
                            <tr>
                               <td><code>fieldId</code></td>
                               <td><code>int</code></td>
-                              <td>nepovinný</td>
                               <td>ID hřiště</td>
                            </tr>
                            <tr>
                               <td><code>date</code></td>
                               <td><code>datetime</code></td>
-                              <td>nepovinný</td>
                               <td>datum</td>
                            </tr>
                            <tr>
                               <td><code>active</code></td>
                               <td><code>boolean</code></td>
-                              <td>nepovinný</td>
                               <td>právě odehrávaná utkání</td>
                            </tr>
                            <tr>
                               <td><code>terminated</code></td>
                               <td><code>boolean</code></td>
-                              <td>nepovinný</td>
                               <td>již odehraná utkání</td>
                            </tr>
                         </tbody>
                      </table>
                      </p>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 GET /api/tournament/1/matches?fieldId=1&date="2016-04-01" HTTP/1.1
@@ -1362,13 +1525,11 @@ Content-Type: application/json
                <div id="tournamentSpirit" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
                      <h3>GET - Získá kolekci průměrných hodnocení SOTG</h3>
-                     <span class="label label-info">public</span>
-                     <span class="label label-info">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
+                     <span class="label label-default">public</span>
                      <p>
-                     <p>Turnaj musí mít příznak <code>terminated</code>. Bez něj jsou výsledky veřejné pouze pro roli <span class="label label-default">organizer</span>. Ke svým odevzdaným hodnocením má vždy přístup role <span class="label label-default">club</span>.</p>
+                     <p>Turnaj musí mít příznak <code>terminated</code>. Bez něj jsou výsledky veřejné pouze pro <strong>organizátora</strong>. Ke svým odevzdaným hodnocením má vždy přístup klubový účet.</p>
                      <p>Díky parametru <code>teamId</code> lze získat hodnocení jednoho konkrétního týmu.</p>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 GET /api/tournament/1/spirit?teamId=1 HTTP/1.1
@@ -1421,57 +1582,49 @@ Host: catcher.zlutazimnice.cz
                      <div>
                         <h3>GET - Utkání</h3>
                         <span class="label label-default">public</span>
-                        <span class="label label-default">club</span>
-                        <span class="label label-default">organizer</span>
-                        <span class="label label-default">admin</span>
                         <p>
-                        <p>Vrátí jeden konkrétní zápas.</p>
+                        <p>Vrátí data jednoho konkrétního zápasu.</p>
                         <h3>PUT - Úprava zápasu</h3>
                         <span class="label label-default">organizer</span>
                         <span class="label label-default">admin</span>
                         <p>
                         <p>Nejčastěji půjde o zahájení a ukončení zápasu úpravou atributů <code>active</code> a <code>terminate</code>.</p>
-                        <h5>Tělo požadavku</h5>
+                        <h4>Popis polí požadavku</h4>
                         <table class="table table-sm">
                            <tbody>
                               <tr>
                                  <td><code>active</code></td>
                                  <td><code>boolean</code></td>
-                                 <td>nepovinný</td>
                                  <td>příznak, že utkání se právě odehrává</td>
                               </tr>
                               <tr>
                                  <td><code>terminated</code></td>
                                  <td><code>boolean</code></td>
-                                 <td>nepovinný</td>
                                  <td>příznak, že utkání je již ukončeno</td>
                               </tr>
                               <tr>
                                  <td><code>fieldId</code></td>
                                  <td><code>int</code></td>
-                                 <td>nepovinný</td>
                                  <td>ID hřiště</td>
                               </tr>
                               <tr>
                                  <td><code>description</code></td>
                                  <td><code>string</code></td>
-                                 <td>nepovinný</td>
                                  <td>textový popis zápasu</td>
                               </tr>
                               <tr>
                                  <td><code>startTime</code></td>
                                  <td><code>timestamp</code></td>
-                                 <td>nepovinný</td>
                                  <td>čas zajájení</td>
                               </tr>
                               <tr>
                                  <td><code>endTime</code></td>
                                  <td><code>timestamp</code></td>
-                                 <td>nepovinný</td>
                                  <td>čas ukončení</td>
                               </tr>
                            </tbody>
                         </table>
+                        <h4>Příklad</h4>
                         <h5>Požadavek</h5>
                         <pre>
 PUT /api/match/1 HTTP/1.1
@@ -1554,13 +1707,11 @@ Content-Type: application/json
                </div>
                <div id="tournamentPoints" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
-                     <h3>GET - Získá odehrané body v konkrétním zápase</h3>
-                     <span class="label label-info">public</span>
-                     <span class="label label-info">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
+                     <h3>GET - Odehrané body v zápase</h3>
+                     <span class="label label-default">public</span>
                      <p>
                      <p>Vrátí informace o zápase a kolekci všech již odehraných bodů (seřazené sestupně).</p>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 GET /api/tournament/1/match/1/points HTTP/1.1
@@ -1626,35 +1777,32 @@ Host: catcher.zlutazimnice.cz
                      <span class="label label-default">organizer</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <h5>Tělo požadavku</h5>
+                     <h4>Popis polí požadavku</h4>
                      <table class="table table-sm">
                         <tbody>
                            <tr>
-                              <td><code>homePoint</code></td>
+                              <td><code>homePoint*</code></td>
                               <td><code>boolean</code></td>
-                              <td>povinný</td>
                               <td>příznak, zda domácí tým dal bod</td>
                            </tr>
                            <tr>
                               <td><code>scorePlayerId</code></td>
                               <td><code>int</code></td>
-                              <td>nepovinný</td>
                               <td>ID skórujícího hráče</td>
                            </tr>
                            <tr>
                               <td><code>assistPlayerId</code></td>
                               <td><code>int</code></td>
-                              <td>nepovinný</td>
                               <td>ID asistujícího hráč</td>
                            </tr>
                            <tr>
                               <td><code>callahan</code></td>
                               <td><code>boolean</code></td>
-                              <td>nepovinný</td>
                               <td>Callahan</td>
                            </tr>
                         </tbody>
                      </table>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 POST /api/tournament/1/match/1/points HTTP/1.1
@@ -1686,31 +1834,27 @@ Content-Type: application/json
                      <span class="label label-default">admin</span>
                      <p>
                      <p>Slouží pro zpětnou editaci. Pro chybně zadané body je v průběhu zápasů doporučeno body smazat a znovu vytvořit. Nelze totiž upravit skóre (tj. změna týmu, který dal bod). V tom případě je nutné daný bod i všechny násedující vymazat a vytvořit je znovu.</p>
-                     <h5>Tělo požadavku</h5>
+                     <h4>Popis polí požadavku</h4>
                      <table class="table table-sm">
                         <tbody>
                            <tr>
-                              <td><code>order</code></td>
+                              <td><code>order*</code></td>
                               <td><code>int</code></td>
-                              <td>povinný</td>
                               <td>bod, který má být upraven</td>
                            </tr>
                            <tr>
                               <td><code>scorePlayerId</code></td>
                               <td><code>int</code></td>
-                              <td>nepovinný</td>
                               <td>ID skórujícího hráče</td>
                            </tr>
                            <tr>
                               <td><code>assistPlayerId</code></td>
                               <td><code>int</code></td>
-                              <td>nepovinný</td>
                               <td>ID asistujícího hráč</td>
                            </tr>
                            <tr>
                               <td><code>callahan</code></td>
                               <td><code>boolean</code></td>
-                              <td>nepovinný</td>
                               <td>Callahan</td>
                            </tr>
                         </tbody>
@@ -1720,6 +1864,7 @@ Content-Type: application/json
                      <span class="label label-default">admin</span>
                      <p>
                      <p>Smaže <strong>poslední</strong> uložený bod. Opakovaným voláním lze smazat všechny již dříve uložené body. Tento požadavek lze volat pouze na zápasy, které ještě nebyly ukončeny.</p>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 DELETE /api/tournament/1/match/12/points HTTP/1.1
@@ -1749,12 +1894,10 @@ Host: catcher.zlutazimnice.cz
                <div id="matchSpirit" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
                      <h3>GET - Hodnocení SOTG</h3>
-                     <span class="label label-default">public</span>
-                     <span class="label label-default">club</span>
-                     <span class="label label-default">organizer</span>
-                     <span class="label label-default">admin</span>
+                     <span class="label label-default">public - limited</span>
                      <p>
-                     <p>Získá informace o zápase a hodnocení Spirit of the Game.</p>
+                     <p>Získá informace o zápase a hodnocení Spirit of the Game. Pokud turnaj nemá příznak <code>terminated</code>, jsou výsledky viditelné pouze pro <strong>organizátora</strong>.</p>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 GET /api/match/8/spirit HTTP/1.1
@@ -1821,8 +1964,8 @@ Host: catcher.zlutazimnice.cz
                      <span class="label label-default">organizer</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Hodnocení Spirit of the Game může <span class="label label-default">club</span> udělit jinému týmu pouze za předpokladu, že s ním odehrál zápas. Hodnocení všem zápasům může zadávat i <span class="label label-default">organizer</span>.</p>
-                     <h5>Tělo požadavku</h5>
+                     <p>Hodnocení Spirit of the Game může tým (<strong>klubový účet</strong>) udělit jinému týmu pouze za předpokladu, že s ním odehrál zápas. Hodnocení všem zápasům může zadávat i <strong>organizátor</strong>.</p>
+                     <h4>Popis polí požadavku</h4>
                      <table class="table table-sm">
                         <tbody>
                            <tr>
@@ -1838,30 +1981,31 @@ Host: catcher.zlutazimnice.cz
                            <tr>
                               <td><code>rules</code></td>
                               <td><code>int</code></td>
-                              <td>hodnocení SOTG: znalost pravidel</td>
+                              <td>hodnocení SOTG: znalost pravidel (0 až 4)</td>
                            </tr>
                            <tr>
                               <td><code>fouls</code></td>
                               <td><code>int</code></td>
-                              <td>hodnocení SOTG: fauly a tělesný kontakt</td>
+                              <td>hodnocení SOTG: fauly a tělesný kontakt (0 až 4)</td>
                            </tr>
                            <tr>
                               <td><code>fair</code></td>
                               <td><code>int</code></td>
-                              <td>hodnocení SOTG: férové smýšlení</td>
+                              <td>hodnocení SOTG: férové smýšlení (0 až 4)</td>
                            </tr>
                            <tr>
                               <td><code>positive</code></td>
                               <td><code>int</code></td>
-                              <td>hodnocení SOTG: pozitivní přístup</td>
+                              <td>hodnocení SOTG: pozitivní přístup (0 až 4)</td>
                            </tr>
                            <tr>
                               <td><code>communication</code></td>
                               <td><code>int</code></td>
-                              <td>hodnocení SOTG: komunikace</td>
+                              <td>hodnocení SOTG: komunikace (0 až 4)</td>
                            </tr>
                         </tbody>
                      </table>
+                     <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
 POST /api/match/8/spirit HTTP/1.1
@@ -1894,11 +2038,11 @@ Content-Type: application/json
   "total": 12
 }</pre>
                      <h3>PUT - Upraví hodnocení SOTG</h3>
-                     <span class="label label-default">team</span>
+                     <span class="label label-default">club</span>
                      <span class="label label-default">organizer</span>
                      <span class="label label-default">admin</span>
                      <p>
-                     <p>Požadavek smaže původní hodnocení a nahradí jej novým. Tělo požadavku odpovídá požadavku POST.</p>
+                     <p>Požadavek smaže původní hodnocení a nahradí jej novým. Popis polí požadavku odpovídá požadavku POST.</p>
                      <p>Upravovat hodnocení SOTG nelze po ukončení turnaje (příznak <code>terminated</code>).</p>
                   </div>
                </div>
