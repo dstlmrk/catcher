@@ -15,7 +15,7 @@ else
 fi
 
 # import first data
-if cat /home/dstlmrk/catcher/catcher/init/dataset.sql | mysql; then
+if cat /home/dstlmrk/catcher/catcher/init/dataset.sql | mysql -u root -p; then
     echo -e "\e[32mDataset is imported.\033[0m"
 else
     echo -e "\e[31mDataset is NOT imported.\033[0m"
