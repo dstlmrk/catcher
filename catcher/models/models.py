@@ -67,14 +67,6 @@ class NullUser(object):
     apiKey = None
     clubId = None
 # -------------------------------------------------------------------------------------
-class OrganizerHasTournament(MySQLModel):
-    userId = pw.IntegerField(db_column='user_id')
-    tournamentId = pw.IntegerField(db_column='tournament_id')
-
-    class Meta:
-        db_table = 'organizer_has_tournament'
-        primary_key = pw.CompositeKey('userId', 'tournamentId')
-# -------------------------------------------------------------------------------------
 class Club(MySQLModel):
     # id       = pw.PrimaryKeyField()
     user     = pw.IntegerField(db_column='user_id')
@@ -144,6 +136,7 @@ class Tournament(MySQLModel):
     teams            = pw.IntegerField()
     ready            = pw.BooleanField()
     terminated       = pw.BooleanField()
+    userId           = pw.IntegerField(db_column='user_id')
 # -------------------------------------------------------------------------------------
 class Field(MySQLModel):
     id         = pw.IntegerField()
@@ -183,16 +176,15 @@ class TeamAtTournament(MySQLModel):
 
 # ------------------------------------------------------------------------------------- 
 class Identificator(MySQLModel):
-    identificator = pw.CharField(max_length=3)
+    ide           = pw.CharField(max_length=3)
     tournamentId  = pw.IntegerField(db_column='tournament_id')
     matchId       = pw.IntegerField(db_column='match_id')
+    groupId       = pw.IntegerField(db_column='group_id')
 
     class Meta:
-        indexes = (
-            (('tournament', 'identificator'), True),
-        )
+        # primary_key = False
         # Nemuzu pouzivat, protoze bych jinak nemohl vytvaret nove zaznamy
-        # primary_key = pw.CompositeKey('id', 'tournament')
+        primary_key = pw.CompositeKey('ide', 'tournamentId')
 # ------------------------------------------------------------------------------------- 
 class Match(MySQLModel):
     fieldId             = pw.IntegerField(db_column='field_id')
@@ -203,9 +195,9 @@ class Match(MySQLModel):
     terminated          = pw.BooleanField()
     looserFinalStanding = pw.IntegerField(db_column = 'looser_final_standing')
     winnerFinalStanding = pw.IntegerField(db_column = 'winner_final_standing')
-    identificatorId     = pw.IntegerField(db_column='identificator_id')
-    looserNextStepId    = pw.IntegerField(db_column='looser_next_step')
-    winnerNextStepId    = pw.IntegerField(db_column='winner_next_step')
+    ide                 = pw.CharField()
+    looserNextStepIde   = pw.CharField(db_column='looser_next_step_ide')
+    winnerNextStepIde   = pw.CharField(db_column='winner_next_step_ide')
     homeSeed            = pw.IntegerField(db_column = 'home_seed')
     awaySeed            = pw.IntegerField(db_column = 'away_seed')
     flip                = pw.BooleanField()
@@ -216,6 +208,7 @@ class Match(MySQLModel):
     awayTeamId          = pw.IntegerField(db_column='away_team_id')
     homeTeamId          = pw.IntegerField(db_column='home_team_id')
     active              = pw.BooleanField()
+    group               = pw.BooleanField()
 # -------------------------------------------------------------------------------------
 class Standing(MySQLModel):
     standing     = pw.IntegerField()

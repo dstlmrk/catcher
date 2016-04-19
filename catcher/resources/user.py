@@ -66,7 +66,7 @@ class Users(object):
             ).save()
 
     # TODO: zatim se muzes registrovat pouze uzivatel s roli organizer
-    # @falcon.before(Privilege("admin"))
+    # admin muze zaregistrovat club
     def on_post(self, req, resp):
         '''create new user'''
         data = req.context['data']

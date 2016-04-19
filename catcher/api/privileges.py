@@ -37,11 +37,11 @@ class Privilege(object):
             return
         if loggedUser.role == "organizer":
             try:
-                m.OrganizerHasTournament.get(
+                m.Tournament.get(
                     userId = loggedUser.id,
-                    tournamentId = tournamentId
+                    id = tournamentId
                     )
-            except m.OrganizerHasTournament.DoesNotExist:
+            except m.Tournament.DoesNotExist:
                 Privilege.raise401()
 
     @classmethod

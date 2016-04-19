@@ -7,7 +7,7 @@ from playhouse.shortcuts import model_to_dict
 class Queries(object):
 
     @staticmethod
-    def getTournaments(country=None, divisionId=None, active=None, terminated=None):
+    def getTournaments(country=None, divisionId=None, active=None, terminated=None, userId=None):
         whereActive = "" if active is None else (
             "AND (tournament.start_date %s CURDATE() %s tournament.end_date %s CURDATE())"
             )
@@ -20,10 +20,11 @@ class Queries(object):
             )
         whereDivision = "" if divisionId is None else ("AND division_id = %s" % divisionId)
         whereCountry = "" if country is None else ("AND country = %s" % country)
+        whereUser = "" if userId is None else ("AND user_id = %s" % userId)
         q = ("SELECT id, division_id, teams, tournament.ready, tournament.terminated,"
-             " name, start_date, end_date, city, country, cald_tournament_id "
-             " FROM tournament WHERE 1=1 %s %s %s %s;" 
-             % (whereCountry, whereDivision, whereActive, whereTerminated))
+             " name, start_date, end_date, city, country, cald_tournament_id, user_id"
+             " FROM tournament WHERE 1=1 %s %s %s %s %s;" 
+             % (whereCountry, whereDivision, whereActive, whereTerminated, whereUser))
         qr = m.db.execute_sql(q)
         tournaments = []
         for row in qr:
@@ -38,7 +39,8 @@ class Queries(object):
                 'endDate'         : row[7],
                 'city'            : row[8],
                 'country'         : row[9],
-                'caldTournamentId': row[10]
+                'caldTournamentId': row[10],
+                'user_id'         : row[11]
                 })
         return tournaments
 
@@ -119,22 +121,22 @@ class Queries(object):
         whereDate       = "" if date is None else ("AND DATE(match.start_time) = %s" % date) 
         whereActive     = "" if active is None else ("AND match.active = %s" % active) 
         whereTerminated = "" if terminated is None else ("AND match.terminated = %s" % terminated) 
-        q = ("SELECT match.id, identificator.identificator, field.id, field.name,"
+        q = ("SELECT match.id, identificator.ide, field.id, field.name,"
              " home_team_id, home_club.name, home_team.degree, away_team_id, away_club.name,"
              " away_team.degree, match.start_time, match.end_time, match.terminated,"
              " match.home_score, match.away_score, match.spirit_home, match.spirit_away,"
              " match.description, match.looser_final_standing, match.winner_final_standing,"
-             " winner_next_step.identificator, winner_next_step.match_id, winner_next_step.group_id,"
-             " looser_next_step.identificator, looser_next_step.match_id, looser_next_step.group_id,"
+             " winner_next_step.ide, winner_next_step.match_id, winner_next_step.group_id,"
+             " looser_next_step.ide, looser_next_step.match_id, looser_next_step.group_id,"
              " match.home_seed, match.away_seed, match.active FROM `match`"
-             " JOIN identificator ON match.identificator_id = identificator.id"
+             " JOIN identificator ON match.ide = identificator.ide"
              " JOIN field ON field.id = match.field_id AND field.tournament_id = match.tournament_id"
              " LEFT OUTER JOIN team AS home_team ON home_team.id = match.home_team_id"
              " LEFT OUTER JOIN team AS away_team ON away_team.id = match.away_team_id"
              " LEFT OUTER JOIN club AS home_club ON home_club.id = home_team.id"
              " LEFT OUTER JOIN club AS away_club ON away_club.id = away_team.id"
-             " LEFT OUTER JOIN identificator AS winner_next_step ON winner_next_step.id = match.winner_next_step"
-             " LEFT OUTER JOIN identificator AS looser_next_step ON looser_next_step.id = match.looser_next_step"
+             " LEFT OUTER JOIN identificator AS winner_next_step ON winner_next_step.ide = match.winner_next_step_ide"
+             " LEFT OUTER JOIN identificator AS looser_next_step ON looser_next_step.ide = match.looser_next_step_ide"
              " WHERE 1 %s %s %s %s %s %s;" 
              % (whereTournament, whereMatch, whereField, whereDate, whereActive, whereTerminated)
              )
@@ -144,20 +146,20 @@ class Queries(object):
             looserNextStep = None
             if row[20] is not None:
                 looserNextStep = {
-                    'identificator':row[20],
-                    'matchId':row[21],
-                    'groupId':row[22]
+                    'ide'     :row[20],
+                    'matchId' :row[21],
+                    'groupId' :row[22]
                 }
             winnerNextStep = None
             if row[23] is not None:
                 winnerNextStep = {
-                    'identificator':row[23],
-                    'matchId'     :row[24],
-                    'groupId'     :row[25]
+                    'ide'     :row[23],
+                    'matchId' :row[24],
+                    'groupId' :row[25]
                 }
             matches.append({
                 'id'            : row[0],
-                'identificator' : row[1],
+                'ide'           : row[1],
                 'field'         : {
                     'id'        : row[2],
                     'name'      : row[3]

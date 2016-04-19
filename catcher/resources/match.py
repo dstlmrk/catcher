@@ -19,12 +19,12 @@ class Match(Item):
             ).execute()
 
     @staticmethod
-    def addTeamInNextStep(tournamentId, teamId, idId):
-        identificator = m.Identificator.get(id = idId)
-        match = m.Match.get(tournamentId=tournamentId, identificatorId=idId)
+    def addTeamInNextStep(tournamentId, teamId, ide):
+        identificator = m.Identificator.get(ide = ide)
+        match = m.Match.get(tournamentId=tournamentId, ide=ide)
 
         if identificator.matchId:
-            logging.info("4: Saving team in match %s" % identificator.identificator)
+            logging.info("4: Saving team in match %s" % identificator.ide)
             # doplnim do dalsiho zapasu
             if match.homeTeamId is None:
                 logging.info("5: Team will play as home")
@@ -33,11 +33,11 @@ class Match(Item):
                 logging.info("5: Team will play as away")
                 match.awayTeamId = teamId
             else:
-                raise RuntimeError("In the match %s want to be more than two teams" % idId)
+                raise RuntimeError("In the match %s want to be more than two teams" % ide)
         else:
             logging.info(
                 "4: Saving team in group %s"
-                % identificator.identificator
+                % identificator.ide
                 )
             # TODO: continue in group
 
@@ -83,7 +83,7 @@ class Match(Item):
 
         # if match has next step, there have to be winner (playoff)
         if match.looserFinalStanding or match.winnerFinalStanding \
-        or match.winnerNextStepId or match.looserNextStepId:
+        or match.winnerNextStepIde or match.looserNextStepIde:
             if match.homeScore > match.awayScore:
                 logging.info("2: Home team won: %s vs %s" % (match.homeTeamId, match.awayTeamId))
                 winnerTeamId = match.homeTeamId
@@ -98,24 +98,24 @@ class Match(Item):
             if match.winnerFinalStanding:
                 logging.info("3: Winner ends on %s. place" % match.winnerFinalStanding)
                 Match.updateStanding(match.tournamentId, winnerTeamId, match.winnerFinalStanding)
-            if match.winnerNextStepId:
-                identificator = m.Identificator.get(id = match.winnerNextStepId)
+            if match.winnerNextStepIde:
+                identificator = m.Identificator.get(ide = match.winnerNextStepIde)
                 logging.info(
                     "3: Winner's next match is %s (%s)" 
-                    % (identificator.matchId, identificator.identificator)
+                    % (identificator.matchId, identificator.ide)
                     )
-                Match.addTeamInNextStep(match.tournamentId, winnerTeamId, match.winnerNextStepId)
+                Match.addTeamInNextStep(match.tournamentId, winnerTeamId, match.winnerNextStepIde)
 
             if match.looserFinalStanding:
                 logging.info("3: Looser ends on %s. place" % match.looserFinalStanding)
                 Match.updateStanding(match.tournamentId, looserTeamid, match.looserFinalStanding)
-            if match.looserNextStepId:
-                identificator = m.Identificator.get(id = match.looserNextStepId)
+            if match.looserNextStepIde:
+                identificator = m.Identificator.get(ide = match.looserNextStepIde)
                 logging.info(
                     "3: Looser's next match is %s (%s)" 
-                    % (identificator.matchId, identificator.identificator)
+                    % (identificator.matchId, identificator.ide)
                     )
-                Match.addTeamInNextStep(match.tournamentId, looserTeamid, match.looserNextStepId)
+                Match.addTeamInNextStep(match.tournamentId, looserTeamid, match.looserNextStepIde)
         else:
             pass
             # TODO: Match hasn't next step, so it's in a group probably.
@@ -123,6 +123,7 @@ class Match(Item):
 
         match.terminated = True
         match.save()
+
         # now is allowed consigning Spirit of the Game
 
     def on_get(self, req, resp, id):

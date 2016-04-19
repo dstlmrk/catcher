@@ -77,14 +77,14 @@ class MissingSpirits(object):
                     'teamId'       : match['homeTeam']['id'],
                     'teamName'     : match['awayTeam']['name'],
                     'matchId'      : match['id'],
-                    'identificator': match['identificator']
+                    'ide'          : match['ide']
                     })
             if match['awayTeam']['spirit'] is None:
                 missingSpirits.append({
                     'teamId'       : match['homeTeam']['id'],
                     'teamName'     : match['homeTeam']['name'],
                     'matchId'      : match['id'],
-                    'identificator': match['identificator']
+                    'ide'          : match['ide']
                     }) 
 
         collection = {

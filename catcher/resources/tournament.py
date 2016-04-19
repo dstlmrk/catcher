@@ -82,7 +82,7 @@ class Tournament(Item):
             if match['homeTeam']['spirit'] is None or match['awayTeam']['spirit'] is None:
                 raise falcon.HTTPBadRequest(
                     "Tournanent can't be terminated",
-                    ("Spirit from match %s is still missing" % match['identificator'])
+                    ("Spirit from match %s is still missing" % match['ide'])
                     )
 
         tournament.terminated = True
@@ -119,7 +119,8 @@ class Tournaments(Collection):
             req.params.get('country'),
             req.params.get('divisionId'),
             req.get_param_as_bool('active'),
-            req.get_param_as_bool('terminated')
+            req.get_param_as_bool('terminated'),
+            req.params.get('userId'),
             )
 
         collection = {
@@ -132,7 +133,7 @@ class Tournaments(Collection):
     def on_post(self, req, resp):
         tournamentCreater = TournamentCreater()
         createdTurnament = tournamentCreater.createTournament(req, resp, req.context['user'])
-        req.context['result'] = createdTurnament 
+        req.context['result'] = createdTurnament
         resp.status = falcon.HTTP_201
 
 class TournamentTeams(object):

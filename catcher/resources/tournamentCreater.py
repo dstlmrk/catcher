@@ -47,6 +47,37 @@ class TournamentCreater(object):
         if len(fieldIds) != fieldsCount:
             raise ValueError("Some field is added more times than once")
 
+    def checkGroups(self, groups):
+        # TODO: write better input control
+        if not groups:
+            return
+        
+        for group in groups:
+            teamsCount = len(group['teams'])
+
+            if teamsCount <= 0:
+                raise ValueError("Group without teams is not allowed")
+
+            if teamsCount != len(group['advancements']):
+                raise ValueError("Number of teams and advancements don't correspond")
+
+            advancements = set([x for x in range(1, teamsCount + 1)])
+            for advancement in group['advancements']:
+                advancements.remove(advancement['standing'])
+                if advancement.get('nextStep') is None and advancement.get('finalStanding') is None:
+                    raise ValueError(
+                        "Advancement for %s.place in group %s is missing"
+                        % (advancement['standing'], group['ide'])
+                        )
+            
+            if len(advancements) != 0:
+                raise ValueError("Some advancements in group %s are missing" % group['ide'])
+
+            # for future use
+            # matchesInGroup = [
+            #     match for match in matches if match['ide']==group['ide']
+            #     ]
+
     def checkMatchId(self, id):
         if not isinstance(id, str) and not isinstance(id, unicode):
             raise ValueError(
@@ -93,50 +124,62 @@ class TournamentCreater(object):
             if startTime > endTime:
                 raise ValueError(
                     "Match %s has incorrect time"
-                    " (start is after end)" % match['identificator']
+                    " (start is after end)" % match['ide']
                     )
             if startDate.date() > startTime.date() or endTime.date() > endDate.date():
                 raise ValueError(
                     "Match %s has incorrect time"
-                    " (isn't in the tournament term)" % match['identificator']
+                    " (isn't in the tournament term)" % match['ide']
                     )
             # on the field is added match
             schedule[match['fieldId']].append(
-                (match['identificator'], startTime, endTime)
+                (match['ide'], startTime, endTime)
                 )
         self.checkMatchTimes(schedule)
 
     def checkMatchIds(self, match):
         # matchId can be only alphanumeric (no int)
-        self.checkMatchId(match['identificator'])
+        self.checkMatchId(match['ide'])
         # check ids in play-off, it can be alphanumeric
-        if match['winnerNextStep']:
-            self.checkMatchId(match['winnerNextStep'])
-        if match['looserNextStep']:
-            self.checkMatchId(match['looserNextStep'])
+        if match['winnerNextStepIde']:
+            self.checkMatchId(match['winnerNextStepIde'])
+        if match['looserNextStepIde']:
+            self.checkMatchId(match['looserNextStepIde'])
 
-    def checkMatches(self, matches, startDate, endDate, fields):
+    @staticmethod
+    def checkNextStepInMatch(match):
+        if not match.get('looserNextStepIde') and not match.get('looserFinalStanding'):
+            raise ValueError(
+                    "Match %s has no more way for looser" % match['ide']
+                    )
+        if not match.get('winnerNextStepIde') and not match.get('winnerFinalStanding'):
+            raise ValueError(
+                "Match %s has no more way for winner" % match['ide']
+                )
+
+    def checkMatches(self, matches, startDate, endDate, fields, groups):
+        groupMatches = []
+        groupIdentificators = [group['ide'] for group in groups]
+        print groupIdentificators
         matchIds = set()
-        matchesCount = len(matches)
-        if matchesCount == 0:
+        # matchesCount = len(matches)
+        if len(matches) == 0:
             raise ValueError("Tournament without matches is not allowed")
         for match in matches:
             self.checkMatchIds(match)
-            matchIds.add(match['identificator'])
-            # check, if exists way further
-            if not match.get('looserNextStep') and not match.get('looserFinalStanding'):
-                raise ValueError(
-                    "Match %s has no more way for looser" % match['identificator']
-                    )
-            if not match.get('winnerNextStep') and not match.get('winnerFinalStanding'):
-                raise ValueError(
-                    "Match %s has no more way for winner" % match['identificator']
-                    )
+            # if match isn't in group check, if exists way further
+            if match['ide'] not in groupIdentificators:
+                matchIds.add(match['ide'])
+                TournamentCreater.checkNextStepInMatch(match)
+            else:
+                groupMatches.append(match)
 
         # check, if all matches are added only once
-        if len(matchIds) != matchesCount:
-            raise ValueError("Some match is added more times than once")
+        # if len(matchIds) != matchesCount:
+        #     raise ValueError("Some match is added more times than once")
         self.checkTimesAndFields(matches, startDate, endDate, fields)
+
+        return groupMatches
 
     def checkSeedings(self, matches, teamsCount):
         for match in matches:
@@ -148,15 +191,15 @@ class TournamentCreater(object):
             # check, if seedings are out of range
             if homeSeed is not None and not 1 <= homeSeed <= teamsCount:
                 raise ValueError(
-                    "Match %s has seeding home team out of range" % match['identificator']
+                    "Match %s has seeding home team out of range" % match['ide']
                     )
             if awaySeed is not None and not 1 <= awaySeed <= teamsCount:
                 raise ValueError(
-                    "Match %s has seeding away team out of range" % match['identificator']
+                    "Match %s has seeding away team out of range" % match['ide']
                     )
             # check, if seeding are equal
             if homeSeed == awaySeed:
-                raise ValueError("Match %s has two same teams" % match['identificator'])
+                raise ValueError("Match %s has two same teams" % match['ide'])
 
     class Match(object):
         def __init__(self, id, winMatch=None, lostMatch=None, placement=None):
@@ -166,45 +209,53 @@ class TournamentCreater(object):
             self.placement = placement
             self.freeSpots = 2
 
-    def checkTournamentTree(self, matches, teams):
-        finalPlacements = list([x for x in range(1, len(teams) + 1)])
+    def checkFinalPlacementRange(self, placement, placementsCount):
+        if not 1 <= placement <= placementsCount:
+            raise ValueError(
+                "Final statement %s is out of range" \
+                % placement
+                )
+
+    def checkFinalPlacement(self, finalPlacements, finalStanding, placementsCount):
+        if finalStanding:
+            self.checkFinalPlacementRange(finalStanding, placementsCount)
+            try:
+                finalPlacements.remove(finalStanding)
+            except ValueError:
+                raise ValueError(
+                    "Final statement %s is contained more than once" \
+                    % finalStanding
+                    )
+
+
+    def checkTournamentTree(self, matches, groups, teams):
+        placementsCount = len(teams)
+        finalPlacements = list([x for x in range(1, placementsCount + 1)])
 
         for match in matches:
-            matchId = match['identificator']
+            matchId = match['ide']
+
             winnerFinalStanding  = match.get('winnerFinalStanding')
             looserFinalStanding  = match.get('looserFinalStanding')
+            
+            self.checkFinalPlacement(
+                finalPlacements, winnerFinalStanding, placementsCount
+                )
 
-            # check final statements
-            if winnerFinalStanding:
-                if not 1 <= winnerFinalStanding <= len(matches):
-                    raise ValueError(
-                        "Final statement %s is out of range" \
-                        % winnerFinalStanding
-                        )
-                try:
-                    finalPlacements.remove(winnerFinalStanding)
-                except ValueError:
-                    raise ValueError(
-                        "Final statement %s is contained more than once" \
-                        % winnerFinalStanding
-                        )
-            if looserFinalStanding:
-                if not 1 <= looserFinalStanding <= len(matches):
-                    raise ValueError(
-                        "Final statement %s is out of range" \
-                        % looserFinalStanding
-                        )
-                try:
-                    finalPlacements.remove(looserFinalStanding)
-                except ValueError:
-                    raise ValueError(
-                        "Final statement %s is contained more than once" \
-                        % looserFinalStanding
-                        )
+            self.checkFinalPlacement(
+                finalPlacements, looserFinalStanding, placementsCount
+                )
 
             # check deadlock
             if winnerFinalStanding == matchId or looserFinalStanding == matchId:
                 raise ValueError("Match %s has infinite loop for next process" % matchId)
+
+        for group in groups:
+            for advancement in group['advancements']:
+                finalPlacement = advancement.get('finalStanding')
+                if finalPlacement is not None:
+                    self.checkFinalPlacementRange(finalPlacement, placementsCount)
+                    finalPlacements.remove(finalPlacement)
 
         # final check, if all final statements are used
         if len(finalPlacements) != 0:
@@ -213,14 +264,14 @@ class TournamentCreater(object):
         # check, if all games have only two ways inwards
         processes  = []
         for match in matches:
-            if match['winnerNextStep']:
-                processes.append(match['winnerNextStep'])
-            if match['looserNextStep']:
-                processes.append(match['looserNextStep'])
+            if match['winnerNextStepIde']:
+                processes.append(match['winnerNextStepIde'])
+            if match['looserNextStepIde']:
+                processes.append(match['looserNextStepIde'])
 
         for match in matches:
             # TODO: az budu kontrolovat i skupiny, musim je zde vyradit
-            matchId = match['identificator']
+            matchId = match['ide']
             # if teams aren't seeded, way inwards must be here
             if not match['homeSeed'] or not match['awaySeed']:
                 try:
@@ -241,7 +292,9 @@ class TournamentCreater(object):
         # (4) --/       \-- (SE2)
 
     @m.db.atomic()
-    def saveTournament(self, data):
+    def saveTournament(self, data, groupMatches, user):
+        print "--------------"
+        print groupMatches
         # Tournament
         tournamentId = m.Tournament.insert(
             caldTournamentId = data.get('caldTournamentId'),
@@ -252,7 +305,7 @@ class TournamentCreater(object):
             startDate        = data['startDate'],
             endDate          = data['endDate'],
             teams            = len(data['teams']),
-            terminated       = False
+            userId           = user.id
             ).execute()
 
         # Field
@@ -267,53 +320,70 @@ class TournamentCreater(object):
                 tournamentId = tournamentId
                 ).execute()
 
+        # Groups
+        # TODO: ulozit skupiny a postupy ze skupin
+
         for match in data['matches']:
-            
+
             # Identificators
             identificator, created = m.Identificator.get_or_create(
                 tournamentId  = tournamentId,
-                identificator = match['identificator']
+                ide           = match['ide']
                 )
 
-            winnerNextStep = None
-            if match['winnerNextStep'] is not None:
-                winnerNextStep, created = m.Identificator.get_or_create(
-                    tournamentId  = tournamentId,
-                    identificator = match['winnerNextStep']
-                    )
+            if match not in groupMatches:
+                
+                winnerNextStepIde = None
+                if match['winnerNextStepIde'] is not None:
+                    winnerNextStepIde, created = m.Identificator.get_or_create(
+                        tournamentId  = tournamentId,
+                        ide           = match['winnerNextStepIde']
+                        )
+                    winnerNextStepIde = winnerNextStepIde.ide
 
-            looserNextStep = None
-            if match['looserNextStep'] is not None:
-                looserNextStep, created = m.Identificator.get_or_create(
-                    tournamentId  = tournamentId,
-                    identificator = match['looserNextStep']
-                    )
+                looserNextStepIde = None
+                if match['looserNextStepIde'] is not None:
+                    looserNextStepIde, created = m.Identificator.get_or_create(
+                        tournamentId  = tournamentId,
+                        ide           = match['looserNextStepIde']
+                        )
+                    looserNextStepIde = looserNextStepIde.ide
 
-            del match['identificator']
-            del match['winnerNextStep']
-            del match['looserNextStep']
+                del match['ide']
+                del match['winnerNextStepIde']
+                del match['looserNextStepIde']
 
-            # Match
-            matchId = m.Match.insert(
-                tournamentId = tournamentId,
-                identificatorId = identificator.id,
-                terminated = False,
-                looserNextStepId = looserNextStep,
-                winnerNextStepId = winnerNextStep,
-                **match
-                ).execute()
+                print match
+
+                print winnerNextStepIde
+                # Match
+                matchId = m.Match.insert(
+                    tournamentId      = tournamentId,
+                    ide               = identificator.ide,
+                    looserNextStepIde = looserNextStepIde,
+                    winnerNextStepIde = winnerNextStepIde,
+                    **match
+                    ).execute()
+
+            # else:
+            #     del match['ide']
+            #     matchId = m.Match.insert(
+            #         tournamentId = tournamentId,
+            #         identificatorId = identificator.id,
+            #         **match
+            #         ).execute()
 
             m.Identificator.\
                 update(matchId = matchId).\
-                where(m.Identificator.id == identificator.id).\
+                where(m.Identificator.ide == identificator.ide).\
                 execute()
 
-        # Organizer has table
-        if data['user'].role == "organizer":
-            m.OrganizerHasTournament.insert(
-                    userId = data['user'].id,
-                    tournamentId = tournamentId
-                ).execute()
+        # # Organizer has table
+        # if data['user'].role == "organizer":
+        #     m.OrganizerHasTournament.insert(
+        #             userId = data['user'].id,
+        #             tournamentId = tournamentId
+        #         ).execute()
 
         return tournamentId
 
@@ -341,17 +411,18 @@ class TournamentCreater(object):
         self.checkFields(fields)
         
         # load groups
-        # TODO: nacist a zkontrolovat skupiny
+        groups = data.get('groups')
+        self.checkGroups(groups)
 
         # load and check matches
         matches = data.get('matches')
         # TODO: nutne otestovat
         self.checkSeedings(matches, len(teams))
-        self.checkMatches(matches, startDate, endDate, fields)
-        self.checkTournamentTree(matches, teams)
+        groupMatches = self.checkMatches(matches, startDate, endDate, fields, groups)
+        self.checkTournamentTree(matches, groups, teams)
  
         # atomic create tournament
-        tournamentId = self.saveTournament(data)
+        tournamentId = self.saveTournament(data, groupMatches, user)
 
         # for result body
         createdTurnament = m.Tournament.get(id=tournamentId)

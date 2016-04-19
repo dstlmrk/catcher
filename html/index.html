@@ -798,7 +798,7 @@ Host: catcher.zlutazimnice.cz</pre>
                      <div class="col-md-6">
                         <h3 class="panel-title">
                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournaments" aria-expanded="false" aria-controls="tournaments">
-                           <strong><span class="label label-danger">UNFINISHED</span> /tournaments</strong>
+                           <strong>/tournaments</strong>
                            </a>
                         </h3>
                      </div>
@@ -836,6 +836,11 @@ Host: catcher.zlutazimnice.cz</pre>
                               <td><code>boolean</code></td>
                               <td>ukončené turnaje</td>
                            </tr>
+                           <tr>
+                              <td><code>userId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID uživatele, který turnaj vytvořil</td>
+                           </tr>
                         </tbody>
                      </table>
                      <h4>Příklad</h4>
@@ -872,7 +877,7 @@ Host: catcher.zlutazimnice.cz
 }
 </pre>
                      <div>
-                        <h3>POST - Vytvoření nového turnaje</h3>
+                        <h3><span class="label label-danger">UNFINISHED</span> POST - Vytvoření nového turnaje</h3>
                         <span class="label label-default">organizer</span>
                         <span class="label label-default">admin</span>
                         <p>
@@ -939,7 +944,7 @@ Content-Type: application/json
     "winnerNextStep": "FIN",
     "looserFinalStanding": null,
     "winnerFinalStanding": null,
-    "identificator": "SE1",
+    "ide": "SE1",
     "description": null
   }, {
     "fieldId": 1,
@@ -951,7 +956,7 @@ Content-Type: application/json
     "winnerNextStep": "FIN",
     "looserFinalStanding": null,
     "winnerFinalStanding": null,
-    "identificator": "SE2",
+    "ide": "SE2",
     "description": null
   }, {
     "fieldId": 1,
@@ -963,7 +968,7 @@ Content-Type: application/json
     "winnerNextStep": null,
     "looserFinalStanding": 4,
     "winnerFinalStanding": 3,
-    "identificator": "3RD",
+    "ide": "3RD",
     "description": null
   }, {
     "fieldId": 1,
@@ -975,7 +980,7 @@ Content-Type: application/json
     "winnerNextStep": null,
     "looserFinalStanding": 2,
     "winnerFinalStanding": 1,
-    "identificator": "FIN",
+    "ide": "FIN",
     "description": "Finale"
   }]
 }</pre>
@@ -1131,20 +1136,10 @@ Host: catcher.zlutazimnice.cz
     "teamId": 1
   }],
   "spirits": [{
-    "foulsGiven": 2.0,
-    "fair": 4.0,
     "totalGiven": 10.0,
     "matches": 2,
-    "communication": 2.0,
-    "communicationGiven": 2.0,
-    "rulesGiven": 2.0,
-    "fairGiven": 2.0,
-    "fouls": 1.0,
     "teamId": 1,
-    "rules": 3.0,
-    "positiveGiven": 2.0,
     "total": 12.0,
-    "positive": 2.0
   }, ...
   ]
 }
@@ -1443,7 +1438,7 @@ Content-Type: application/json
       "id": 1,
       "looser": {
         "nextStep": {
-          "identificator": "FIN",
+          "ide": "FIN",
           "group_id": null,
           "match_id": 4
         },
@@ -1459,7 +1454,7 @@ Content-Type: application/json
       },
       "winner": {
         "nextStep": {
-          "identificator": "3RD",
+          "ide": "3RD",
           "group_id": null,
           "match_id": 3
         },
@@ -1473,7 +1468,7 @@ Content-Type: application/json
         "start": "2016-04-01T09:00:00",
         "end": "2016-04-01T09:29:00"
       },
-      "identificator": "SE1"
+      "ide": "SE1"
     },
     ...
   ]
@@ -1594,12 +1589,12 @@ Authorization: secretApiKey
   "missingSpirits": [{
     "teamId": 1,
     "matchId": 5,
-    "identificator": "SE1",
+    "ide": "SE1",
     "teamName": "FC Ostrava A"
   }, {
     "teamId": 4,
     "matchId": 8,
-    "identificator": "FIN",
+    "ide": "FIN",
     "teamName": "FC Ostrava A"
   }]
 }</pre>
@@ -1699,7 +1694,7 @@ Content-Type: application/json
   "id": 1,
   "looser": {
     "nextStep": {
-      "identificator": "FIN",
+      "ide": "FIN",
       "groupId": null,
       "matchId": 4
     },
@@ -1715,7 +1710,7 @@ Content-Type: application/json
   },
   "winner": {
     "nextStep": {
-      "identificator": "3RD",
+      "ide": "3RD",
       "groupId": null,
       "matchId": 3
     },
@@ -1729,7 +1724,7 @@ Content-Type: application/json
     "start": "2016-04-01T09:00:00",
     "end": "2016-04-01T09:29:00"
   },
-  "identificator": "SE1"
+  "ide": "SE1"
 }</pre>
                      </div>
                   </div>
@@ -1778,7 +1773,7 @@ Host: catcher.zlutazimnice.cz
   "id": 1,
   "looser": {
     "nextStep": {
-      "identificator": "FIN",
+      "ide": "FIN",
       "matchId": 4,
       "groupId": null
     },
@@ -1794,7 +1789,7 @@ Host: catcher.zlutazimnice.cz
   },
   "winner": {
     "nextStep": {
-      "identificator": "3RD",
+      "ide": "3RD",
       "matchId": 3,
       "groupId": null
     },
@@ -1942,7 +1937,7 @@ Host: catcher.zlutazimnice.cz
                      <h3>GET - Hodnocení SOTG</h3>
                      <span class="label label-default">public - limited</span>
                      <p>
-                     <p>Získá informace o zápase a hodnocení Spirit of the Game. Pokud turnaj nemá příznak <code>terminated</code>, jsou výsledky viditelné pouze pro <strong>organizátora</strong>.</p>
+                     <p>Získá informace o zápase a hodnocení Spirit of the Game. Pokud turnaj nemá příznak <code>terminated</code>, jsou výsledky viditelné pouze pro <strong>organizátora</strong> nebo pro <strong>klubový účet</strong>.</p>
                      <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
@@ -1998,7 +1993,7 @@ Host: catcher.zlutazimnice.cz
     "end": "2016-04-01 10:59:00"
   },
   "active": 1,
-  "identificator": "FIN",
+  "ide": "FIN",
   "id": 8,
   "looser": {
     "nextStep": null,
