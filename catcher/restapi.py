@@ -3,10 +3,10 @@
 
 import logger
 import falcon
-from api import errors
-from api import middleware
-import resources
-import models as m
+from catcher.api import errors
+from catcher.api import middleware
+from catcher import resources
+from catcher import models as m
 import peewee as pw
 
 '''
@@ -27,7 +27,6 @@ api = falcon.API(
     )
 
 # resources are represented by long-lived class instances
-# TODO: editable cols presunout nekam, kde je muzu upravovat zaroven i pro testy
 api.add_route('/api/club/{id}',  resources.Club(m.Club))
 api.add_route('/api/club/{id}/players',  resources.ClubPlayers())
 api.add_route('/api/club/{id}/teams',  resources.ClubTeams())
@@ -47,24 +46,25 @@ api.add_route('/api/tournament/{id}/standings',  resources.Standings())
 api.add_route('/api/tournament/{id}/players',  resources.TournamentPlayers())
 api.add_route('/api/tournament/{id}/teams',  resources.TournamentTeams())
 api.add_route('/api/tournament/{id}/matches',  resources.TournamentMatches())
-api.add_route('/api/tournament/{id}/spirit',  resources.Spirits())
+api.add_route('/api/tournament/{id}/spirits',  resources.Spirits())
+api.add_route('/api/tournament/{id}/missing-spirits',  resources.MissingSpirits())
 
 api.add_route('/api/match/{id}',  resources.Match(m.Match))
 api.add_route('/api/match/{id}/points',  resources.MatchPoints())
 api.add_route('/api/match/{id}/point/{order}',  resources.MatchPoint())
-api.add_route('/api/match/{id}/spirit',  resources.Spirit())
+api.add_route('/api/match/{id}/spirits',  resources.Spirit())
 
-# TODO: otestovat
 api.add_route("/api/users", resources.Users())
 api.add_route("/api/user/{id}", resources.User())
 
 api.add_route("/api/login", resources.Login())
-api.add_route("/api/forgottenPassword", resources.ForgottenPassword())
+api.add_route("/api/forgotten-password", resources.ForgottenPassword())
 
 # not implemented
 api.add_route('/api/tournament/{id}/groups',  resources.TournamentGroups())
 
 # errors
+# TODO: doplnit
 api.add_error_handler(RuntimeError, errors.InternalServerError)
 api.add_error_handler(TypeError, errors.BadRequest)
 api.add_error_handler(KeyError, errors.BadRequest)

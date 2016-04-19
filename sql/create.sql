@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`user` (
   UNIQUE INDEX `api_key_UNIQUE` (`api_key` ASC),
   INDEX `fk_user_club1_idx` (`club_id` ASC),
   INDEX `fk_user_role1_idx` (`role` ASC),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC),
   CONSTRAINT `fk_user_club1`
     FOREIGN KEY (`club_id`)
     REFERENCES `catcher`.`club` (`id`)
@@ -664,42 +665,3 @@ SHOW WARNINGS;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
--- -----------------------------------------------------
--- Data for table `catcher`.`role`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `catcher`;
-INSERT INTO `catcher`.`role` (`role`) VALUES ('admin');
-INSERT INTO `catcher`.`role` (`role`) VALUES ('public');
-INSERT INTO `catcher`.`role` (`role`) VALUES ('club');
-INSERT INTO `catcher`.`role` (`role`) VALUES ('organizer');
-
-COMMIT;
-
-
--- -----------------------------------------------------
--- Data for table `catcher`.`user`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `catcher`;
-INSERT INTO `catcher`.`user` (`id`, `email`, `password`, `api_key`, `created_at`, `role`, `club_id`) VALUES (1, 'veselj43@fit.cvut.cz', 'x', 'W1x8UmkV5RWCZOXuRmcqqnrt6qQNnjnr', '', 'admin', NULL);
-INSERT INTO `catcher`.`user` (`id`, `email`, `password`, `api_key`, `created_at`, `role`, `club_id`) VALUES (2, 'dstlmrk@gmail.com', 'x', 'nVFrrUXJSAXmTPp9lvZZLEyjiRVUydIg', '', 'admin', NULL);
-INSERT INTO `catcher`.`user` (`id`, `email`, `password`, `api_key`, `created_at`, `role`, `club_id`) VALUES (3, 'list@zlutazimnice.cz', 'x', 'M7mz4BwcdwR8QmfdKJw2w3PJj3j2YZlB', '', 'club', NULL);
-
-COMMIT;
-
-
--- -----------------------------------------------------
--- Data for table `catcher`.`division`
--- -----------------------------------------------------
-START TRANSACTION;
-USE `catcher`;
-INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (1, 'open');
-INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (2, 'women');
-INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (3, 'mixed');
-INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (4, 'masters');
-INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (5, 'junior');
-
-COMMIT;
-

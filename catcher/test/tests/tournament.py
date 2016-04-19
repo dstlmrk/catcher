@@ -130,7 +130,7 @@ class Tournaments(TournamentTestCase):
             path    = '/api/tournaments'
             )
         self.assertEqual(response['count'], tournaments)
-        # self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(self.srmock.status, HTTP_200)
 
 class Tournament(TournamentTestCase):
 
@@ -199,7 +199,7 @@ class Tournament(TournamentTestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/tournament/%s' % newTournament['id']),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = body
             )
         self.assertEqual(self.srmock.status, HTTP_304)
@@ -207,12 +207,11 @@ class Tournament(TournamentTestCase):
     def testPutReady(self):
         newTournament = self.createTournament()
         tournamentId = newTournament['id']
-        body = {"ready": True}
         response = self.request(
             method  = 'PUT',
             path    = ('/api/tournament/%s' % tournamentId),
-            headers = {"Content-Type": "application/json"},
-            body    = body
+            headers = self.headers,
+            body    = {"ready": True}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
         standings = len(models.Standing.select().where(
@@ -241,12 +240,11 @@ class Tournament(TournamentTestCase):
     
     def testTerminate1(self):
         newTournament = self.createTournament()
-        body = {"terminated": True}
         response = self.request(
             method  = 'PUT',
             path    = ('/api/tournament/%s' % newTournament['id']),
-            headers = {"Content-Type": "application/json"},
-            body    = body
+            headers = self.headers,
+            body    = {"terminated": True}
             )
         self.assertEqual(self.srmock.status, HTTP_400)
 
@@ -264,167 +262,185 @@ class Tournament(TournamentTestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/tournament/%s' % newTournament['id']),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {"terminated": True}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
 
-# class TournamentPlayers(TournamentTestCase):
+class TournamentPlayers(TournamentTestCase):
     
-#     def testGet1(self):
-#         newTournament = self.createTournament()
-#         self.readyTournament(newTournament['id'])
-#         self.createRosters(newTournament['id'])
-#         players = len(models.PlayerAtTournament.select().where(
-#             models.PlayerAtTournament.tournamentId ==  newTournament['id']
-#             ))
-#         response = self.request(
-#             method  = 'GET',
-#             path    = ('/api/tournament/%s/players' % newTournament['id'])
-#             )
-#         self.assertEqual(response['count'], players)
-#         self.assertEqual(self.srmock.status, HTTP_200)
+    def testGet1(self):
+        newTournament = self.createTournament()
+        self.readyTournament(newTournament['id'])
+        self.createRosters(newTournament['id'])
+        players = len(models.PlayerAtTournament.select().where(
+            models.PlayerAtTournament.tournamentId ==  newTournament['id']
+            ))
+        response = self.request(
+            method  = 'GET',
+            path    = ('/api/tournament/%s/players' % newTournament['id'])
+            )
+        self.assertEqual(response['count'], players)
+        self.assertEqual(self.srmock.status, HTTP_200)
 
-#     def testGet2(self):
-#         teamId = 1
-#         newTournament = self.createTournament()
-#         self.readyTournament(newTournament['id'])
-#         self.createRosters(newTournament['id'])
-#         players = len(models.PlayerAtTournament.select().where(
-#             models.PlayerAtTournament.tournamentId ==  newTournament['id'],
-#             models.PlayerAtTournament.teamId == teamId
-#             ))
+    def testGet2(self):
+        teamId = 1
+        newTournament = self.createTournament()
+        self.readyTournament(newTournament['id'])
+        self.createRosters(newTournament['id'])
+        players = len(models.PlayerAtTournament.select().where(
+            models.PlayerAtTournament.tournamentId ==  newTournament['id'],
+            models.PlayerAtTournament.teamId == teamId
+            ))
 
-#         response = self.request(
-#             method      = 'GET',
-#             path        = ('/api/tournament/%s/players' % (newTournament['id'])),
-#             queryString = 'teamId=1'
-#             )
-#         self.assertEqual(self.srmock.status, HTTP_200)
-#         self.assertEqual(response['count'], players)
+        response = self.request(
+            method      = 'GET',
+            path        = ('/api/tournament/%s/players' % (newTournament['id'])),
+            queryString = 'teamId=1'
+            )
+        self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(response['count'], players)
 
-#     def testPost(self):
-#         newTournament = self.createTournament()
-#         self.readyTournament(newTournament['id'])
-#         response = self.request(
-#             method  = 'POST',
-#             path    = ('/api/tournament/%s/players' % (newTournament['id'])),
-#             headers = {"Content-Type": "application/json"},
-#             body    = {"playerId": 1,"teamId": 1}
-#             )
+    def testPost(self):
+        newTournament = self.createTournament()
+        self.readyTournament(newTournament['id'])
+        response = self.request(
+            method  = 'POST',
+            path    = ('/api/tournament/%s/players' % (newTournament['id'])),
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey3"
+                },
+            body    = {"playerId": 1,"teamId": 1}
+            )
 
-#         self.assertEqual(self.srmock.status, HTTP_201)
-#         self.assertEqual(response['matches'], 0)
-#         self.assertEqual(response['playerId'], 1)
-#         self.assertEqual(response['teamId'], 1)
-#         self.assertEqual(response['assists'], 0)
-#         self.assertEqual(response['tournamentId'], newTournament['id'])
-#         self.assertEqual(response['scores'], 0)
-#         self.assertEqual(response['total'], 0)
+        self.assertEqual(self.srmock.status, HTTP_201)
+        self.assertEqual(response['matches'], 0)
+        self.assertEqual(response['playerId'], 1)
+        self.assertEqual(response['teamId'], 1)
+        self.assertEqual(response['assists'], 0)
+        self.assertEqual(response['tournamentId'], newTournament['id'])
+        self.assertEqual(response['scores'], 0)
+        self.assertEqual(response['total'], 0)
     
-#     def testDelete(self):
-#         '''create player and delete him'''
-#         newTournament = self.createTournament()
-#         self.readyTournament(newTournament['id'])
-#         response = self.request(
-#             method  = 'POST',
-#             path    = ('/api/tournament/%s/players' % (newTournament['id'])),
-#             headers = {"Content-Type": "application/json"},
-#             body    = {"playerId": 1,"teamId": 1}
-#             )
-#         self.assertEqual(self.srmock.status, HTTP_201)
+    def testDelete(self):
+        '''create player and delete him'''
+        newTournament = self.createTournament()
+        self.readyTournament(newTournament['id'])
+        response = self.request(
+            method  = 'POST',
+            path    = ('/api/tournament/%s/players' % (newTournament['id'])),
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey2"
+                },
+            body    = {"playerId": 1,"teamId": 1}
+            )
+        self.assertEqual(self.srmock.status, HTTP_201)
 
-#         response = self.request(
-#             method  = 'DELETE',
-#             path    = ('/api/tournament/%s/players' % (newTournament['id'])),
-#             headers = {"Content-Type": "application/json"},
-#             body    = {"playerId":1,"teamId":1}
-#             )
+        response = self.request(
+            method  = 'DELETE',
+            path    = ('/api/tournament/%s/players' % (newTournament['id'])),
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey2"
+                },
+            body    = {"playerId":1,"teamId":1}
+            )
 
-#         with self.assertRaises(models.PlayerAtTournament.DoesNotExist):
-#             models.PlayerAtTournament.get(
-#                 playerId = 1,
-#                 tournamentId = 1
-#             )
+        with self.assertRaises(models.PlayerAtTournament.DoesNotExist):
+            models.PlayerAtTournament.get(
+                playerId = 1,
+                tournamentId = 1
+            )
 
-# class TournamentTeams(TournamentTestCase):
+class TournamentTeams(TournamentTestCase):
     
-#     def testGet(self):
-#         newTournament = self.createTournament()
+    def testGet(self):
+        newTournament = self.createTournament()
 
-#         teams = len(models.TeamAtTournament.select().where(
-#             models.TeamAtTournament.tournamentId == newTournament['id']
-#             ))
-#         response = self.request(
-#             method      = 'GET',
-#             path        = ('/api/tournament/%s/teams' % (newTournament['id']))
-#             )
+        teams = len(models.TeamAtTournament.select().where(
+            models.TeamAtTournament.tournamentId == newTournament['id']
+            ))
+        response = self.request(
+            method      = 'GET',
+            path        = ('/api/tournament/%s/teams' % (newTournament['id']))
+            )
 
-#         self.assertEqual(self.srmock.status, HTTP_200)
-#         self.assertEqual(response['count'], teams)
+        self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(response['count'], teams)
 
-#     def testPut(self):
-#         newTournament = self.createTournament()
+    def testPut(self):
+        newTournament = self.createTournament()
 
-#         response = self.request(
-#             method  = 'PUT',
-#             path    = ('/api/tournament/%s/teams' % newTournament['id']),
-#             headers = {"Content-Type": "application/json"},
-#             body    = {"seeding": 2, "teamId": 5}
-#             )
-#         self.assertEqual(self.srmock.status, HTTP_200)
-#         self.assertEqual(response['teamId'], 5)
-#         self.assertEqual(response['tournamentId'], newTournament['id'])
-#         self.assertEqual(response['seeding'], 2)
+        response = self.request(
+            method  = 'PUT',
+            path    = ('/api/tournament/%s/teams' % newTournament['id']),
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey3"
+                },
+            body    = {"seeding": 2, "teamId": 5}
+            )
+        self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(response['teamId'], 5)
+        self.assertEqual(response['tournamentId'], newTournament['id'])
+        self.assertEqual(response['seeding'], 2)
 
-#         team = models.TeamAtTournament.get(
-#             tournamentId = newTournament['id'],
-#             seeding = 2
-#             )
-#         self.assertEqual(team.teamId, 5)
+        team = models.TeamAtTournament.get(
+            tournamentId = newTournament['id'],
+            seeding = 2
+            )
+        self.assertEqual(team.teamId, 5)
 
-#         # if tournament has ready on true, teams can't be changed
-#         response = self.request(
-#             method  = 'PUT',
-#             path    = ('/api/tournament/%s' % newTournament['id']),
-#             headers = {"Content-Type": "application/json"},
-#             body    = {"ready": True}
-#             )
-#         self.assertEqual(self.srmock.status, HTTP_200)
+        # if tournament has ready on true, teams can't be changed
+        response = self.request(
+            method  = 'PUT',
+            path    = ('/api/tournament/%s' % newTournament['id']),
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey3"
+                },
+            body    = {"ready": True}
+            )
+        self.assertEqual(self.srmock.status, HTTP_200)
 
-#         response = self.request(
-#             method  = 'PUT',
-#             path    = ('/api/tournament/%s/teams' % newTournament['id']),
-#             headers = {"Content-Type": "application/json"},
-#             body    = {"seeding": 2, "teamId": 6}
-#             )
-#         self.assertEqual(self.srmock.status, HTTP_400)
+        response = self.request(
+            method  = 'PUT',
+            path    = ('/api/tournament/%s/teams' % newTournament['id']),
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey3"
+                },
+            body    = {"seeding": 2, "teamId": 6}
+            )
+        self.assertEqual(self.srmock.status, HTTP_400)
 
-# class TournamentMatches(TournamentTestCase):
+class TournamentMatches(TournamentTestCase):
     
-#     def testGet(self):
-#         newTournament = self.createTournament()
-#         matches = len(models.Match.select().where(
-#             models.Match.tournamentId == newTournament['id']
-#             ))
-#         response = self.request(
-#             method      = 'GET',
-#             path        = ('/api/tournament/%s/matches' % (newTournament['id']))
-#             )
-#         self.assertEqual(self.srmock.status, HTTP_200)
-#         self.assertEqual(response['count'], matches)
+    def testGet(self):
+        newTournament = self.createTournament()
+        matches = len(models.Match.select().where(
+            models.Match.tournamentId == newTournament['id']
+            ))
+        response = self.request(
+            method      = 'GET',
+            path        = ('/api/tournament/%s/matches' % (newTournament['id']))
+            )
+        self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(response['count'], matches)
 
-#     def testGet2(self):
-#         newTournament = self.createTournament()
-#         matches = len(models.Match.select().where(
-#             models.Match.tournamentId == newTournament['id'],
-#             models.Match.fieldId == 1
-#             ))
-#         response = self.request(
-#             method      = 'GET',
-#             path        = ('/api/tournament/%s/matches' % (newTournament['id'])),
-#             queryString = 'fieldId=1'
-#             )
-#         self.assertEqual(self.srmock.status, HTTP_200)
-#         self.assertEqual(response['count'], matches)
-#         
+    def testGet2(self):
+        newTournament = self.createTournament()
+        matches = len(models.Match.select().where(
+            models.Match.tournamentId == newTournament['id'],
+            models.Match.fieldId == 1
+            ))
+        response = self.request(
+            method      = 'GET',
+            path        = ('/api/tournament/%s/matches' % (newTournament['id'])),
+            queryString = 'fieldId=1'
+            )
+        self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(response['count'], matches)
+        

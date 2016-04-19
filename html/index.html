@@ -123,7 +123,7 @@
                      <div class="col-md-6">
                         <h3 class="panel-title">
                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#forgottenPassword" aria-expanded="false" aria-controls="forgottenPassword">
-                           <strong>/forgottenPassword</strong>
+                           <strong>/forgotten-password</strong>
                            </a>
                         </h3>
                      </div>
@@ -405,26 +405,25 @@ Host: catcher.zlutazimnice.cz
                         <span class="label label-default">admin</span>
                         <p>
                         <h4>Popis polí požadavku</h4>
-                     <table class="table table-sm">
-                        <tbody>
-                           <tr>
-                              <td><code>city</code></td>
-                              <td><code>string</code></td>
-                              <td>město</td>
-                           </tr>
-                           <tr>
-                              <td><code>country</code></td>
-                              <td><code>string</code></td>
-                              <td>název země ve formátu ISO 3166-1 alpha-3</td>
-                           </tr>
-                           <tr>
-                              <td><code>shortcut</code></td>
-                              <td><code>string</code></td>
-                              <td>libovolná unikátní zkratka v maximální délce tří znaků</td>
-                           </tr>
-                        </tbody>
-                     </table>
-
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>city</code></td>
+                                 <td><code>string</code></td>
+                                 <td>město</td>
+                              </tr>
+                              <tr>
+                                 <td><code>country</code></td>
+                                 <td><code>string</code></td>
+                                 <td>název země ve formátu ISO 3166-1 alpha-3</td>
+                              </tr>
+                              <tr>
+                                 <td><code>shortcut</code></td>
+                                 <td><code>string</code></td>
+                                 <td>libovolná unikátní zkratka v maximální délce tří znaků</td>
+                              </tr>
+                           </tbody>
+                        </table>
                         <h4>Příklad</h4>
                         <h5>Požadavek</h5>
                         <pre>
@@ -642,40 +641,40 @@ Host: catcher.zlutazimnice.cz</pre>
                         <span class="label label-default">admin</span>
                         <p>
                         <h4>Popis polí požadavku</h4>
-                     <table class="table table-sm">
-                        <tbody>
-                           <tr>
-                              <td><code>firstname</code></td>
-                              <td><code>string</code></td>
-                              <td>křestní jméno</td>
-                           </tr>
-                           <tr>
-                              <td><code>lastname</code></td>
-                              <td><code>string</code></td>
-                              <td>příjmení</td>
-                           </tr>
-                           <tr>
-                              <td><code>nickname</code></td>
-                              <td><code>string</code></td>
-                              <td>přezdívka</td>
-                           </tr>
-                           <tr>
-                              <td><code>clubId</code></td>
-                              <td><code>int</code></td>
-                              <td>ID klubu</td>
-                           </tr>
-                           <tr>
-                              <td><code>number</code></td>
-                              <td><code>int</code></td>
-                              <td>číslo dresu</td>
-                           </tr>
-                        </tbody>
-                     </table>
+                        <table class="table table-sm">
+                           <tbody>
+                              <tr>
+                                 <td><code>firstname</code></td>
+                                 <td><code>string</code></td>
+                                 <td>křestní jméno</td>
+                              </tr>
+                              <tr>
+                                 <td><code>lastname</code></td>
+                                 <td><code>string</code></td>
+                                 <td>příjmení</td>
+                              </tr>
+                              <tr>
+                                 <td><code>nickname</code></td>
+                                 <td><code>string</code></td>
+                                 <td>přezdívka</td>
+                              </tr>
+                              <tr>
+                                 <td><code>clubId</code></td>
+                                 <td><code>int</code></td>
+                                 <td>ID klubu</td>
+                              </tr>
+                              <tr>
+                                 <td><code>number</code></td>
+                                 <td><code>int</code></td>
+                                 <td>číslo dresu</td>
+                              </tr>
+                           </tbody>
+                        </table>
                      </div>
                      <div>
                         <h3>DELETE - Smazání hráče</h3>
                         <!-- <span class="label label-default">club</span>
-                        Mohl by smazat hrace s historii. Data se zatim mazou FYZICKY. -->
+                           Mohl by smazat hrace s historii. Data se zatim mazou FYZICKY. -->
                         <span class="label label-default">admin</span>
                         <p>
                         <p>Smaže hráče v databázi.</p>
@@ -1033,35 +1032,35 @@ Content-Type: application/json
                      <p>
                      <p>Nejdůležitejší úpravou je změna příznaků <code>ready</code> a <code>terminated</code> na <code>true</code>. První změnou dojde k přiřazení týmů na jejich místa podle nasazení a turnaj se považuje za připravený. Druhý příznak turnaj ukončí a zveřejní hodnocení SOTG všem uživatelům.</p>
                      <h4>Popis polí požadavku</h4>
-                        <table class="table table-sm">
-                           <tbody>
-                              <tr>
-                                 <td><code>name</code></td>
-                                 <td><code>string</code></td>
-                                 <td>jméno turnaje</td>
-                              </tr>
-                              <tr>
-                                 <td><code>startDate</code></td>
-                                 <td><code>datetime</code></td>
-                                 <td>první hrací den turnaje</td>
-                              </tr>
-                              <tr>
-                                 <td><code>endDate</code></td>
-                                 <td><code>datetime</code></td>
-                                 <td>poslední hrací den turnaje</td>
-                              </tr>
-                              <tr>
-                                 <td><code>city</code></td>
-                                 <td><code>string</code></td>
-                                 <td>město</td>
-                              </tr>
-                              <tr>
-                                 <td><code>country</code></td>
-                                 <td><code>string</code></td>
-                                 <td>název země ve formátu ISO 3166-1 alpha-3</td>
-                              </tr>
-                           </tbody>
-                        </table>
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>name</code></td>
+                              <td><code>string</code></td>
+                              <td>jméno turnaje</td>
+                           </tr>
+                           <tr>
+                              <td><code>startDate</code></td>
+                              <td><code>datetime</code></td>
+                              <td>první hrací den turnaje</td>
+                           </tr>
+                           <tr>
+                              <td><code>endDate</code></td>
+                              <td><code>datetime</code></td>
+                              <td>poslední hrací den turnaje</td>
+                           </tr>
+                           <tr>
+                              <td><code></code>e>city</code></td>
+                              <td><code>string</code></td>
+                              <td>město</td>
+                           </tr>
+                           <tr>
+                              <td><code>country</code></td>
+                              <td><code>string</code></td>
+                              <td>název země ve formátu ISO 3166-1 alpha-3</td>
+                           </tr>
+                        </tbody>
+                     </table>
                   </div>
                </div>
             </div>
@@ -1084,9 +1083,9 @@ Content-Type: application/json
                <div id="tournamentStandings" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
                      <h3>GET - Výsledné pořadí týmů včetně SOTG</h3>
-                     <span class="label label-default">public - limited</span>
+                     <span class="label label-default">public</span>
                      <p>
-                     <p>Získá výsledné pořadí týmů na turnaji včetně kategorie SOTG (pokud turnaj nemá příznak <code>terminated</code>, jsou výsledky viditelné pouze pro <stron>organizátora</stron>).</p>
+                     <p>Získá výsledné pořadí týmů na turnaji a průměrná hodnocení v kategorii SOTG (jestliže turnaj má příznak <code>terminated</code>).</p>
                      <h4>Popis polí úspěšné odpovědi</h4>
                      <table class="table table-sm">
                         <tbody>
@@ -1190,8 +1189,6 @@ Host: catcher.zlutazimnice.cz
                            </tr>
                         </tbody>
                      </table>
-
-
                      <h3>POST - Přidání hráče k týmu</h3>
                      <span class="label label-default">club</span>
                      <span class="label label-default">organizer</span>
@@ -1199,21 +1196,20 @@ Host: catcher.zlutazimnice.cz
                      <p>
                      <p>Vytváří vazbu mezi týmem a hráčem. Lze tak individuálně přídávat hráče na soupisku (až v moment, kdy turnaj má příznak <code>ready</code>). Každý hráč smí být pouze na soupisce jednoho týmu.</p>
                      <h4>Popis polí požadavku</h4>
-                        <table class="table table-sm">
-                           <tbody>
-                              <tr>
-                                 <td><code>playerId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>ID hráče</td>
-                              </tr>
-                              <tr>
-                                 <td><code>teamId</code></td>
-                                 <td><code>int</code></td>
-                                 <td>ID týmu</td>
-                              </tr>
-                           </tbody>
-                        </table>
-
+                     <table class="table table-sm">
+                        <tbody>
+                           <tr>
+                              <td><code>playerId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID hráče</td>
+                           </tr>
+                           <tr>
+                              <td><code>teamId</code></td>
+                              <td><code>int</code></td>
+                              <td>ID týmu</td>
+                           </tr>
+                        </tbody>
+                     </table>
                      <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
@@ -1513,7 +1509,7 @@ Content-Type: application/json
                      <div class="col-md-6">
                         <h3 class="panel-title">
                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentSpirit" aria-expanded="false" aria-controls="tournamentSpirit">
-                           <strong>/tournament/{id}/spirit</strong>
+                           <strong>/tournament/{id}/spirits</strong>
                            </a>
                         </h3>
                      </div>
@@ -1532,7 +1528,7 @@ Content-Type: application/json
                      <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
-GET /api/tournament/1/spirit?teamId=1 HTTP/1.1
+GET /api/tournament/1/spirits?teamId=1 HTTP/1.1
 Host: catcher.zlutazimnice.cz
 </pre>
                      <h5>Odpověď</h5>
@@ -1555,6 +1551,56 @@ Host: catcher.zlutazimnice.cz
     "positiveGiven": 2.0,
     "total": 12.0,
     "positive": 2.0
+  }]
+}</pre>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentMissingSpirit" aria-expanded="false" aria-controls="tournamentMissingSpirit">
+                           <strong>/tournament/{id}/missing-spirits</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Chybějící hodnocení SOTG</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="tournamentMissingSpirit" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                     <h3>GET - Kolekce chybějících hodnocení SOTG</h3>
+                     <span class="label label-default">organizer</span>
+                     <span class="label label-default">admin</span>
+                     <p>
+                     <p>Vrátí seznam všech chybějících hodnocení SOTG, bez kterých nelze turnaj ukončit.</p>
+                     <h4>Příklad</h4>
+                     <h5>Požadavek</h5>
+                     <pre>
+GET /api/tournament/1/missing-spirits HTTP/1.1
+Host: catcher.zlutazimnice.cz
+Authorization: secretApiKey
+</pre>
+                     <h5>Odpověď</h5>
+                     <pre>HTTP/1.1 200 OK</pre>
+                     <pre>
+{
+  "count": 2,
+  "missingSpirits": [{
+    "teamId": 1,
+    "matchId": 5,
+    "identificator": "SE1",
+    "teamName": "FC Ostrava A"
+  }, {
+    "teamId": 4,
+    "matchId": 8,
+    "identificator": "FIN",
+    "teamName": "FC Ostrava A"
   }]
 }</pre>
                   </div>
@@ -1882,7 +1928,7 @@ Host: catcher.zlutazimnice.cz
                      <div class="col-md-6">
                         <h3 class="panel-title">
                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#matchSpirit" aria-expanded="false" aria-controls="matchSpirit">
-                           <strong>/match/{id}/spirit</strong>
+                           <strong>/match/{id}/spirits</strong>
                            </a>
                         </h3>
                      </div>
@@ -1900,7 +1946,7 @@ Host: catcher.zlutazimnice.cz
                      <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
-GET /api/match/8/spirit HTTP/1.1
+GET /api/match/8/spirits HTTP/1.1
 Host: catcher.zlutazimnice.cz
 </pre>
                      <h5>Odpověď</h5>
@@ -2008,7 +2054,7 @@ Host: catcher.zlutazimnice.cz
                      <h4>Příklad</h4>
                      <h5>Požadavek</h5>
                      <pre>
-POST /api/match/8/spirit HTTP/1.1
+POST /api/match/8/spirits HTTP/1.1
 Host: catcher.zlutazimnice.cz
 Content-Type: application/json
 </pre>

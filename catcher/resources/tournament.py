@@ -88,7 +88,7 @@ class Tournament(Item):
         tournament.terminated = True
         tournament.save()
 
-    falcon.before(Privilege(["organizer", "admin"]))
+    @falcon.before(Privilege(["organizer", "admin"]))
     def on_put(self, req, resp, id):
         Privilege.checkOrganizer(req.context['user'], int(id))
         
@@ -145,7 +145,10 @@ class TournamentTeams(object):
         }
         req.context['result'] = collection
 
+    @falcon.before(Privilege(["organizer", "admin"]))
     def on_put(self, req, resp, id):
+        Privilege.checkOrganizer(req.context['user'], int(id))
+        
         tournament = m.Tournament.get(id=id)
         if tournament.ready:
             raise ValueError("Tournament is ready and teams can't be changed")
@@ -194,34 +197,43 @@ class TournamentPlayers(object):
         } 
         req.context['result'] = collection
 
+    @falcon.before(Privilege(["club", "organizer", "admin"]))
     def on_post(self, req, resp, id):
+        teamId   = req.context['data']['teamId']
+        playerId = req.context['data']['playerId']
+        Privilege.checkOrganizer(req.context['user'], int(id))
+        Privilege.checkClub(req.context['user'], m.Team.get(id=teamId).clubId)
+
         tournament = m.Tournament.get(id=id)
         if not tournament.ready:
             raise ValueError("Tournament is not ready")
         newPlayer, created = m.PlayerAtTournament.create_or_get(
             tournamentId = int(id),
-            teamId       = req.context['data']['teamId'],
-            playerId     = req.context['data']['playerId']
+            teamId       = teamId,
+            playerId     = playerId
             )
         resp.status = falcon.HTTP_201 if created else falcon.HTTP_200
         req.context['result'] = newPlayer
 
+    @falcon.before(Privilege(["club", "organizer", "admin"]))
     def on_delete(self, req, resp, id):
-        teamId   = req.context['data'].get('teamId')
-        playerId = req.context['data'].get('playerId')
+        teamId   = req.context['data']['teamId']
+        playerId = req.context['data']['playerId']
+        Privilege.checkOrganizer(req.context['user'], int(id))
+        Privilege.checkClub(req.context['user'], m.Team.get(id=teamId).clubId)
         
         matches = m.PlayerAtTournament.get(
-            m.PlayerAtTournament.tournamentId == id,
-            m.PlayerAtTournament.teamId       == teamId,
-            m.PlayerAtTournament.playerId     == playerId
+            tournamentId = id,
+            teamId       = teamId,
+            playerId     = playerId
             ).matches
 
         if matches == 0:
-            d = m.PlayerAtTournament.delete().where(
-                m.PlayerAtTournament.tournamentId == id,
-                m.PlayerAtTournament.teamId       == teamId,
-                m.PlayerAtTournament.playerId     == playerId
-                ).execute()
+            player = m.PlayerAtTournament.get(
+                tournamentId = id,
+                teamId       = teamId,
+                playerId     = playerId
+                ).delete_instance()
         else:
             raise ValueError("Player has played matches")
 

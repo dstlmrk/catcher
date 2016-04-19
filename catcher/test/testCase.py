@@ -39,8 +39,6 @@ class TestCase(falcon.testing.TestBase):
 
     def setUp(self):
         Database.fill()
-        super(TestCase, self).setUp()
-        self.api = restapi.api
 
         models.Role(role="organizer").save()
         models.Role(role="admin").save()
@@ -64,7 +62,10 @@ class TestCase(falcon.testing.TestBase):
             apiKey   = "#apiKey3",
             role     = "organizer"
             ).save()
-
+        # database has to be filled before call before()
+        super(TestCase, self).setUp()
+        # api has to be after super
+        self.api = restapi.api
 
     def tearDown(self):
         super(TestCase, self).tearDown()
@@ -175,7 +176,7 @@ class TournamentTestCase(TestCase):
                 self.request(
                     method  = 'POST',
                     path    = ('/api/tournament/%s/players' % (tournamentId)),
-                    headers = {"Content-Type": "application/json"},
+                    headers = self.headers,
                     body    = {"playerId": playerId,"teamId": teamId}
                     )
                 self.assertEqual(self.srmock.status, HTTP_201)
@@ -191,8 +192,17 @@ class TournamentTestCase(TestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/tournament/%s' % tournamentId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {"ready": True}
+            )
+        self.assertEqual(self.srmock.status, HTTP_200)
+
+    def terminateTournament(self, tournamentId):
+        response = self.request(
+            method  = 'PUT',
+            path    = ('/api/tournament/%s' % tournamentId),
+            headers = self.headers,
+            body    = {"terminated": True}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
 
@@ -200,7 +210,7 @@ class TournamentTestCase(TestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/match/%s' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {"active": True}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
@@ -210,7 +220,7 @@ class TournamentTestCase(TestCase):
         response = self.request(
             method  = 'POST',
             path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {
                 "assistPlayerId": homePlayers[0],   
                 "scorePlayerId": homePlayers[1],
@@ -221,7 +231,7 @@ class TournamentTestCase(TestCase):
         response = self.request(
             method  = 'POST',
             path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {
                 "assistPlayerId": awayPlayers[0],   
                 "scorePlayerId": awayPlayers[1],
@@ -232,7 +242,7 @@ class TournamentTestCase(TestCase):
         response = self.request(
             method  = 'POST',
             path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {  
                 "scorePlayerId": awayPlayers[1],
                 "homePoint": False,
@@ -243,7 +253,7 @@ class TournamentTestCase(TestCase):
         response = self.request(
             method  = 'POST',
             path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {
                 "assistPlayerId": homePlayers[1],   
                 "scorePlayerId": homePlayers[2],
@@ -254,7 +264,7 @@ class TournamentTestCase(TestCase):
         response = self.request(
             method  = 'POST',
             path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {
                 "assistPlayerId": awayPlayers[2],
                 "scorePlayerId": None,
@@ -295,7 +305,7 @@ class TournamentTestCase(TestCase):
             response = self.request(
                 method  = 'PUT',
                 path    = ('/api/match/%s' % match.id),
-                headers = {"Content-Type": "application/json"},
+                headers = self.headers,
                 body    = {"terminated": True}
                 )
             self.assertEqual(self.srmock.status, HTTP_200)
@@ -332,7 +342,7 @@ class TournamentTestCase(TestCase):
             response = self.request(
                 method  = 'PUT',
                 path    = ('/api/match/%s' % match.id),
-                headers = {"Content-Type": "application/json"},
+                headers = self.headers,
                 body    = {"terminated": True}
                 )
             self.assertEqual(self.srmock.status, HTTP_200)
@@ -349,8 +359,8 @@ class TournamentTestCase(TestCase):
 
             response = self.request(
                 method  = 'POST',
-                path    = ('/api/match/%s/spirit' % match.id),
-                headers = {"Content-Type": "application/json"},
+                path    = ('/api/match/%s/spirits' % match.id),
+                headers = self.headers,
                 body    = {
                     "teamId": match.homeTeamId,
                     "comment": "Game was very agresive, but fair",
@@ -377,8 +387,8 @@ class TournamentTestCase(TestCase):
 
             response = self.request(
                 method  = 'POST',
-                path    = ('/api/match/%s/spirit' % match.id),
-                headers = {"Content-Type": "application/json"},
+                path    = ('/api/match/%s/spirits' % match.id),
+                headers = self.headers,
                 body    = {
                     "teamId": match.awayTeamId,
                     "comment": "Game was very agresive, but fair",

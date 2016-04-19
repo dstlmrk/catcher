@@ -25,7 +25,7 @@ class Match(TournamentTestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/match/%s' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {"active": True}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
@@ -61,7 +61,7 @@ class Match(TournamentTestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/match/%s' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {"description": "Baráž"}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
@@ -75,7 +75,7 @@ class Match(TournamentTestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/match/%s' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {"fieldId": 2}
             )
         self.assertEqual(self.srmock.status, HTTP_400)
@@ -115,7 +115,7 @@ class MatchPoints(TournamentTestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/match/%s/point/2' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {"assistPlayerId": 18, "scorePlayerId": 19}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
@@ -123,7 +123,7 @@ class MatchPoints(TournamentTestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/match/%s/point/4' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {"callahan": True}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
@@ -202,7 +202,7 @@ class MatchPoints(TournamentTestCase):
         response = self.request(
             method  = 'POST',
             path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = body
             )
         self.assertEqual(self.srmock.status, HTTP_400)
@@ -212,7 +212,7 @@ class MatchPoints(TournamentTestCase):
         response = self.request(
             method  = 'POST',
             path    = ('/api/match/%s/points' % matchId),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = body
             )
         self.assertEqual(self.srmock.status, HTTP_201)
@@ -357,12 +357,14 @@ class MatchPoints(TournamentTestCase):
         # delete two last points
         response = self.request(
             method  = 'DELETE',
-            path    = ('/api/match/%s/points' % matchId)
+            path    = ('/api/match/%s/points' % matchId),
+            headers = self.headers
             )
         self.assertEqual(self.srmock.status, HTTP_200)
         response = self.request(
             method  = 'DELETE',
-            path    = ('/api/match/%s/points' % matchId)
+            path    = ('/api/match/%s/points' % matchId),
+            headers = self.headers
             )
         self.assertEqual(self.srmock.status, HTTP_200)
 

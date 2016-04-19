@@ -9,6 +9,7 @@ import logging
 # import datetime
 from catcher.models.queries import Queries
 from playhouse.shortcuts import model_to_dict
+from catcher.api.privileges import Privilege
 
 class Sotg(object):
 
@@ -30,7 +31,13 @@ class Sotg(object):
 class Spirits(object):
     
     def on_get(self, req, resp, id):
-        
+        tournament = m.Tournament.get(id=id)
+        if not tournament.terminated:
+            raise falcon.HTTPBadRequest(
+                "Tournament isn't terminated yet",
+                "Spirits are visible after tournament"
+                )
+
         teamId = req.params.get('teamId')
         if teamId:
             qr = m.SpiritAvg.select().where(
@@ -53,7 +60,52 @@ class Spirits(object):
         }
         req.context['result'] = collection
 
+class MissingSpirits(object):
+
+    @falcon.before(Privilege(["organizer", "admin"]))
+    def on_get(self, req, resp, id):
+        Privilege.checkOrganizer(req.context['user'], int(id))
+        tournament = m.Tournament.get(id=id)
+        matches = Queries.getMatches(tournamentId=id)
+
+        missingSpirits = []
+        for match in matches:
+            if match['terminated'] != True:
+                continue
+            if match['homeTeam']['spirit'] is None:
+                missingSpirits.append({
+                    'teamId'       : match['homeTeam']['id'],
+                    'teamName'     : match['awayTeam']['name'],
+                    'matchId'      : match['id'],
+                    'identificator': match['identificator']
+                    })
+            if match['awayTeam']['spirit'] is None:
+                missingSpirits.append({
+                    'teamId'       : match['homeTeam']['id'],
+                    'teamName'     : match['homeTeam']['name'],
+                    'matchId'      : match['id'],
+                    'identificator': match['identificator']
+                    }) 
+
+        collection = {
+            'count'         : len(missingSpirits),
+            'missingSpirits': missingSpirits
+        }
+        req.context['result'] = collection
+
+
+
+
+
 class Spirit(object):
+
+    def getGivingTeamId(self, receivingTeamId, match):
+        if receivingTeamId == match.homeTeamId:
+            return match.awayTeamId
+        elif receivingTeamId == match.awayTeamId:
+            return match.homeTeamId
+        else:
+            raise ValueError("In match %s isn't team %s" % (match.id, receivingTeamId))
 
     def getNewAvg(self, avg, matches, newValue, oldValue = None):
         if oldValue is None:
@@ -61,25 +113,27 @@ class Spirit(object):
         else:
             return ((avg * matches) - oldValue + newValue) / (matches)
 
-    def updateSpirit(self, matchId, data, put = False):
-        
+    def updateSpirit(self, matchId, data, user, put = False):
         logging.info("Match %s has new spirit" % matchId)
 
         match = m.Match.get(id=matchId)
+        tournament = m.Tournament.get(id=match.tournamentId)
+
+        if tournament.terminated:
+            raise ValueError("Tournament is terminated")
         
         if not match.terminated:
-            ValueError("Match is not terminated still")
+            raise ValueError("Match is not terminated still")
         
         # check team ids
         receivingTeamId = int(data['teamId'])
-        if receivingTeamId == match.homeTeamId:
-            givingTeamId = match.awayTeamId
-        elif receivingTeamId == match.awayTeamId:
-            givingTeamId = match.homeTeamId
-        else:
-            raise ValueError("In match %s isn't team %s" % (match.id, receivingTeamId))
+        givingTeamId = self.getGivingTeamId(receivingTeamId, match)
 
-        # TODO: check rights, if user is giving team
+        # check rights, if user is giving team
+        Privilege.checkOrganizer(user, match.tournamentId)
+        team = m.Team.get(id=givingTeamId)
+        Privilege.checkClub(user, team.clubId)
+
 
         logging.info("Team %s gives spirit to team %s " % (givingTeamId, receivingTeamId))
 
@@ -226,15 +280,21 @@ class Spirit(object):
 
         return spirit, created
 
+    @falcon.before(Privilege(["club", "organizer", "admin"]))
     def on_get(self, req, resp, id):
-        # TODO: pouze, pokud jde o organizatora
+        loggedUser = req.context['user']
         match = Queries.getMatches(matchId=id)[0]
+        Privilege.checkOrganizer(loggedUser, m.Match.get(id=id).tournamentId)
+        
         homeSpirit = None
         awaySpirit = None
-
         try:
             homeSpirit = model_to_dict(m.Spirit.get(matchId = id, teamId = match['homeTeam']['id']))
             del homeSpirit['matchId'], homeSpirit['teamId'], homeSpirit['givingTeamId']
+            # if spirit is not club's
+            team = m.Team.get(id=match['homeTeam']['id'])
+            if loggedUser.role =="club" and not loggedUser.clubId ==  team.clubId:
+                homeSpirit = None
         except m.Spirit.DoesNotExist:
             pass
         finally:
@@ -243,6 +303,10 @@ class Spirit(object):
         try:
             awaySpirit = model_to_dict(m.Spirit.get(matchId = id, teamId = match['awayTeam']['id']))
             del awaySpirit['matchId'], awaySpirit['teamId'], awaySpirit['givingTeamId']
+            # if spirit is not club's
+            team = m.Team.get(id=match['awayTeam']['id'])
+            if loggedUser.role =="club" and not loggedUser.clubId ==  team.clubId:
+                homeSpirit = None
         except m.Spirit.DoesNotExist:
             pass
         finally:
@@ -250,17 +314,14 @@ class Spirit(object):
 
         req.context['result'] = match
 
+    @falcon.before(Privilege(["club", "organizer", "admin"])) 
     def on_put(self, req, resp, id):
-        match = m.Match.get(id=id)
-        tournament = m.Tournament.get(id=match.tournamentId)
-        if tournament.terminated:
-            raise ValueError("Tournament is terminated")
-        spirit, created = self.updateSpirit(int(id), req.context['data'], True)
+        spirit, created = self.updateSpirit(int(id), req.context['data'], req.context['user'], True)
         resp.status = falcon.HTTP_200 if created else falcon.HTTP_304
         req.context['result'] = spirit
 
-    # /api/match/{id}/spirit
+    @falcon.before(Privilege(["club", "organizer", "admin"]))
     def on_post(self, req, resp, id):
-        spirit, created = self.updateSpirit(int(id), req.context['data'])
+        spirit, created = self.updateSpirit(int(id), req.context['data'], req.context['user'])
         resp.status = falcon.HTTP_201 if created else falcon.HTTP_200
         req.context['result'] = spirit

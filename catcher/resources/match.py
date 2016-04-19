@@ -4,6 +4,7 @@
 from catcher.api.resource import Collection, Item
 from catcher import models as m
 from catcher.models.queries import Queries
+from catcher.api.privileges import Privilege
 import falcon
 
 import logging
@@ -127,9 +128,12 @@ class Match(Item):
     def on_get(self, req, resp, id):
         req.context['result'] = Queries.getMatches(matchId=id)[0]
 
+    @falcon.before(Privilege(["organizer", "admin"]))
     def on_put(self, req, resp, id):
-        data = req.context['data']
         match = m.Match.get(id=id)
+        Privilege.checkOrganizer(req.context['user'], match.tournamentId)
+        data = req.context['data']
+
         super(Match, self).on_put(req, resp, id,
             ['fieldId', 'startTime', 'endTime', 'description']
             )
@@ -224,13 +228,16 @@ class MatchPoints(Point):
         match['points'] = Queries.getPoints(id)
         req.context['result'] = match
 
+    @falcon.before(Privilege(["organizer", "admin"]))
     def on_post(self, req, resp, id):
+        match = m.Match.get(id=id)
+        Privilege.checkOrganizer(req.context['user'], match.tournamentId)
+
         data           = req.context['data']
         assistPlayerId = data.get('assistPlayerId')
         scorePlayerId  = data.get('scorePlayerId')
         callahan       = data.get('callahan', False)
         homePoint      = bool(data['homePoint'])
-        match          = m.Match.get(id=id)
         tournament     = m.Tournament.get(id=match.tournamentId)
 
         if not tournament.ready:
@@ -281,8 +288,10 @@ class MatchPoints(Point):
         req.context['result'] = point
         resp.status = falcon.HTTP_201
 
+    @falcon.before(Privilege(["organizer", "admin"]))
     def on_delete(self, req, resp, id):
         match          = m.Match.get(id=id)
+        Privilege.checkOrganizer(req.context['user'], match.tournamentId)
         # TODO: unite this two queries
         order, homeScore, awayScore = Queries.getLastPoint(match.id)
         point = Queries.getPoints(match.id, order)[0]
@@ -306,10 +315,12 @@ class MatchPoints(Point):
 
 class MatchPoint(Point):
 
+    @falcon.before(Privilege(["organizer", "admin"]))
     def on_put(self, req, resp, id, order):
-        
-        editableCols   = ['assistPlayerId', 'scorePlayerId', 'callahan']
         match          = m.Match.get(id=id)
+        Privilege.checkOrganizer(req.context['user'], match.tournamentId)
+
+        editableCols   = ['assistPlayerId', 'scorePlayerId', 'callahan']
         point          = m.Point.get(matchId=match.id, order=order)
         data           = req.context['data']
         assistPlayerId = data.get('assistPlayerId')

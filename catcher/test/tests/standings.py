@@ -47,7 +47,7 @@ class TournamentStandings(TournamentTestCase):
         response = self.request(
             method  = 'PUT',
             path    = ('/api/tournament/%s' % newTournament['id']),
-            headers = {"Content-Type": "application/json"},
+            headers = self.headers,
             body    = {"terminated": True}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
@@ -76,13 +76,3 @@ class TournamentStandings(TournamentTestCase):
         self.assertEqual(response['spirits'][0]['matches'], 2)
         self.assertEqual(response['spirits'][0]['total'], 12)
         self.assertEqual(response['spirits'][0]['totalGiven'], 10)
-        self.assertEqual(response['spirits'][0]['fouls'], 1)
-        self.assertEqual(response['spirits'][0]['foulsGiven'], 2)
-        self.assertEqual(response['spirits'][0]['fair'], 4)
-        self.assertEqual(response['spirits'][0]['fairGiven'], 2)
-        self.assertEqual(response['spirits'][0]['communication'], 2)
-        self.assertEqual(response['spirits'][0]['communicationGiven'], 2)
-        self.assertEqual(response['spirits'][0]['rules'], 3)
-        self.assertEqual(response['spirits'][0]['rulesGiven'], 2)
-        self.assertEqual(response['spirits'][0]['positive'], 2)
-        self.assertEqual(response['spirits'][0]['positiveGiven'], 2)

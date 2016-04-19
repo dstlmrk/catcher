@@ -5,9 +5,56 @@ from testCase import TournamentTestCase
 from falcon import HTTP_200, HTTP_201, HTTP_304, HTTP_400
 from catcher import models
 
-class Spirits(TournamentTestCase):
+class MissingSpirits(TournamentTestCase):
 
     def testGet1(self):
+        newTournament = self.createTournament()
+        tournamentId = newTournament['id']
+        # ready tournament
+        self.readyTournament(tournamentId)
+        self.createRosters(tournamentId)
+        # play all matches on tournament
+        self.playMatches(tournamentId)
+
+        # all spirits
+        response = self.request(
+            method  = 'GET',
+            path    = ('/api/tournament/%s/missing-spirits' % tournamentId),
+            headers = self.headers
+            )
+
+        self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(response['count'], 8)
+
+        matchId = self.getMatchId(tournamentId)
+        match = models.Match.get(id=matchId)
+        response = self.request(
+            method  = 'POST',
+            path    = ('/api/match/%s/spirits' % matchId),
+            headers = self.headers,
+            body    = {
+                "teamId": match.awayTeamId,
+                "comment": "Game was very agresive, but fair",
+                "rules": 4,
+                "fouls": 4,
+                "fair": 4,
+                "positive": 4,
+                "communication": 4
+                }
+            )
+        self.assertEqual(self.srmock.status, HTTP_201)
+
+        # all spirits - 1
+        response = self.request(
+            method  = 'GET',
+            path    = ('/api/tournament/%s/missing-spirits' % tournamentId),
+            headers = self.headers
+            )
+
+        self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(response['count'], 7)
+
+    def testGet2(self):
         newTournament = self.createTournament()
         tournamentId = newTournament['id']
         # ready tournament
@@ -19,7 +66,29 @@ class Spirits(TournamentTestCase):
 
         response = self.request(
             method  = 'GET',
-            path    = ('/api/tournament/%s/spirit' % tournamentId),
+            path    = ('/api/tournament/%s/missing-spirits' % tournamentId),
+            headers = self.headers
+            )
+
+        self.assertEqual(self.srmock.status, HTTP_200)
+        self.assertEqual(response['count'], 0)
+
+class Spirits(TournamentTestCase):
+
+    def testGet1(self):
+        newTournament = self.createTournament()
+        tournamentId = newTournament['id']
+        # ready tournament
+        self.readyTournament(tournamentId)
+        self.createRosters(tournamentId)
+        # play all matches on tournament
+        self.playMatches(tournamentId)
+        self.surrenderSpirit(tournamentId)
+        self.terminateTournament(tournamentId)
+
+        response = self.request(
+            method  = 'GET',
+            path    = ('/api/tournament/%s/spirits' % tournamentId),
             headers = {"Content-Type": "application/json"}
             )
         self.assertEqual(self.srmock.status, HTTP_200)
@@ -34,12 +103,13 @@ class Spirits(TournamentTestCase):
         # play all matches on tournament
         self.playMatches(tournamentId)
         self.surrenderSpirit(tournamentId)
-
+        self.terminateTournament(tournamentId)
+        
         matchId = self.getMatchId(tournamentId)
         match = models.Match.get(id=matchId)
         response = self.request(
             method      = 'GET',
-            path        = ('/api/tournament/%s/spirit' % tournamentId),
+            path        = ('/api/tournament/%s/spirits' % tournamentId),
             headers     = {"Content-Type": "application/json"},
             queryString = ("teamId=%s" % match.homeTeamId)
             )
@@ -77,8 +147,8 @@ class Spirit(TournamentTestCase):
         # put spirit at final
         response = self.request(
             method  = 'GET',
-            path    = ('/api/match/%s/spirit' % match.id),
-            headers = {"Content-Type": "application/json"}
+            path    = ('/api/match/%s/spirits' % match.id),
+            headers = self.headers
             )
 
         self.assertEqual(self.srmock.status, HTTP_200)
@@ -188,8 +258,8 @@ class Spirit(TournamentTestCase):
         # put spirit at final
         response = self.request(
             method  = 'PUT',
-            path    = ('/api/match/%s/spirit' % match.id),
-            headers = {"Content-Type": "application/json"},
+            path    = ('/api/match/%s/spirits' % match.id),
+            headers = self.headers,
             body    = {
                 "teamId": match.homeTeamId,
                 "comment": "Game was very agresive, but fair",
@@ -206,8 +276,8 @@ class Spirit(TournamentTestCase):
         # put spirit at final
         response = self.request(
             method  = 'PUT',
-            path    = ('/api/match/%s/spirit' % match.id),
-            headers = {"Content-Type": "application/json"},
+            path    = ('/api/match/%s/spirits' % match.id),
+            headers = self.headers,
             body    = {
                 "teamId": match.awayTeamId,
                 "comment": "Game was very agresive, but fair",

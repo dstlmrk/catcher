@@ -7,26 +7,15 @@ from catcher import models
 
 class User(TestCase):
 
-    def before(self):
-        models.Role(role="organizer").save()
-        models.Role(role="admin").save()
-        models.Role(role="club").save()
-        models.User(
-            email    = "test@test.cz",
-            password = "heslo1",
-            apiKey   = "#apiKey",
-            role     = "organizer"
-            ).save()
-
     def testPut1(self):
         '''edit email and password'''
-        user = models.User.get(apiKey="#apiKey")
+        user = models.User.get(apiKey="#apiKey3")
         response = self.request(
             method  = 'PUT',
             path    = ('/api/user/%s' % user.id),
             headers = {
                 "Content-Type" : "application/json",
-                "Authorization": "#apiKey"
+                "Authorization": "#apiKey3"
                 },
             body    = {
                 "email"   : "test2@test.cz",
@@ -42,7 +31,7 @@ class User(TestCase):
 
     def testPut2(self):
         '''edit email and password'''
-        user = models.User.get(apiKey="#apiKey")
+        user = models.User.get(apiKey="#apiKey3")
         response = self.request(
             method  = 'PUT',
             path    = ('/api/user/%s' % user.id),
@@ -79,17 +68,6 @@ class User(TestCase):
 
 class Users(TestCase):
 
-    def before(self):
-        models.Role(role="organizer").save()
-        models.Role(role="admin").save()
-        models.Role(role="club").save()
-        models.User(
-            email    = "admin@admin.cz",
-            password = "hesloAdmin",
-            apiKey   = "#apiKey",
-            role     = "admin"
-            ).save()
-
     def testPostOrganizer(self):
         '''create organizer'''
         # test new user (organizer)
@@ -110,13 +88,13 @@ class Users(TestCase):
 
     def testPostClub(self):
         '''create club'''
-        # test new user (organizer)
+        # test new user by admin
         response = self.request(
             method  = 'POST',
             path    = '/api/users',
             headers = {
                 "Content-Type" : "application/json",
-                "Authorization": "#apiKey"
+                "Authorization": "#apiKey1"
                 },
             body    = {
                 "email"   : "test@test.cz",
@@ -129,6 +107,3 @@ class Users(TestCase):
         self.assertEqual(response['clubId'], 1)
         self.assertEqual(response['email'], "test@test.cz")
         self.assertEqual(response['role'], "club")
-
-
-# TODO: napsat classu Login, kde overim prihlaseni a funkcnost apiKey
