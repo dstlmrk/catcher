@@ -76,14 +76,14 @@ class Users(TestCase):
             path    = '/api/users',
             headers = {"Content-Type": "application/json"},
             body    = {
-                "email"   : "test2@test.cz",
+                "email"   : "test-organizer@test.cz",
                 "password": "heslo1",
                 "role"    : "organizer"
                 }
             )
         self.assertEqual(self.srmock.status, HTTP_201)
         self.assertEqual(response['clubId'], None)
-        self.assertEqual(response['email'], "test2@test.cz")
+        self.assertEqual(response['email'], "test-organizer@test.cz")
         self.assertEqual(response['role'], "organizer")
 
     def testPostClub(self):

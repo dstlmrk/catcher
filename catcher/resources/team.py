@@ -45,7 +45,7 @@ class Teams(Collection):
         teams = Teams.getTeams()
         collection = {
             'count' : len(teams),
-            'teams' : teams
+            'items' : teams
         }
         req.context['result'] = collection
 

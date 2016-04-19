@@ -123,8 +123,8 @@ class Tournaments(Collection):
             )
 
         collection = {
-            'count'      : len(tournaments),
-            'tournaments': tournaments
+            'count': len(tournaments),
+            'items': tournaments
         }
         req.context['result'] = collection
     
@@ -180,8 +180,8 @@ class TournamentMatches(object):
             req.get_param_as_bool('terminated')
             )
         collection = {
-            'count'  : len(matches),
-            'matches': matches
+            'count': len(matches),
+            'items': matches
         }
         req.context['result'] = collection
 
@@ -193,7 +193,7 @@ class TournamentPlayers(object):
             )
         collection = {
             'count': len(players),
-            'players': players
+            'items': players
         } 
         req.context['result'] = collection
 

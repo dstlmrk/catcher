@@ -29,7 +29,7 @@ class Clubs(Collection):
         clubs = Queries.getClubs()
         collection = {
             'count' : len(clubs),
-            'clubs' : clubs
+            'items' : clubs
         }
         req.context['result'] = collection
 
@@ -57,7 +57,7 @@ class ClubPlayers():
 
         collection = {
             'count' : len(players),
-            'players' : players
+            'items' : players
         }
 
         req.context['result'] = collection
@@ -85,7 +85,7 @@ class ClubTeams():
 
         collection = {
             'count' : len(teams),
-            'teams' : teams
+            'items' : teams
         }
 
         req.context['result'] = collection

@@ -55,8 +55,8 @@ class Spirits(object):
             spirits.append(spirit)
         
         collection = {
-            'count'  : len(spirits),
-            'spirits': spirits
+            'count': len(spirits),
+            'items': spirits
         }
         req.context['result'] = collection
 
@@ -88,8 +88,8 @@ class MissingSpirits(object):
                     }) 
 
         collection = {
-            'count'         : len(missingSpirits),
-            'missingSpirits': missingSpirits
+            'count': len(missingSpirits),
+            'items': missingSpirits
         }
         req.context['result'] = collection
 
