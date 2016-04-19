@@ -22,7 +22,7 @@ else
 fi
 
 # creates init data
-if python /home/dstlmrk/catcher/catcher/createInitData.py; then
+if python /home/dstlmrk/catcher/catcher/init/createInitData.py; then
     echo -e "\e[32mInit data are created.\033[0m"
 else
     echo -e "\e[31mInit data are NOT created.\033[0m"
