@@ -23,8 +23,10 @@ class PeeweeConnection(object):
 
 class Crossdomain(object):
 
-    def process_response(self, req, resp, resource):
-        resp.set_header('Access-Control-Allow-Origin', '*')
+    def process_request(self, req, resp):
+        resp.append_header("Access-Control-Allow-Origin", "*")
+        resp.append_header("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Name")
+        resp.append_header("Access-Control-Allow-Methods", "PUT,POST,DELETE,GET")
 
 class Authorization(object):
 
