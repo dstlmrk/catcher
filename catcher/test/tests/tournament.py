@@ -8,6 +8,9 @@ from datetime import datetime
 
 class Tournaments(TournamentTestCase):
 
+    def testPost0(self):
+        self.createLeague()
+
     def testPost1(self):
         '''new tournament'''
         response = self.createTournament()
@@ -25,6 +28,8 @@ class Tournaments(TournamentTestCase):
             }
         # I can't know, what id is there
         del response['id']
+        del response['userId']
+
         self.assertEqual(response, expectedResponse)
         self.assertEqual(self.srmock.status, HTTP_201)
 
@@ -65,11 +70,15 @@ class Tournaments(TournamentTestCase):
                 "endTime": "2016-04-01T09:29:00",
                 "homeSeed": 1,
                 "awaySeed": 4,
-                "looserNextStep": "3RD",
-                "winnerNextStep": "FIN",
-                "looserFinalStanding": None,
-                "winnerFinalStanding": None,
-                "identificator": "SE1",
+                "winner":{
+                    "nextStepIde": "FIN",
+                    "finalStanding": None
+                },
+                "looser":{
+                    "nextStepIde": "3RD",
+                    "finalStanding": None
+                },
+                "ide": "SE1",
                 "description": None
             }, {
                 "fieldId": 1,
@@ -77,11 +86,15 @@ class Tournaments(TournamentTestCase):
                 "endTime": "2016-04-01T09:59:00",
                 "homeSeed": 2,
                 "awaySeed": 3,
-                "looserNextStep": "3RD",
-                "winnerNextStep": "FIN",
-                "looserFinalStanding": None,
-                "winnerFinalStanding": None,
-                "identificator": "SE2",
+                "winner":{
+                    "nextStepIde": "FIN",
+                    "finalStanding": None
+                },
+                "looser":{
+                    "nextStepIde": "3RD",
+                    "finalStanding": None
+                },
+                "ide": "SE2",
                 "description": None
             }, {
                 "fieldId": 1,
@@ -89,11 +102,15 @@ class Tournaments(TournamentTestCase):
                 "endTime": "2016-04-01T10:29:00",
                 "homeSeed": None,
                 "awaySeed": None,
-                "looserNextStep": None,
-                "winnerNextStep": None,
-                "looserFinalStanding": 4,
-                "winnerFinalStanding": 3,
-                "identificator": "3RD",
+                "winner":{
+                    "nextStepIde": None,
+                    "finalStanding": 3
+                },
+                "looser":{
+                    "nextStepIde": None,
+                    "finalStanding": 4
+                },
+                "ide": "3RD",
                 "description": None
             }, {
                 "fieldId": 1,
@@ -101,11 +118,15 @@ class Tournaments(TournamentTestCase):
                 "endTime": "2016-04-01T10:59:00",
                 "homeSeed": None,
                 "awaySeed": None,
-                "looserNextStep": None,
-                "winnerNextStep": None,
-                "looserFinalStanding": 2,
-                "winnerFinalStanding": 1,
-                "identificator": "FI",
+                "winner":{
+                    "nextStepIde": None,
+                    "finalStanding": 1
+                },
+                "looser":{
+                    "nextStepIde": None,
+                    "finalStanding": 2
+                },
+                "ide": "FI",
                 "description": "Finale"
             }]
         }

@@ -18,15 +18,15 @@ class User(TestCase):
                 "Authorization": "#apiKey3"
                 },
             body    = {
-                "email"   : "test2@test.cz",
-                "oldPassword": "heslo1",
-                "newPassword": "heslo2"
+                "email"   : "test33@test.cz",
+                "oldPassword": "heslo3",
+                "newPassword": "heslo33"
                 }
             )
 
         self.assertEqual(response['id'], user.id)
-        self.assertEqual(response['email'], "test2@test.cz")
-        self.assertEqual(response['password'], "heslo2")
+        self.assertEqual(response['email'], "test33@test.cz")
+        self.assertEqual(response['password'], "heslo33")
         self.assertEqual(self.srmock.status, HTTP_200)
 
     def testPut2(self):
@@ -37,7 +37,7 @@ class User(TestCase):
             path    = ('/api/user/%s' % user.id),
             headers = {
                 "Content-Type" : "application/json",
-                "Authorization": "#apiKey"
+                "Authorization": "#apiKey3"
                 },
             body    = {
                 "email"   : "test2@test.cz",
@@ -49,13 +49,13 @@ class User(TestCase):
 
     def testPut3(self):
         '''edit email and password by invalid user'''
-        user = models.User.get(apiKey="#apiKey")
+        user = models.User.get(apiKey="#apiKey1")
         response = self.request(
             method  = 'PUT',
             path    = ('/api/user/%s' % (user.id + 1)),
             headers = {
                 "Content-Type" : "application/json",
-                "Authorization": "#apiKey"
+                "Authorization": "#apiKey1"
                 },
             body    = {
                 "email"   : "test2@test.cz",

@@ -115,11 +115,15 @@ class TournamentTestCase(TestCase):
                 "endTime": "2016-04-01T09:29:00",
                 "homeSeed": 1,
                 "awaySeed": 4,
-                "looserNextStep": "3RD",
-                "winnerNextStep": "FIN",
-                "looserFinalStanding": None,
-                "winnerFinalStanding": None,
-                "identificator": "SE1",
+                "winner":{
+                    "nextStepIde": "FIN",
+                    "finalStanding": None
+                },
+                "looser":{
+                    "nextStepIde": "3RD",
+                    "finalStanding": None
+                },
+                "ide": "SE1",
                 "description": None
             }, {
                 "fieldId": 1,
@@ -127,11 +131,15 @@ class TournamentTestCase(TestCase):
                 "endTime": "2016-04-01T09:59:00",
                 "homeSeed": 2,
                 "awaySeed": 3,
-                "looserNextStep": "3RD",
-                "winnerNextStep": "FIN",
-                "looserFinalStanding": None,
-                "winnerFinalStanding": None,
-                "identificator": "SE2",
+                "winner":{
+                    "nextStepIde": "FIN",
+                    "finalStanding": None
+                },
+                "looser":{
+                    "nextStepIde": "3RD",
+                    "finalStanding": None
+                },
+                "ide": "SE2",
                 "description": None
             }, {
                 "fieldId": 1,
@@ -139,11 +147,15 @@ class TournamentTestCase(TestCase):
                 "endTime": "2016-04-01T10:29:00",
                 "homeSeed": None,
                 "awaySeed": None,
-                "looserNextStep": None,
-                "winnerNextStep": None,
-                "looserFinalStanding": 4,
-                "winnerFinalStanding": 3,
-                "identificator": "3RD",
+                "winner":{
+                    "nextStepIde": None,
+                    "finalStanding": 3
+                },
+                "looser":{
+                    "nextStepIde": None,
+                    "finalStanding": 4
+                },
+                "ide": "3RD",
                 "description": None
             }, {
                 "fieldId": 1,
@@ -151,11 +163,15 @@ class TournamentTestCase(TestCase):
                 "endTime": "2016-04-01T10:59:00",
                 "homeSeed": None,
                 "awaySeed": None,
-                "looserNextStep": None,
-                "winnerNextStep": None,
-                "looserFinalStanding": 2,
-                "winnerFinalStanding": 1,
-                "identificator": "FIN",
+                "winner":{
+                    "nextStepIde": None,
+                    "finalStanding": 1
+                },
+                "looser":{
+                    "nextStepIde": None,
+                    "finalStanding": 2
+                },
+                "ide": "FIN",
                 "description": "Finale"
             }]
         }
@@ -168,10 +184,125 @@ class TournamentTestCase(TestCase):
         self.assertEqual(self.srmock.status, HTTP_201)
         return response
 
-    def createRosters(self, tournamentId):
-        '''this method is used by tests for creating rosters (5 player for 4 teams)'''
+    def createLeague(self):
+        '''create tournament with groups'''
+        body = {
+            "name": "Champions League 2016",
+            "city": "Prague",
+            "country": "CZE",
+            "startDate": "2016-08-01",
+            "endDate": "2016-08-01",
+            "divisionId": 1,
+            "caldTournamentId": None,
+            "teams": [{
+                "id": 1,
+                "seeding": 1
+            }, {
+                "id": 2,
+                "seeding": 2
+            }, {
+                "id": 3,
+                "seeding": 3
+            }],
+            "fieldsCount": 1,
+            "fields": [{
+                "id": 1,
+                "name": "Main field"
+            }],
+            "groups": [{
+                "ide":"A",
+                "teams": [{
+                    "id": 1,
+                    "seeding": 1
+                    }, {
+                    "id": 2,
+                    "seeding": 2
+                    }, {
+                    "id": 3,
+                    "seeding": 3
+                    }],
+                "advancements":[{
+                    "standing": 1,
+                    "nextStepIde": None,
+                    "finalStanding": 1
+                    },{
+                    "standing": 2,
+                    "nextStepIde": None,
+                    "finalStanding": 2
+                    },{
+                    "standing": 3,
+                    "nextStepIde": None,
+                    "finalStanding": 3
+                    }]
+                }
+            ],
+            "matches": [{
+                "fieldId": 1,
+                "startTime": "2016-08-01T09:00:00",
+                "endTime": "2016-08-01T09:29:00",
+                "homeSeed": 1,
+                "awaySeed": 2,
+                "winner":{
+                    "nextStepIde": None,
+                    "finalStanding": None
+                },
+                "looser":{
+                    "nextStepIde": None,
+                    "finalStanding": None
+                },
+                "ide": "A",
+                "description": None
+            }, {
+                "fieldId": 1,
+                "startTime": "2016-08-01T09:30:00",
+                "endTime": "2016-08-01T09:59:00",
+                "homeSeed": 2,
+                "awaySeed": 3,
+                "winner":{
+                    "nextStepIde": None,
+                    "finalStanding": None
+                },
+                "looser":{
+                    "nextStepIde": None,
+                    "finalStanding": None
+                },
+                "ide": "A",
+                "description": None
+            }, {
+                "fieldId": 1,
+                "startTime": "2016-08-01T10:00:00",
+                "endTime": "2016-08-01T10:29:00",
+                "homeSeed": 3,
+                "awaySeed": 1,
+                "winner":{
+                    "nextStepIde": None,
+                    "finalStanding": None
+                },
+                "looser":{
+                    "nextStepIde": None,
+                    "finalStanding": None
+                },
+                "ide": "A",
+                "description": None
+            }]
+        }
+        response = self.request(
+            method  = 'POST',
+            path    = '/api/tournaments',
+            headers = {
+                "Content-Type" : "application/json",
+                "Authorization": "#apiKey3"
+                },
+            body    = body
+            )
+        self.assertEqual(self.srmock.status, HTTP_201)
+        self.assertEqual(response['teams'], 3)
+        return response
+
+    def createRosters(self, tournamentId, teamsCount = 4):
+        '''this method is used by tests for creating rosters (5 player for N teams)'''
         playerId = 1
-        for teamId in range(1,5):
+        for teamId in range(1,(teamsCount+1)):
             for i in range(0,5):
                 self.request(
                     method  = 'POST',

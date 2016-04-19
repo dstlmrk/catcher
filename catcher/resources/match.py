@@ -81,20 +81,19 @@ class Match(Item):
 
         match = m.Match.get(id=matchId)
 
-        # if match has next step, there have to be winner (playoff)
-        if match.looserFinalStanding or match.winnerFinalStanding \
-        or match.winnerNextStepIde or match.looserNextStepIde:
-            if match.homeScore > match.awayScore:
-                logging.info("2: Home team won: %s vs %s" % (match.homeTeamId, match.awayTeamId))
-                winnerTeamId = match.homeTeamId
-                looserTeamid = match.awayTeamId
-            elif match.homeScore < match.awayScore:
-                logging.info("2: Away team won: %s vs %s" % (match.homeTeamId, match.awayTeamId))
-                winnerTeamId = match.awayTeamId
-                looserTeamid = match.homeTeamId
-            else:
-                raise ValueError("Match have to have the one winner")
+        if match.homeScore > match.awayScore:
+            logging.info("2: Home team won: %s vs %s" % (match.homeTeamId, match.awayTeamId))
+            winnerTeamId = match.homeTeamId
+            looserTeamid = match.awayTeamId
+        elif match.homeScore < match.awayScore:
+            logging.info("2: Away team won: %s vs %s" % (match.homeTeamId, match.awayTeamId))
+            winnerTeamId = match.awayTeamId
+            looserTeamid = match.homeTeamId
+        else:
+            raise ValueError("Match have to have the one winner")
 
+        # if match has next step, there have to be winner (playoff)
+        if not match.group:
             if match.winnerFinalStanding:
                 logging.info("3: Winner ends on %s. place" % match.winnerFinalStanding)
                 Match.updateStanding(match.tournamentId, winnerTeamId, match.winnerFinalStanding)
@@ -117,7 +116,11 @@ class Match(Item):
                     )
                 Match.addTeamInNextStep(match.tournamentId, looserTeamid, match.looserNextStepIde)
         else:
-            pass
+            print match.homeScore, match.awayScore
+
+            # zapsat skore a vsechno ostatni do tabulky
+            # pokud skupina skoncila, poslat do dalsiho zapasu nebo umisteni
+            
             # TODO: Match hasn't next step, so it's in a group probably.
             # I can identify group by idendificator. 
 
@@ -134,21 +137,23 @@ class Match(Item):
         match = m.Match.get(id=id)
         Privilege.checkOrganizer(req.context['user'], match.tournamentId)
         data = req.context['data']
-
-        super(Match, self).on_put(req, resp, id,
-            ['fieldId', 'startTime', 'endTime', 'description']
-            )
         
-        edited = False
+        activated = False
         if not match.active and data.get('active'):
             self.activeMatch(id)
-            edited = True
+            activated = True
 
-        if match.active and not match.terminated and data.get('terminated'):
+        # after active, because it rewrites score
+        super(Match, self).on_put(req, resp, id,
+            ['homeScore', 'awayScore', 'fieldId', 'startTime', 'endTime', 'description']
+            )
+
+        terminated = False
+        if (match.active or activated) and not match.terminated and data.get('terminated'):
             self.terminateMatch(id)
-            edited = True
+            terminated = True
 
-        if edited:
+        if activated or terminated:
             resp.status = falcon.HTTP_200 
 
         req.context['result'] = Queries.getMatches(matchId = id)[0]

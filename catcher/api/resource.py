@@ -12,10 +12,10 @@ class Item(object):
         req.context['result'] = item
 
     def on_put(self, req, resp, id, editableCols=None):
-        requestBody = req.context['data']
+        data = req.context['data']
         params = None
         if editableCols is not None:
-            params = { key : requestBody[key] for key in requestBody if key in editableCols}
+            params = { key : data[key] for key in data if key in editableCols}
         qr = None
         if params:
             qr = self.model.update(**params).where(self.model.id==id).execute()
