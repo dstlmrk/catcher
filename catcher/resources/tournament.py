@@ -238,5 +238,47 @@ class TournamentPlayers(object):
         else:
             raise ValueError("Player has played matches")
 
+class TournamentGroup(object):
+
+    @staticmethod
+    def getGroup(tournamentId, ide):
+        qr = m.Group.get(tournamentId=tournamentId, ide=ide)
+        group = {
+            'ide'        : qr.ide,
+            'description': qr.description
+        }
+        qr = m.GroupHasTeam.select().where(
+            m.GroupHasTeam.tournamentId == tournamentId,
+            m.GroupHasTeam.ide == ide
+            )
+        teams = []
+        for team in qr:
+            teams.append({
+                'teamId'  : team.teamId,
+                'matches' : team.matches,
+                'wins'    : team.wins,
+                'losses'  : team.losses,
+                'plus'    : team.plus,
+                'minus'   : team.minus,
+                'points'  : team.points,
+                'standing': team.standing
+                })
+        group['teams'] = teams
+        return group
+    
+    def on_get(self, req, resp, id, ide):
+        req.context['result'] = TournamentGroup.getGroup(id, ide)
+
 class TournamentGroups(object):
-    pass
+
+    def on_get(self, req, resp, id):
+        
+        groups = []
+        qr = m.Group.select().where(m.Group.tournamentId==id)
+        for group in qr:
+            groups.append(TournamentGroup.getGroup(id, group.ide))
+        collection = {
+            'count': len(groups),
+            'items': groups
+        } 
+        req.context['result'] = collection

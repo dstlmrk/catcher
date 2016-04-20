@@ -179,7 +179,7 @@ class Identificator(MySQLModel):
     ide           = pw.CharField(max_length=3)
     tournamentId  = pw.IntegerField(db_column='tournament_id')
     matchId       = pw.IntegerField(db_column='match_id')
-    groupId       = pw.IntegerField(db_column='group_id')
+    # groupId       = pw.IntegerField(db_column='group_id')
 
     class Meta:
         # primary_key = False
@@ -187,6 +187,7 @@ class Identificator(MySQLModel):
         primary_key = pw.CompositeKey('ide', 'tournamentId')
 # ------------------------------------------------------------------------------------- 
 class Match(MySQLModel):
+    # id                  = pw.IntegerField()
     fieldId             = pw.IntegerField(db_column='field_id')
     description         = pw.CharField()
     startTime           = pw.DateTimeField(db_column = 'start_time')
@@ -208,7 +209,10 @@ class Match(MySQLModel):
     awayTeamId          = pw.IntegerField(db_column='away_team_id')
     homeTeamId          = pw.IntegerField(db_column='home_team_id')
     active              = pw.BooleanField()
-    group               = pw.BooleanField()
+    groupIde            = pw.CharField(db_column = 'group_ide')
+
+    # class Meta:
+    #     primary_key = pw.CompositeKey('ide', 'tournamentId')
 # -------------------------------------------------------------------------------------
 class Standing(MySQLModel):
     standing     = pw.IntegerField()
@@ -317,3 +321,38 @@ class SpiritAvg(MySQLModel):
     class Meta:
         primary_key = pw.CompositeKey('teamId', 'tournamentId') 
         db_table = 'spirit_avg'
+# -------------------------------------------------------------------------------------
+class Group(MySQLModel):
+    tournamentId  = pw.IntegerField(db_column='tournament_id')
+    ide           = pw.CharField()
+    teams         = pw.IntegerField()
+    description   = pw.CharField()
+
+    class Meta:
+        primary_key = pw.CompositeKey('tournamentId', 'ide')
+# -------------------------------------------------------------------------------------
+class Advancement(MySQLModel):
+    tournamentId  = pw.IntegerField(db_column='tournament_id')
+    ide           = pw.CharField()
+    standing      = pw.IntegerField()
+    finalStanding = pw.IntegerField(db_column='final_standing')
+    nextStepIde   = pw.CharField(db_column='next_step_ide')
+    
+    class Meta:
+        primary_key = pw.CompositeKey('group', 'standing')
+# -------------------------------------------------------------------------------------
+class GroupHasTeam(MySQLModel):
+    tournamentId = pw.IntegerField(db_column='tournament_id')
+    ide          = pw.CharField()
+    teamId       = pw.IntegerField(db_column='team_id')
+    matches      = pw.IntegerField()
+    wins         = pw.IntegerField()
+    losses       = pw.IntegerField()
+    plus         = pw.IntegerField()
+    minus        = pw.IntegerField()
+    points       = pw.IntegerField()
+    standing     = pw.IntegerField()
+
+    class Meta:
+        db_table = 'group_has_team'
+        primary_key = pw.CompositeKey('tournamentId', 'ide', 'teamId')

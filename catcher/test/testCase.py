@@ -109,7 +109,7 @@ class TournamentTestCase(TestCase):
             "groups": [
 
             ],
-            "matches": [{
+            "playoff": [{
                 "fieldId": 1,
                 "startTime": "2016-04-01T09:00:00",
                 "endTime": "2016-04-01T09:29:00",
@@ -212,14 +212,14 @@ class TournamentTestCase(TestCase):
             "groups": [{
                 "ide":"A",
                 "teams": [{
-                    "id": 1,
-                    "seeding": 1
+                    "id": 1
+                    # "seeding": 1
                     }, {
-                    "id": 2,
-                    "seeding": 2
+                    "id": 2
+                    # "seeding": 2
                     }, {
-                    "id": 3,
-                    "seeding": 3
+                    "id": 3
+                    # "seeding": 3
                     }],
                 "advancements":[{
                     "standing": 1,
@@ -233,58 +233,58 @@ class TournamentTestCase(TestCase):
                     "standing": 3,
                     "nextStepIde": None,
                     "finalStanding": 3
-                    }]
+                    }],
+                "matches": [{
+                    "fieldId": 1,
+                    "startTime": "2016-08-01T09:00:00",
+                    "endTime": "2016-08-01T09:29:00",
+                    "homeSeed": 1,
+                    "awaySeed": 2,
+                    "winner":{
+                        "nextStepIde": None,
+                        "finalStanding": None
+                    },
+                    "looser":{
+                        "nextStepIde": None,
+                        "finalStanding": None
+                    },
+                    "ide": "A1",
+                    "description": None
+                }, {
+                    "fieldId": 1,
+                    "startTime": "2016-08-01T09:30:00",
+                    "endTime": "2016-08-01T09:59:00",
+                    "homeSeed": 2,
+                    "awaySeed": 3,
+                    "winner":{
+                        "nextStepIde": None,
+                        "finalStanding": None
+                    },
+                    "looser":{
+                        "nextStepIde": None,
+                        "finalStanding": None
+                    },
+                    "ide": "A2",
+                    "description": None
+                }, {
+                    "fieldId": 1,
+                    "startTime": "2016-08-01T10:00:00",
+                    "endTime": "2016-08-01T10:29:00",
+                    "homeSeed": 1,
+                    "awaySeed": 3,
+                    "winner":{
+                        "nextStepIde": None,
+                        "finalStanding": None
+                    },
+                    "looser":{
+                        "nextStepIde": None,
+                        "finalStanding": None
+                    },
+                    "ide": "A3",
+                    "description": None
+                }]
                 }
-            ],
-            "matches": [{
-                "fieldId": 1,
-                "startTime": "2016-08-01T09:00:00",
-                "endTime": "2016-08-01T09:29:00",
-                "homeSeed": 1,
-                "awaySeed": 2,
-                "winner":{
-                    "nextStepIde": None,
-                    "finalStanding": None
-                },
-                "looser":{
-                    "nextStepIde": None,
-                    "finalStanding": None
-                },
-                "ide": "A",
-                "description": None
-            }, {
-                "fieldId": 1,
-                "startTime": "2016-08-01T09:30:00",
-                "endTime": "2016-08-01T09:59:00",
-                "homeSeed": 2,
-                "awaySeed": 3,
-                "winner":{
-                    "nextStepIde": None,
-                    "finalStanding": None
-                },
-                "looser":{
-                    "nextStepIde": None,
-                    "finalStanding": None
-                },
-                "ide": "A",
-                "description": None
-            }, {
-                "fieldId": 1,
-                "startTime": "2016-08-01T10:00:00",
-                "endTime": "2016-08-01T10:29:00",
-                "homeSeed": 3,
-                "awaySeed": 1,
-                "winner":{
-                    "nextStepIde": None,
-                    "finalStanding": None
-                },
-                "looser":{
-                    "nextStepIde": None,
-                    "finalStanding": None
-                },
-                "ide": "A",
-                "description": None
-            }]
+            ]
         }
         response = self.request(
             method  = 'POST',

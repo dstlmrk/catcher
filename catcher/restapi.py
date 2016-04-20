@@ -60,8 +60,8 @@ api.add_route("/api/user/{id}", resources.User())
 api.add_route("/api/login", resources.Login())
 api.add_route("/api/forgotten-password", resources.ForgottenPassword())
 
-# not implemented
-api.add_route('/api/tournament/{id}/groups',  resources.TournamentGroups())
+api.add_route('/api/tournament/{id}/groups', resources.TournamentGroups())
+api.add_route('/api/tournament/{id}/group/{ide}', resources.TournamentGroup())
 
 # errors
 # TODO: doplnit

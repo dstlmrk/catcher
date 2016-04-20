@@ -20,6 +20,7 @@ class Match(TournamentTestCase):
 
     def testPutActive(self):
         newTournament = self.createTournament()
+        self.readyTournament(newTournament['id'])
         # get one id match
         matchId = self.getMatchId(newTournament['id'])
         response = self.request(

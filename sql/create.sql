@@ -292,7 +292,6 @@ CREATE TABLE IF NOT EXISTS `catcher`.`identificator` (
   `ide` VARCHAR(3) NOT NULL,
   `tournament_id` INT NOT NULL,
   `match_id` INT NULL DEFAULT NULL COMMENT 'TODO: mohl bych snadneji poznavat, zda jde o skupinu/zapas',
-  `group_id` VARCHAR(3) NULL,
   PRIMARY KEY (`ide`, `tournament_id`),
   INDEX `fk_identificator_tournament1_idx` (`tournament_id` ASC),
   CONSTRAINT `fk_identificator_tournament1`
@@ -304,6 +303,37 @@ ENGINE = InnoDB
 COMMENT = 'Tahle tabulka je tu proto, aby nevznikaly duplicitni identif /* comment truncated */ /*icatory napric group a match.
 
 tournament_id a indentificator jsou unikatni dvojice*/';
+
+SHOW WARNINGS;
+
+-- -----------------------------------------------------
+-- Table `catcher`.`group`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `catcher`.`group` ;
+
+SHOW WARNINGS;
+CREATE TABLE IF NOT EXISTS `catcher`.`group` (
+  `tournament_id` INT NOT NULL,
+  `ide` VARCHAR(3) NOT NULL,
+  `teams` INT NOT NULL,
+  `description` VARCHAR(45) NULL COMMENT 'Nazev skupiny, napr. Skupina A',
+  PRIMARY KEY (`tournament_id`, `ide`),
+  UNIQUE INDEX `description_UNIQUE` (`description` ASC, `tournament_id` ASC)  COMMENT ' /* comment truncated */ /*Kazda skupina musi mit na turnaji jiny popisek.
+
+*/',
+  INDEX `fk_group_tournament1_idx` (`tournament_id` ASC),
+  INDEX `fk_group_identificator1_idx` (`ide` ASC),
+  CONSTRAINT `fk_group_tournament1`
+    FOREIGN KEY (`tournament_id`)
+    REFERENCES `catcher`.`tournament` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_group_identificator1`
+    FOREIGN KEY (`ide`)
+    REFERENCES `catcher`.`identificator` (`ide`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 SHOW WARNINGS;
 
@@ -336,13 +366,14 @@ CREATE TABLE IF NOT EXISTS `catcher`.`match` (
   `home_seed` SMALLINT NULL DEFAULT NULL,
   `away_seed` SMALLINT NULL DEFAULT NULL,
   `active` TINYINT(1) NOT NULL DEFAULT FALSE,
-  `group` TINYINT(1) NOT NULL DEFAULT FALSE,
+  `group_ide` VARCHAR(3) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_game_tournament1_idx` (`tournament_id` ASC),
   INDEX `fk_match_team1_idx` (`home_team_id` ASC),
   INDEX `fk_match_team2_idx` (`away_team_id` ASC),
   INDEX `fk_match_field1_idx` (`field_id` ASC),
   INDEX `fk_match_identificator1_idx` (`ide` ASC),
+  INDEX `fk_match_group1_idx` (`group_ide` ASC),
   CONSTRAINT `fk_game_tournament1`
     FOREIGN KEY (`tournament_id`)
     REFERENCES `catcher`.`tournament` (`id`)
@@ -366,6 +397,11 @@ CREATE TABLE IF NOT EXISTS `catcher`.`match` (
   CONSTRAINT `fk_match_identificator1`
     FOREIGN KEY (`ide`)
     REFERENCES `catcher`.`identificator` (`ide`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_match_group1`
+    FOREIGN KEY (`group_ide`)
+    REFERENCES `catcher`.`group` (`ide`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -514,37 +550,6 @@ COMMENT = 'TODO: Tahle tabulka se muze pouzit v budoucnu pro team_spiri /* comme
 SHOW WARNINGS;
 
 -- -----------------------------------------------------
--- Table `catcher`.`group`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `catcher`.`group` ;
-
-SHOW WARNINGS;
-CREATE TABLE IF NOT EXISTS `catcher`.`group` (
-  `tournament_id` INT NOT NULL,
-  `ide` VARCHAR(3) NOT NULL,
-  `teams` INT NOT NULL,
-  `description` VARCHAR(45) NOT NULL COMMENT 'Nazev skupiny, napr. Skupina A',
-  PRIMARY KEY (`tournament_id`, `ide`),
-  UNIQUE INDEX `description_UNIQUE` (`description` ASC, `tournament_id` ASC)  COMMENT ' /* comment truncated */ /*Kazda skupina musi mit na turnaji jiny popisek.
-
-*/',
-  INDEX `fk_group_tournament1_idx` (`tournament_id` ASC),
-  INDEX `fk_group_identificator1_idx` (`ide` ASC),
-  CONSTRAINT `fk_group_tournament1`
-    FOREIGN KEY (`tournament_id`)
-    REFERENCES `catcher`.`tournament` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_group_identificator1`
-    FOREIGN KEY (`ide`)
-    REFERENCES `catcher`.`identificator` (`ide`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-SHOW WARNINGS;
-
--- -----------------------------------------------------
 -- Table `catcher`.`group_has_team`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `catcher`.`group_has_team` ;
@@ -560,7 +565,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`group_has_team` (
   `plus` SMALLINT NOT NULL DEFAULT 0,
   `minus` SMALLINT NOT NULL DEFAULT 0,
   `points` SMALLINT NOT NULL DEFAULT 0,
-  `standing` SMALLINT NULL,
+  `standing` SMALLINT NULL DEFAULT NULL,
   PRIMARY KEY (`tournament_id`, `ide`, `team_id`),
   INDEX `fk_group_has_team_at_tournament_team_at_tournament1_idx` (`tournament_id` ASC, `team_id` ASC),
   INDEX `fk_group_has_team_group1_idx` (`ide` ASC),
@@ -588,12 +593,19 @@ CREATE TABLE IF NOT EXISTS `catcher`.`advancement` (
   `tournament_id` INT NOT NULL,
   `ide` VARCHAR(3) NOT NULL,
   `standing` SMALLINT NOT NULL,
-  `final_standing` SMALLINT NULL,
+  `final_standing` SMALLINT NULL DEFAULT NULL,
+  `next_step_ide` VARCHAR(3) NULL DEFAULT NULL,
   PRIMARY KEY (`tournament_id`, `ide`, `standing`),
   INDEX `fk_advancement_group1_idx` (`tournament_id` ASC, `ide` ASC),
+  INDEX `fk_advancement_identificator1_idx` (`next_step_ide` ASC),
   CONSTRAINT `fk_advancement_group1`
     FOREIGN KEY (`tournament_id` , `ide`)
     REFERENCES `catcher`.`group` (`tournament_id` , `ide`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_advancement_identificator1`
+    FOREIGN KEY (`next_step_ide`)
+    REFERENCES `catcher`.`identificator` (`ide`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

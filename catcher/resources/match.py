@@ -75,25 +75,97 @@ class Match(Item):
         match.active = True
         match.save()
 
+    def updateGroupTable(self, winner, looser, winnerScore, looserScore):
+        winner.matches      = winner.matches + 1
+        winner.wins         = winner.wins + 1
+        winner.plus         = winner.plus + winnerScore
+        winner.minus        = winner.minus + looserScore
+        winner.points       = winner.points + 2
+        looser.matches      = looser.matches + 1
+        looser.losses       = looser.losses + 1
+        looser.plus         = looser.plus + looserScore
+        looser.minus        = looser.minus + winnerScore
+        winner.save()
+        looser.save()
+
+    def recomputeGroup(self, tournamentId, groupIde):
+        # prepocitat vysledky
+        # teams = []
+
+        teams = m.GroupHasTeam.select().where(
+            m.GroupHasTeam.tournamentId == tournamentId,
+            m.GroupHasTeam.ide == groupIde
+            ).order_by(
+            m.GroupHasTeam.points.desc(),
+            (m.GroupHasTeam.plus).desc()
+            )
+
+        standing = 1
+        for team in teams:
+            team.standing = standing
+            team.save()
+            standing += 1
+            print team
+
+
+        matches = m.Match.select().where(
+            m.Match.groupIde == groupIde
+            )
+        for match in matches:
+            print match
+            if not match.terminated:
+                return
+
+        logging.info("Group is complete")
+
+        for team in teams:
+            advancement = m.Advancement.get(
+                tournamentId = tournamentId,
+                ide = groupIde,
+                standing = team.standing
+                )
+
+            if advancement.finalStanding:
+                Match.updateStanding(
+                    tournamentId, team.teamId, advancement.finalStanding
+                    )
+            elif advancement.nextStepIde:
+                Match.addTeamInNextStep(
+                    tournamentId, team.teamId, advancement.nextStepIde
+                    )
+            else:
+                raise RuntimeError(
+                    "Team %s doesn't know, where continue from %s group"
+                    % (team.teamId, groupIde)
+                    )
+
+
+
     @m.db.atomic()
     def terminateMatch(self, matchId):
         logging.info("1: Match %s is in terminating" % matchId)
 
         match = m.Match.get(id=matchId)
+        match.terminated = True
+        match.save()
 
         if match.homeScore > match.awayScore:
             logging.info("2: Home team won: %s vs %s" % (match.homeTeamId, match.awayTeamId))
             winnerTeamId = match.homeTeamId
-            looserTeamid = match.awayTeamId
+            winnerScore  = match.homeScore
+            looserTeamId = match.awayTeamId
+            looserScore  = match.awayScore
         elif match.homeScore < match.awayScore:
             logging.info("2: Away team won: %s vs %s" % (match.homeTeamId, match.awayTeamId))
             winnerTeamId = match.awayTeamId
-            looserTeamid = match.homeTeamId
+            winnerScore  = match.awayScore
+            looserTeamId = match.homeTeamId
+            looserScore  = match.homeScore
         else:
             raise ValueError("Match have to have the one winner")
 
         # if match has next step, there have to be winner (playoff)
-        if not match.group:
+        if not match.groupIde:
             if match.winnerFinalStanding:
                 logging.info("3: Winner ends on %s. place" % match.winnerFinalStanding)
                 Match.updateStanding(match.tournamentId, winnerTeamId, match.winnerFinalStanding)
@@ -107,25 +179,32 @@ class Match(Item):
 
             if match.looserFinalStanding:
                 logging.info("3: Looser ends on %s. place" % match.looserFinalStanding)
-                Match.updateStanding(match.tournamentId, looserTeamid, match.looserFinalStanding)
+                Match.updateStanding(match.tournamentId, looserTeamId, match.looserFinalStanding)
             if match.looserNextStepIde:
                 identificator = m.Identificator.get(ide = match.looserNextStepIde)
                 logging.info(
                     "3: Looser's next match is %s (%s)" 
                     % (identificator.matchId, identificator.ide)
                     )
-                Match.addTeamInNextStep(match.tournamentId, looserTeamid, match.looserNextStepIde)
+                Match.addTeamInNextStep(match.tournamentId, looserTeamId, match.looserNextStepIde)
         else:
             print match.homeScore, match.awayScore
 
-            # zapsat skore a vsechno ostatni do tabulky
-            # pokud skupina skoncila, poslat do dalsiho zapasu nebo umisteni
-            
-            # TODO: Match hasn't next step, so it's in a group probably.
-            # I can identify group by idendificator. 
+            winner = m.GroupHasTeam.get(
+                tournamentId = match.tournamentId,
+                ide = match.groupIde,
+                teamId = winnerTeamId
+                )
 
-        match.terminated = True
-        match.save()
+            looser = m.GroupHasTeam.get(
+                tournamentId = match.tournamentId,
+                ide = match.groupIde,
+                teamId = looserTeamId
+                )
+
+            self.updateGroupTable(winner, looser, winnerScore, looserScore)
+
+            self.recomputeGroup(match.tournamentId, match.groupIde)
 
         # now is allowed consigning Spirit of the Game
 
@@ -137,9 +216,15 @@ class Match(Item):
         match = m.Match.get(id=id)
         Privilege.checkOrganizer(req.context['user'], match.tournamentId)
         data = req.context['data']
+
+
+        tournament = m.Tournament.get(id=match.tournamentId)
         
         activated = False
         if not match.active and data.get('active'):
+            if not tournament.ready:
+                raise ValueError("Tournament is not ready yet")
+
             self.activeMatch(id)
             activated = True
 
@@ -147,6 +232,10 @@ class Match(Item):
         super(Match, self).on_put(req, resp, id,
             ['homeScore', 'awayScore', 'fieldId', 'startTime', 'endTime', 'description']
             )
+
+        if 'homeScore' in data and 'awayScore' in data:
+            pass
+            # TODO: pri zmene skore smazat vsechny doposud odehrane body
 
         terminated = False
         if (match.active or activated) and not match.terminated and data.get('terminated'):

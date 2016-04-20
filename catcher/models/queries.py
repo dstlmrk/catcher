@@ -126,8 +126,8 @@ class Queries(object):
              " away_team.degree, match.start_time, match.end_time, match.terminated,"
              " match.home_score, match.away_score, match.spirit_home, match.spirit_away,"
              " match.description, match.looser_final_standing, match.winner_final_standing,"
-             " winner_next_step.ide, winner_next_step.match_id, winner_next_step.group_id,"
-             " looser_next_step.ide, looser_next_step.match_id, looser_next_step.group_id,"
+             " winner_next_step.ide, winner_next_step.match_id,"
+             " looser_next_step.ide, looser_next_step.match_id,"
              " match.home_seed, match.away_seed, match.active FROM `match`"
              " JOIN identificator ON match.ide = identificator.ide"
              " JOIN field ON field.id = match.field_id AND field.tournament_id = match.tournament_id"
@@ -147,15 +147,13 @@ class Queries(object):
             if row[20] is not None:
                 looserNextStep = {
                     'ide'     :row[20],
-                    'matchId' :row[21],
-                    'groupId' :row[22]
+                    'matchId' :row[21]
                 }
             winnerNextStep = None
-            if row[23] is not None:
+            if row[22] is not None:
                 winnerNextStep = {
-                    'ide'     :row[23],
-                    'matchId' :row[24],
-                    'groupId' :row[25]
+                    'ide'     :row[22],
+                    'matchId' :row[23]
                 }
             matches.append({
                 'id'            : row[0],
@@ -169,14 +167,14 @@ class Queries(object):
                     'name'      : (row[5] + " " + row[6]) if row[5] is not None else None,
                     'score'     : row[13],
                     'spirit'    : row[15],
-                    'seed'      : row[26]
+                    'seed'      : row[24]
                     },
                 'awayTeam'      : {
                     'id'        : row[7] if row[4] is not None else None,
                     'name'      : (row[8] + " " + row[9]) if row[5] is not None else None,
                     'score'     : row[14],
                     'spirit'    : row[16],
-                    'seed'      : row[27]
+                    'seed'      : row[25]
                     },
                 'time'          : {
                     'start'     : row[10],
@@ -192,7 +190,7 @@ class Queries(object):
                     'finalStanding': row[19],
                     'nextStep'  : winnerNextStep
                     },
-                'active'        : row[28]
+                'active'        : row[26]
                 })
         return matches
 

@@ -7,6 +7,8 @@ import falcon
 
 # TODO: kdyz zadam u finale homeSeed, turnaj se vytvori
 
+        
+
 class TournamentCreater(object):
 
     def getTimestamp(self, timestamp):
@@ -148,14 +150,16 @@ class TournamentCreater(object):
 
     @staticmethod
     def checkNextStepInMatch(match):
-        if not match.get('looser').get('nextStepIde') and not match.get('looser').get('finalStanding'):
-            raise ValueError(
-                    "Match %s has no more way for looser" % match['ide']
-                    )
-        if not match.get('winner').get('nextStepIde') and not match.get('winner').get('finalStanding'):
-            raise ValueError(
-                "Match %s has no more way for winner" % match['ide']
-                )
+        pass
+        # TODO: nefunguje na zapasy ve skupine
+        # if not match.get('looser').get('nextStepIde') and not match.get('looser').get('finalStanding'):
+        #     raise ValueError(
+        #             "Match %s has no more way for looser" % match['ide']
+        #             )
+        # if not match.get('winner').get('nextStepIde') and not match.get('winner').get('finalStanding'):
+        #     raise ValueError(
+        #         "Match %s has no more way for winner" % match['ide']
+        #         )
 
     def checkMatches(self, matches, startDate, endDate, fields, groups):
         groupMatches = []
@@ -269,18 +273,19 @@ class TournamentCreater(object):
                 processes.append(match['winner']['nextStepIde'])
             if match.get('looser').get('nextStepIde'):
                 processes.append(match['looser']['nextStepIde'])
+        # TODO: tady musim pridat idcka z postupovych mist ze skupiny 
 
-        for match in matches:
-            if match not in groupMatches:
-                matchIde = match['ide']
-                # if teams aren't seeded, way inwards must be here
-                if not match.get('homeSeed') or not match.get('awaySeed'):
-                    try:
-                        # twice removed because there have to be two ways  
-                        processes.remove(matchIde)
-                        processes.remove(matchIde)
-                    except ValueError:
-                        raise ValueError("In match %s won't play two teams" % matchIde)
+        # for match in matches:
+        #     if match not in groupMatches:
+        #         matchIde = match['ide']
+        #         # if teams aren't seeded, way inwards must be here
+        #         if not match.get('homeSeed') or not match.get('awaySeed'):
+        #             try:
+        #                 # twice removed because there have to be two ways  
+        #                 processes.remove(matchIde)
+        #                 processes.remove(matchIde)
+        #             except ValueError:
+        #                 raise ValueError("In match %s won't play two teams" % matchIde)
 
         # TODO: napsat funkce pro simulaci pruchodu turnajem, aby se zjistilo,
         # ze nejaky tym nema sanci skoncit prvni (druhy apod.)
@@ -293,7 +298,7 @@ class TournamentCreater(object):
         # (4) --/       \-- (SE2)
 
     @m.db.atomic()
-    def saveTournament(self, data, groupMatches, user):
+    def saveTournament(self, data, groupMatches, user, matches):
         print "--------------"
         print groupMatches
         # Tournament
@@ -321,48 +326,62 @@ class TournamentCreater(object):
                 tournamentId = tournamentId
                 ).execute()
 
+        groups = data.get('groups')
+        # Identificators
+        if matches:
+            for match in matches:
+                identificator, created = m.Identificator.get_or_create(
+                    tournamentId  = tournamentId,
+                    ide           = match['ide']
+                    )
+        if groups:
+            for group in groups:
+                identificator, created = m.Identificator.get_or_create(
+                    tournamentId  = tournamentId,
+                    ide           = group['ide']
+                    )
+
         # Groups
-        # TODO: ulozit skupiny a postupy ze skupin
+        if groups:
+            for group in groups:
+                print group
+                
+                m.Group.insert(
+                    tournamentId = tournamentId,
+                    ide          = group['ide'],
+                    teams        = len(group['teams']),
+                    description  = group.get('description')
+                ).execute()
 
-        for match in data['matches']:
+                for advancement in group['advancements']:
+                    m.Advancement.insert(
+                        tournamentId  = tournamentId,
+                        ide           = group['ide'],
+                        standing      = advancement['standing'],
+                        finalStanding = advancement.get('finalStanding'),
+                        nextStepIde   = advancement.get('nextStepIde')
+                    ).execute()
 
-            # Identificators
-            identificator, created = m.Identificator.get_or_create(
-                tournamentId  = tournamentId,
-                ide           = match['ide']
-                )
+                # vyplni skupiny tymy, tzn, ze se zatim neda do skupiny postupovat
+                for team in group['teams']:
+                    m.GroupHasTeam.insert(
+                        tournamentId = tournamentId,
+                        ide          = group['ide'],
+                        teamId       = team['id']
+                        ).execute()
+
+        for match in matches:
 
             if match not in groupMatches:
-                
-                winnerNextStepIde = None
-                if match['winner']['nextStepIde'] is not None:
-                    winnerNextStepIde, created = m.Identificator.get_or_create(
-                        tournamentId  = tournamentId,
-                        ide           = match['winner']['nextStepIde']
-                        )
-                    winnerNextStepIde = winnerNextStepIde.ide
 
-                looserNextStepIde = None
-                if match['looser']['nextStepIde'] is not None:
-                    looserNextStepIde, created = m.Identificator.get_or_create(
-                        tournamentId  = tournamentId,
-                        ide           = match['looser']['nextStepIde']
-                        )
-                    looserNextStepIde = looserNextStepIde.ide
-
-                
-                # del match['winnerNextStepIde']
-                # del match['looserNextStepIde']
-
+                winnerNextStepIde = match['winner']['nextStepIde']
+                looserNextStepIde = match['looser']['nextStepIde']
                 winnerFinalStanding = match.get('winner').get('finalStanding')
                 looserFinalStanding = match.get('looser').get('finalStanding')
 
                 del match['winner']
                 del match['looser']
 
-                print match
-
-                print winnerNextStepIde
                 # Match
                 matchId = m.Match.insert(
                     tournamentId      = tournamentId,
@@ -376,31 +395,47 @@ class TournamentCreater(object):
                 m.Identificator.\
                     update(matchId = matchId).\
                     where(
-                        m.Identificator.ide == identificator.ide,
+                        m.Identificator.ide == match['ide'],
                         m.Identificator.tournamentId == tournamentId
                         ).execute()
 
             else:
-                print "VKLADAM ZAPAS", match
+                print "VKLADAM ZAPAS VE SKUPINE", match
 
                 del match['winner']
                 del match['looser']
 
-                # Match
+                # Match in Group
                 matchId = m.Match.insert(
                     tournamentId      = tournamentId,
-                    group             = True,
+                    groupIde          = True,
                     **match
                     ).execute()
-                print "ULOZENO"
-
-
 
         return tournamentId
 
+    def getAllMatches(self, data):
+        matches = []
+        groups = data.get('groups')
+        if groups:
+            for group in groups:
+                for match in group['matches']:
+                    match['groupIde'] = group['ide']
+                    matches.append(match)
+        playoff = data.get('playoff')
+        if playoff:
+            for match in playoff:
+                matches.append(match)
+        return matches
+
     # method get is used, where value can be null
     def createTournament(self, req, resp, user):
+
         data = req.context['data']
+
+        # TODO: do budoucna
+        # tournament = Tournament(data, user)
+
 
         data['user'] = user
         # load term and check it
@@ -426,16 +461,42 @@ class TournamentCreater(object):
         self.checkGroups(groups)
 
         # load and check matches
-        matches = data.get('matches')
+        matches = self.getAllMatches(data)
         # TODO: nutne otestovat
+        # if matches:
         self.checkSeedings(matches, len(teams))
         groupMatches = self.checkMatches(matches, startDate, endDate, fields, groups)
         self.checkTournamentTree(matches, groups, teams, groupMatches)
  
         # atomic create tournament
-        tournamentId = self.saveTournament(data, groupMatches, user)
+        tournamentId = self.saveTournament(data, groupMatches, user, matches)
 
         # for result body
         createdTurnament = m.Tournament.get(id=tournamentId)
 
         return createdTurnament
+
+
+# class Tournament(object):
+#     def __init__(self, data, user):
+#         print "VYTVARIM TURNAJ"
+#         self.matches = Tournament.getAllMatches(data)
+#         self.fields  = data.get('fields')
+#         self.user    = user
+
+#     def save(self):
+#         pass
+
+#     @staticmethod
+#     def getAllMatches(data):
+#         matches = []
+#         groups = data.get('groups')
+#         if groups:
+#             for group in groups:
+#                 for match in group['matches']:
+#                     matches.append(match)
+#         playoff = data.get('playoff')
+#         if playoff:
+#             for match in playoff:
+#                 matches.append(match)
+#         return matches
