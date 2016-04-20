@@ -52,6 +52,6 @@ class ForgottenPassword(object):
             server.quit()
             user.password = newPassword
             user.save()
-        except:
-            logging.error("Reset password for %s wasn't successful" % email)
+        except Exception ex:
+            logging.error("Reset password for %s wasn't successful (%s)" % (email,ex))
             falcon.HTTPInternalServerError(title, description, **kwargs)
