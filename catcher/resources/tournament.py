@@ -178,7 +178,8 @@ class TournamentMatches(object):
             req.params.get('fieldId'),
             req.params.get('date'),
             req.get_param_as_bool('active'),
-            req.get_param_as_bool('terminated')
+            req.get_param_as_bool('terminated'),
+            req.params.get('groupIde')
             )
         collection = {
             'count': len(matches),

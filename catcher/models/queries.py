@@ -114,13 +114,21 @@ class Queries(object):
         return qr if qr else (0, 0, 0)
 
     @staticmethod
-    def getMatches(tournamentId = None, matchId = None, fieldId = None, date = None, active = None, terminated = None):
+    def getMatches(tournamentId = None,
+                   matchId      = None,
+                   fieldId      = None,
+                   date         = None,
+                   active       = None,
+                   terminated   = None,
+                   groupIde     = None
+                   ):
         whereTournament = "" if tournamentId is None else ("AND match.tournament_id = %s" % tournamentId)
         whereMatch      = "" if matchId is None else ("AND match.id = %s" % matchId) 
         whereField      = "" if fieldId is None else ("AND field.id = %s" % fieldId) 
         whereDate       = "" if date is None else ("AND DATE(match.start_time) = %s" % date) 
         whereActive     = "" if active is None else ("AND match.active = %s" % active) 
-        whereTerminated = "" if terminated is None else ("AND match.terminated = %s" % terminated) 
+        whereTerminated = "" if terminated is None else ("AND match.terminated = %s" % terminated)
+        whereGroup      = "" if groupIde is None else ("AND match.group_ide = \"%s\"" % groupIde) 
         q = ("SELECT match.id, identificator.ide, field.id, field.name,"
              " home_team_id, home_club.name, home_team.degree, away_team_id, away_club.name,"
              " away_team.degree, match.start_time, match.end_time, match.terminated,"
@@ -128,17 +136,19 @@ class Queries(object):
              " match.description, match.looser_final_standing, match.winner_final_standing,"
              " winner_next_step.ide, winner_next_step.match_id,"
              " looser_next_step.ide, looser_next_step.match_id,"
-             " match.home_seed, match.away_seed, match.active FROM `match`"
-             " JOIN identificator ON match.ide = identificator.ide"
+             " match.home_seed, match.away_seed, match.active, match.group_ide FROM `match`"
+             " JOIN identificator ON match.ide = identificator.ide AND match.tournament_id = identificator.tournament_id"
              " JOIN field ON field.id = match.field_id AND field.tournament_id = match.tournament_id"
              " LEFT OUTER JOIN team AS home_team ON home_team.id = match.home_team_id"
              " LEFT OUTER JOIN team AS away_team ON away_team.id = match.away_team_id"
              " LEFT OUTER JOIN club AS home_club ON home_club.id = home_team.id"
              " LEFT OUTER JOIN club AS away_club ON away_club.id = away_team.id"
              " LEFT OUTER JOIN identificator AS winner_next_step ON winner_next_step.ide = match.winner_next_step_ide"
+             " AND match.tournament_id = winner_next_step.tournament_id"
              " LEFT OUTER JOIN identificator AS looser_next_step ON looser_next_step.ide = match.looser_next_step_ide"
-             " WHERE 1 %s %s %s %s %s %s;" 
-             % (whereTournament, whereMatch, whereField, whereDate, whereActive, whereTerminated)
+             " AND match.tournament_id = looser_next_step.tournament_id"
+             " WHERE 1 %s %s %s %s %s %s %s;" 
+             % (whereTournament, whereMatch, whereField, whereDate, whereActive, whereTerminated, whereGroup)
              )
         qr = m.db.execute_sql(q)
         matches = []
@@ -190,7 +200,8 @@ class Queries(object):
                     'finalStanding': row[19],
                     'nextStep'  : winnerNextStep
                     },
-                'active'        : row[26]
+                'active'        : row[26],
+                'groupIde'      : row[27]
                 })
         return matches
 
