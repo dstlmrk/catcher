@@ -877,7 +877,7 @@ Host: catcher.zlutazimnice.cz
 }
 </pre>
                      <div>
-                        <h3><span class="label label-danger">UNFINISHED</span> POST - Vytvoření nového turnaje</h3>
+                        <h3>POST - Vytvoření nového turnaje</h3>
                         <span class="label label-default">organizer</span>
                         <span class="label label-default">admin</span>
                         <p>
@@ -897,7 +897,9 @@ Host: catcher.zlutazimnice.cz
                               </tr>
                            </tbody>
                         </table>
+                        Ostatní popíšu později... Nejdůležitejší ale je, aby každý zápas měl unikátní <code>ide</code>.
                         <h4>Příklad</h4>
+                        Ukázka turnaje s dvěma skupinamy, které mají pouze dva členy a jeden zápas. Celkem tedy 4 zápasy (dva skupinové a dva křížové).
                         <h5>Požadavek</h5>
                         <pre>
 POST /api/tournaments/ HTTP/1.1
@@ -906,90 +908,138 @@ Content-Type: application/json
 </pre>
                         <pre>
 {
-  "name": "PFL 2016",
-  "city": "Prague",
-  "country": "CZE",
-  "startDate": "2016-04-01",
-  "endDate": "2016-04-01",
-  "divisionId": 1,
-  "caldTournamentId": null,
-  "teams": [{
-    "id": 1,
-    "seeding": 1
-  }, {
-    "id": 2,
-    "seeding": 2
-  }, {
-    "id": 3,
-    "seeding": 3
-  }, {
-    "id": 4,
-    "seeding": 4
-  }],
-  "fieldsCount": 1,
-  "fields": [{
-    "id": 1,
-    "name": "Main field"
-  }],
-  "groups": [
-
-  ],
-  "matches": [{
-    "fieldId": 1,
-    "startTime": "2016-04-01T09:00:00",
-    "endTime": "2016-04-01T09:29:00",
-    "homeSeed": 1,
-    "awaySeed": 4,
-    "looserNextStep": "3RD",
-    "winnerNextStep": "FIN",
-    "looserFinalStanding": null,
-    "winnerFinalStanding": null,
-    "ide": "SE1",
-    "description": null
-  }, {
-    "fieldId": 1,
-    "startTime": "2016-04-01T09:30:00",
-    "endTime": "2016-04-01T09:59:00",
-    "homeSeed": 2,
-    "awaySeed": 3,
-    "looserNextStep": "3RD",
-    "winnerNextStep": "FIN",
-    "looserFinalStanding": null,
-    "winnerFinalStanding": null,
-    "ide": "SE2",
-    "description": null
-  }, {
-    "fieldId": 1,
-    "startTime": "2016-04-01T10:00:00",
-    "endTime": "2016-04-01T10:29:00",
-    "homeSeed": null,
-    "awaySeed": null,
-    "looserNextStep": null,
-    "winnerNextStep": null,
-    "looserFinalStanding": 4,
-    "winnerFinalStanding": 3,
-    "ide": "3RD",
-    "description": null
-  }, {
-    "fieldId": 1,
-    "startTime": "2016-04-01T10:30:00",
-    "endTime": "2016-04-01T10:59:00",
-    "homeSeed": null,
-    "awaySeed": null,
-    "looserNextStep": null,
-    "winnerNextStep": null,
-    "looserFinalStanding": 2,
-    "winnerFinalStanding": 1,
-    "ide": "FIN",
-    "description": "Finale"
-  }]
+   "name": "PFL 2016",
+   "city": "Prague",
+   "country": "CZE",
+   "startDate": "2016-08-01",
+   "endDate": "2016-08-01",
+   "divisionId": 1,
+   "caldTournamentId": null,
+   "teams": [{
+      "id": 1,
+      "seeding": 1
+   }, {
+      "id": 2,
+      "seeding": 2
+   }, {
+      "id": 3,
+      "seeding": 3
+   }, {
+      "id": 4,
+      "seeding": 4
+   }],
+   "fieldsCount": 1,
+   "fields": [{
+      "id": 1,
+      "name": "Main field"
+   }],
+   "groups": [{
+      "ide": "A",
+      "teams": [{
+         "id": 1
+      }, {
+         "id": 2
+      }],
+      "advancements": [{
+         "standing": 1,
+         "nextStepIde": "FIN",
+         "finalStanding": null
+      }, {
+         "standing": 2,
+         "nextStepIde": "3RD",
+         "finalStanding": null
+      }],
+      "matches": [{
+         "fieldId": 1,
+         "startTime": "2016-08-01T09:00:00",
+         "endTime": "2016-08-01T09:29:00",
+         "homeSeed": 1,
+         "awaySeed": 2,
+         "winner": {
+            "nextStepIde": null,
+            "finalStanding": null
+         },
+         "looser": {
+            "nextStepIde": null,
+            "finalStanding": null
+         },
+         "ide": "A1",
+         "description": null
+      }]
+   }, {
+      "ide": "B",
+      "teams": [{
+         "id": 3
+      }, {
+         "id": 4
+      }],
+      "advancements": [{
+         "standing": 1,
+         "nextStepIde": "FIN",
+         "finalStanding": null
+      }, {
+         "standing": 2,
+         "nextStepIde": "3RD",
+         "finalStanding": null
+      }],
+      "matches": [{
+         "fieldId": 1,
+         "startTime": "2016-08-01T09:30:00",
+         "endTime": "2016-08-01T09:59:00",
+         "homeSeed": 3,
+         "awaySeed": 4,
+         "winner": {
+            "nextStepIde": null,
+            "finalStanding": null
+         },
+         "looser": {
+            "nextStepIde": null,
+            "finalStanding": null
+         },
+         "ide": "B1",
+         "description": null
+      }]
+   }],
+   "playoff": [{
+      "fieldId": 1,
+      "startTime": "2016-08-01T10:00:00",
+      "endTime": "2016-08-01T10:29:00",
+      "homeSeed": null,
+      "awaySeed": null,
+      "winner": {
+         "nextStepIde": null,
+         "finalStanding": 3
+      },
+      "looser": {
+         "nextStepIde": null,
+         "finalStanding": 4
+      },
+      "ide": "3RD",
+      "description": null
+   }, {
+      "fieldId": 1,
+      "startTime": "2016-08-01T10:30:00",
+      "endTime": "2016-08-01T10:59:00",
+      "homeSeed": null,
+      "awaySeed": null,
+      "winner": {
+         "nextStepIde": null,
+         "finalStanding": 1
+      },
+      "looser": {
+         "nextStepIde": null,
+         "finalStanding": 2
+      },
+      "ide": "FIN",
+      "description": "Finale"
+   }]
 }</pre>
                         <h5>Odpověď</h5>
                         <pre>HTTP/1.1 201 Created</pre>
                         <pre>
 {
   "city": "Prague",
-  "endDate": "2016-04-01T00:00:00",
+  "endDate": "2016-08-01T00:00:00",
   "name": "PFL 2016",
   "division": {
     "division": "open",
@@ -1483,7 +1533,7 @@ Content-Type: application/json
                      <div class="col-md-6">
                         <h3 class="panel-title">
                            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentGroups" aria-expanded="false" aria-controls="tournamentGroups">
-                           <strong><span class="label label-danger">UNFINISHED</span> /tournament/{id}/groups</strong>
+                           <strong>/tournament/{id}/groups</strong>
                            </a>
                         </h3>
                      </div>
@@ -1494,6 +1544,35 @@ Content-Type: application/json
                </div>
                <div id="tournamentGroups" class="panel-collapse collapse" role="tabpanel">
                   <div class="panel-body">
+                  <h3>GET - Kolekce skupin</h3>
+                     <span class="label label-default">public</span>
+                     <p>
+                     <p>Vrátí výsledky všech skupin na turnaji.</p>
+                  </div>
+               </div>
+            </div>
+            <!-- ----------------------------------------------- -->
+            <div class="panel panel-default">
+               <div class="panel-heading" role="tab">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <h3 class="panel-title">
+                           <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#tournamentGroup" aria-expanded="false" aria-controls="tournamentGroup">
+                           <strong>/tournament/{id}/group/{ide}</strong>
+                           </a>
+                        </h3>
+                     </div>
+                     <div class="col-md-6" align="right">
+                        <strong>Skupina</strong>
+                     </div>
+                  </div>
+               </div>
+               <div id="tournamentGroup" class="panel-collapse collapse" role="tabpanel">
+                  <div class="panel-body">
+                  <h3>GET - Skupina</h3>
+                     <span class="label label-default">public</span>
+                     <p>
+                     <p>Vrátí výsledky jedné konrétní skupiny.</p>
                   </div>
                </div>
             </div>
@@ -1630,6 +1709,7 @@ Authorization: secretApiKey
                         <span class="label label-default">admin</span>
                         <p>
                         <p>Nejčastěji půjde o zahájení a ukončení zápasu úpravou atributů <code>active</code> a <code>terminate</code>.</p>
+                        <p>Místo postupného vkladání bodů lze vložit výsledné skóre. Všechny doposud odehrané body v zápase budou ale vymazány. V požadavku je ale nutné označit turnaj příznakem <code>active</code> a <code>terminated</code> zároveň.</p>
                         <h4>Popis polí požadavku</h4>
                         <table class="table table-sm">
                            <tbody>
