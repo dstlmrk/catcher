@@ -33,21 +33,19 @@ class Users(object):
         Users.checkEmail(email)
         # validate role
         if role not in ["organizer", "club"]:
-            raise ValueError(
+            raise falcon.HTTPBadRequest(
                 "Role %s is not supported" % role
                 )
 
     @staticmethod
     def checkEmail(email):
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            raise ValueError("Email format is invalid")
+            raise falcon.HTTPBadRequest("Email format is invalid")
 
     @staticmethod
     def checkPassword(password):
         if not len(password) > 5:
-            raise ValueError("Password is too much short")
-        if not password.isalnum():
-            raise ValueError("Password in't alphanumeric")
+            raise falcon.HTTPBadRequest("Password is too much short")
 
     @classmethod
     def createClubUser(cls, data, apiKey):
