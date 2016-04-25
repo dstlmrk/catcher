@@ -108,9 +108,9 @@ class User(object):
                 if data['oldPassword'] == user.password:
                     user.password = data['newPassword']
                 else:
-                    raise ValueError("Password is incorrect")
+                    raise falcon.HTTPBadRequest("Password is incorrect", "")
             else:
-                raise ValueError("Old password is missing in body request")
+                raise falcon.HTTPBadRequest("Old password is missing in body request", "")
         
         user.save()
         req.context['result'] = m.User.get(id=user.id)
