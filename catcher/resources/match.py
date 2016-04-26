@@ -378,7 +378,9 @@ class MatchPoints(Point):
 
             self.updateMatchScore(match.id, homePoint)
 
-            point = m.Point.get(matchId=match.id, order=order)
+            point = Queries.getPoints(
+                matchId=match.id, order=order
+                )[0]
 
         req.context['result'] = point
         resp.status = falcon.HTTP_201
