@@ -15,7 +15,7 @@ def NotFound(ex, req, resp, params):
 		)
 
 def BadRequest(ex, req, resp, params):
-	traceback.print_exc()
+	# traceback.print_exc()
 	raise falcon.HTTPBadRequest(
 		ex.__class__.__name__,
 		cutQuotationMark(str(ex))
@@ -25,7 +25,7 @@ def InternalServerError(ex, req, resp, params):
 	logging.error(ex)
 	if isinstance(ex, falcon.HTTPError):
 		raise
-	traceback.print_exc()
+	# traceback.print_exc()
 	raise falcon.HTTPInternalServerError(
 		ex.__class__.__name__,
 		cutQuotationMark(str(ex))
