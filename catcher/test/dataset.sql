@@ -13,9 +13,9 @@ INSERT INTO `test_catcher`.`division`
 (5   , 'junior'  );
 -- -----------------------------------------------------
 INSERT INTO `test_catcher`.`role` 
-(`id`, `role`       ) VALUES 
-(1   , 'admin'      ),
-(2   , 'organizator');
+(`id`, `role`     ) VALUES 
+(1   , 'organizer'),
+(2   , 'admin'    );
 
 
 -- -----------------------------------------------------
