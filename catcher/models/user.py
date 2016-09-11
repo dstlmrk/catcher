@@ -27,7 +27,9 @@ class User(MySQLModel):
     @staticmethod
     def login(email, password):
         ''''''
-        return User.get(email=email, password=password)
+        user = User.get(email=email, password=password)
+
+        return user
 
     @classmethod
     def getEmptyApiKey(cls):

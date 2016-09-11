@@ -48,12 +48,30 @@ def models(db):
 @pytest.fixture(scope='function')
 def users(models):
     models.User.create(
+        id=1,
         email='mickey@mouse.com',
         password="e8WFffXew",
         role="organizer"
     )
     models.User.create(
+        id=2,
         email='adam@mouse.com',
         password="T3Cfp9HYt",
         role="organizer"
     )
+
+
+@pytest.fixture(scope='function')
+def teams(models, users):
+    models.Team.insert(
+        division=1, name="Frozen Angels", shortcut="FAL",
+        city="Liberec", country="CZE", user_id=1,
+    ).execute()
+    models.Team.insert(
+        division=2, name="KeFEAR", shortcut="KEF",
+        city="Košice", country="SVK", user_id=2,
+    ).execute()
+    models.Team.insert(
+        division=2, name="Atruc", shortcut="ATR",
+        city="Plzeň", country="CZE"
+    ).execute()

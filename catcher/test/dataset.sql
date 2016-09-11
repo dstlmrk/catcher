@@ -1,9 +1,9 @@
--- -----------------------------------------------------
+-- --------------------------------------------------------------------
 -- ignoruje cizi klice
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
--- -----------------------------------------------------
+-- --------------------------------------------------------------------
 START TRANSACTION;
--- -----------------------------------------------------
+-- --------------------------------------------------------------------
 INSERT INTO `test_catcher`.`division` 
 (`id`, `division`) VALUES 
 (1   , 'open'    ),
@@ -11,21 +11,13 @@ INSERT INTO `test_catcher`.`division`
 (3   , 'mixed'   ),
 (4   , 'masters' ),
 (5   , 'junior'  );
--- -----------------------------------------------------
+-- --------------------------------------------------------------------
 INSERT INTO `test_catcher`.`role` 
 (`id`, `role`     ) VALUES 
 (1   , 'organizer'),
 (2   , 'admin'    );
-
-
--- -----------------------------------------------------
-
--- INSERT INTO `catcher`.`user`
--- (`id`, `email`               , `password`, `api_key`                         , `role_id`) VALUES
--- (1   , 'veselj43@fit.cvut.cz', 'heslo'   , 'W1x8UmkV5RWCZOXuRmcqqnrt6qQNnjnr', 1        );
--- (2   , 'dstlmrk@gmail.com'   , 'heslo'   , 'nVFrrUXJSAXmTPp9lvZZLEyjiRVUydIg', '', NULL),
--- (3   , 'list@zlutazimnice.cz', 'heslo'   , 'M7mz4BwcdwR8QmfdKJw2w3PJj3j2YZlB', '', NULL);
-
+-- --------------------------------------------------------------------
+COMMIT;
 
 -- INSERT INTO `test_catcher`.`team`
 -- (`id`, `division_id`, `cald_id`, `name`             , `shortcut`, `city`          , `country`, `website`, `user_id`) VALUES
@@ -41,27 +33,6 @@ INSERT INTO `test_catcher`.`role`
 -- (10  , 1     ,      NULL, "FC Zlín"          , "ZLI"     , "Zlín"          , "CZE" ,      NULL, NULL   ),
 -- (11  , 1     ,      NULL, "FC Bratislava"    , "BRA"     , "Bratislava"    , "SVK" ,      NULL, NULL   ),
 -- (12  , 1     ,      NULL, "For delete"      ,  "DEL"     , "Kralupy n.V."  , "CZE" ,      NULL, NULL   );
--- -----------------------------------------------------
--- INSERT INTO `test_catcher`.`team` 
-
--- id, division_id, name, shortcut, city, country, website, cald_id, user_id
--- (`id`, `name`, `division_id`, `degree`) VALUES 
--- (1   ,"FC Praha"        , 1            , 'A'     ),
--- (2   ,"FC Brno"        , 1            , 'A'     ),
--- (3   ,"FC Plzeň"        , 1            , 'A'     ),
--- (4   ,"FC Ostrava"       , 1            , 'A'     ),
--- (5   ,"FC Olomouc"        , 1            , 'A'     ),
--- (6   ,6        , 1            , 'A'     ),
--- (7   ,7        , 1            , 'A'     ),
--- (8   ,8        , 1            , 'A'     ),
--- (9   ,9        , 1            , 'A'     ),
--- (10  ,10       , 1            , 'A'     ),
--- (11  ,11       , 1            , 'A'     ),
--- (12  ,1        , 1            , 'B'     ),
--- (13  ,1        , 1            , 'C'     ),
--- (14  ,1        , 2            , 'A'     ),
--- (15  ,2        , 1            , 'B'     ),
--- (16  ,2        , 1            , 'D'     );
 -- -----------------------------------------------------
 -- INSERT INTO `test_catcher`.`player` 
 -- (`id`, `firstname`, `lastname`, `nickname`, `number`, `ranking`, `cald_id`, `club_id`) VALUES 
@@ -108,4 +79,4 @@ INSERT INTO `test_catcher`.`role`
 -- (41  , "Tomáš"    , "Dvořák"  , NULL      , 12      , NULL     , NULL     , NULL     ),
 -- (42  , "Jaroslav" , "Pernica" , NULL      , 15      , NULL     , NULL     , NULL     );
 -- -----------------------------------------------------
-COMMIT;
+-- COMMIT;

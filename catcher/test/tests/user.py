@@ -29,7 +29,7 @@ def test_user_put_passwd_change(client, models):
     resp = client.put(
         '/api/user?id=%s' % user_id,
         {'old_password': "e8WFffXew", 'new_password': "3kQp54FrT"},
-        headers = {
+        headers={
             "Content-Type": "application/json",
             "Authorization": "W1x8UmkV5RWCZOXuRmcqqnrt6qQNnjnr"
         }
@@ -121,7 +121,7 @@ def test_users_post(client, models):
             'password': "e8WFffXew",
             'role': "organizer"
         },
-        headers = {
+        headers={
             "Content-Type": "application/json"
         }
     )
