@@ -5,7 +5,11 @@ import falcon
 import uuid
 import re
 import peewee as pw
-from catcher.models import MySQLModel, Role
+from catcher.models import MySQLModel
+
+
+class Role(MySQLModel):
+    role = pw.CharField()
 
 
 class User(MySQLModel):
@@ -98,3 +102,13 @@ class User(MySQLModel):
             raise falcon.HTTPBadRequest(
                 "Bad input", "Password is incorrect"
             )
+
+
+class NullUser(object):
+
+    class Role(object):
+        pass
+
+    role = Role()
+    role.role = None
+    api_key = None

@@ -1,85 +1,29 @@
 #!/usr/bin/python
 # coding=utf-8
 
-import peewee as pw
-from iso3166 import countries
-from playhouse.fields import ManyToManyField
-from playhouse.fields import DeferredThroughModel
-from playhouse.shortcuts import model_to_dict, dict_to_model
-import connection
+# import peewee as pw
+# from iso3166 import countries
+# from playhouse.shortcuts import model_to_dict, dict_to_model
+# import connection
 
-# from catcher.models import MySQLModel
+# # from catcher.models import MySQLModel
 
-db = connection.connectDatabase()
+# db = connection.connect_database()
 
-# -------------------------------------------------------------------------------------
-class CountryCode(pw.FixedCharField):
-    def db_value(self, value):
-        '''Check if field is country by ISO 3166-1 alpha-3'''
-        if value is None:
-            return value
-        try:
-            countries.get(value)
-        except KeyError as ex:
-            raise KeyError('Country by ISO 3166-1 alpha-3 not found')
-        else:
-            return value
-# -------------------------------------------------------------------------------------
-class MySQLModel(pw.Model):
-    """A base model that will use our MySQL database"""
+# # -------------------------------------------------------------------------------------
+# class MySQLModel(pw.Model):
+#     """A base model that will use our MySQL database"""
 
-    def __str__(self):
-        return str(model_to_dict(self))
-
-    class Meta:
-        database = db
-# -------------------------------------------------------------------------------------
-class Division(MySQLModel):
-    division = pw.CharField()
-# -------------------------------------------------------------------------------------
-# class Team(MySQLModel):
-
-#     division = pw.ForeignKeyField(Division)
-#     name = pw.CharField()
-#     shortcut = pw.CharField(max_length=3)
-#     city = pw.CharField()
-#     country = CountryCode(max_length=3)
-#     cald_id = pw.IntegerField()
-#     user_id = pw.IntegerField()
-    
-# class UserHasRole(MySQLModel):
-#     userId = pw.IntegerField(db_column='user_id') 
-#     role   = pw.CharField()
+#     def __str__(self):
+#         return str(model_to_dict(self))
 
 #     class Meta:
-#         db_table = 'user_has_role'
-#         primary_key = False
+#         database = db
 # -------------------------------------------------------------------------------------
-# class User(MySQLModel):
-#     email       = pw.CharField()
-#     password    = pw.CharField()
-#     createdAt   = pw.DateTimeField(db_column='created_at')
-#     apiKey      = pw.CharField(db_column='api_key')
-#     role        = pw.CharField()
-#     clubId      = pw.IntegerField(db_column='club_id')
+# class Division(MySQLModel):
+#     division = pw.CharField()
 
-#     @staticmethod
-#     def login(email, password):
-#         return User.get(email = email, password = password)
 
-    # def prepared(self):
-    #     self.password = None
-# -------------------------------------------------------------------------------------
-class Role(MySQLModel):
-    role = pw.CharField()
-    
-    # class Meta:
-        # primary_key = False
-# -------------------------------------------------------------------------------------
-class NullUser(object):
-    role   = "admin" # None
-    api_key = None
-    # clubId = None
 # -------------------------------------------------------------------------------------
 # class Club(MySQLModel):
 #     # id       = pw.PrimaryKeyField()
