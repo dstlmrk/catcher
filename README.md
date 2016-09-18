@@ -18,6 +18,8 @@ pip falcon
 pip iso3166
 pip MySQL-python
 pip ujson
+pip pytest
+pip pytest-falcon
 ```
 
 ## Local deploy
