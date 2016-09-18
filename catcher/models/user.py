@@ -22,7 +22,7 @@ class User(MySQLModel):
         cls.validate(kw['email'], kw['password'], kw['role'])
         kw['api_key'] = cls.getEmptyApiKey()
         kw['role'] = Role.get(role=kw['role']).id
-        super(User, cls).create(*args, **kw)
+        return super(User, cls).create(*args, **kw)
 
     @staticmethod
     def login(email, password):

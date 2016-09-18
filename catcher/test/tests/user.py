@@ -84,7 +84,7 @@ def test_users_get(client, models):
         email='user1@test.cz',
         password="e8WFffXew",
         api_key="#apiKey1",
-        role=1
+        role=2  # admin
     ).execute()
     models.User.insert(
         email='user2@test.cz',
@@ -104,8 +104,13 @@ def test_users_get(client, models):
         api_key="#apiKey4",
         role=1
     ).execute()
-    resp = client.get('/api/users')
-
+    resp = client.get(
+        '/api/users',
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "#apiKey1"
+        }
+    )
     assert resp.status == falcon.HTTP_OK
     assert len(resp.json['users']) == 4
     assert resp.json['users'][3]['email'] == "user4@test.cz"

@@ -29,6 +29,35 @@ def test_team_get(client, models, users):
     assert resp.json == expected_resp
 
 
+def test_team_put(client, teams):
+    resp = client.put(
+        '/api/team/%s' % 1,
+        {'name': "FC Liberec", 'city': None},
+        # TODO: mel by upravovat admin nebo majitel tymu
+        # "Authorization": "W1x8UmkV5RWCZOXuRmcqqnrt6qQNnjnr"
+        headers={
+            "Content-Type": "application/json"
+        }
+    )
+    assert resp.status == falcon.HTTP_OK
+    assert resp.json['name'] == "FC Liberec"
+    assert resp.json['shortcut'] == "FAL"
+    assert resp.json['city'] == None
+
+
+def test_team_delete(client, teams):
+    teams_count = len(client.get('/api/teams').json['teams'])
+    resp = client.delete(
+        '/api/team/%s' % 1,
+        headers={
+            "Authorization": "#apiKeyAdmin"
+        }
+    )
+    assert resp.status == falcon.HTTP_OK
+    resp = client.get('/api/teams')
+    assert len(resp.json['teams']) == teams_count - 1
+
+
 def test_teams_get(client, teams):
     resp = client.get('/api/teams')
     assert resp.status == falcon.HTTP_OK
@@ -57,108 +86,23 @@ def test_specific_teams_get(client, teams):
     assert resp.json['teams'][0]['division']['id'] == 2
 
 
-#     def testPost1(self):
-#         body = {
-#             "clubId": 12,
-#             "degree": "A",
-#             "divisionId": 2
-#             }
-#         headers = {
-#             "Content-Type" : "application/json",
-#             "Authorization": "#apiKey1"
-#             }
-#         response = self.request(
-#             method  = 'POST',
-#             path    = '/api/teams',
-#             headers = headers,
-#             body    = body
-#             )
-
-#         expectedResponse = {
-#             "clubId": 12,
-#             "degree": "A",
-#             "divisionId": 2
-#             }
-
-#         # I can't know, what id is there
-#         del response['id']
-#         self.assertEqual(response, expectedResponse)
-#         self.assertEqual(self.srmock.status, HTTP_201)
-
-#     def testPost2(self):
-#         '''create team with unvalid club id'''
-#         body = {
-#             "clubId": 999999,
-#             "degree": "A",
-#             "divisionId": 2
-#             }
-#         headers = {
-#             "Content-Type" : "application/json",
-#             "Authorization": "#apiKey1"
-#             }
-#         response = self.request(
-#             method  = 'POST',
-#             path    = '/api/teams',
-#             headers = headers,
-#             body    = body
-#             )
-#         expectedResponse = {
-#             "clubId": 12,
-#             "degree": "A",
-#             "divisionId": 2
-#             }
-#         self.assertEqual(self.srmock.status, HTTP_400)
-
-# class Team(TestCase):
-
-#     def testGet(self):
-#         team = models.Team.select().where(models.Team.id == 1).get()        
-#         club = models.Club.select().where(models.Club.id == team.clubId).get()
-#         name = club.name + " " + team.degree
-#         response = self.request(
-#             method  = 'GET',
-#             path    = '/api/team/1',
-#             decode  = 'utf-8'
-#             )
-#         self.assertEqual(response['id'], team.id)
-#         self.assertEqual(response['clubId'], team.clubId)
-#         self.assertEqual(response['degree'], team.degree)
-#         self.assertEqual(response['divisionId'], team.divisionId)
-#         self.assertEqual(response['name'], name)
-#         self.assertEqual(self.srmock.status, HTTP_200)
-
-#     def testPut(self):
-#         '''change shortcut, city and country'''
-#         body = {
-#           "degree": 'B',
-#           "divisionId": 4
-#         }
-        
-#         headers = {
-#             "Content-Type" : "application/json",
-#             "Authorization": "#apiKey1"
-#             }
-        
-#         response = self.request(
-#             method  = 'PUT',
-#             path    = '/api/team/16',
-#             headers = headers,
-#             body    = body
-#             )
-
-#         self.assertEqual(self.srmock.status, HTTP_200)
-#         self.assertEqual(response['degree'], 'B')
-#         self.assertEqual(response['divisionId'], 4)
-
-#     def testDelete(self):
-#         club = models.Team.select().where(models.Team.id == 15).get()
-#         response = self.request(
-#             method  = 'DELETE',
-#             path    = '/api/team/15',
-#             headers = {
-#                 "Authorization": "#apiKey1"
-#                 }
-#             )
-#         self.assertEqual(self.srmock.status, HTTP_200)
-#         with self.assertRaises(models.Team.DoesNotExist):
-#             club = models.Team.select().where(models.Team.id == 15).get()
+def test_teams_post(client, models):
+    resp = client.post(
+        '/api/teams',
+        {
+            'name': "FC Ostrava",
+            'shortcut': "XXXX",
+            'division': "open",
+            'id': 999
+        },
+        headers={
+            "Content-Type": "application/json"
+        }
+    )
+    print resp.json
+    assert resp.status == falcon.HTTP_201
+    assert resp.json['id'] != 999
+    assert resp.json['name'] == "FC Ostrava"
+    assert resp.json['shortcut'] == "XXX"
+    assert resp.json['division']['division'] == "open"
+    assert resp.json['city'] == None

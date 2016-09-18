@@ -1,116 +1,38 @@
 #!/usr/bin/python
 # coding=utf-8
 
-# import logging
-# # import falcon
 import peewee as pw
-# # from datetime import datetime
 from catcher.models import MySQLModel, CountryCode, Division
+
+SHORTCUT_MAX_LENGTH = 3
+
 
 class Team(MySQLModel):
 
     division = pw.ForeignKeyField(Division)
     name = pw.CharField()
-    shortcut = pw.CharField(max_length=3)
+    shortcut = pw.CharField(max_length=SHORTCUT_MAX_LENGTH)
     city = pw.CharField()
     country = CountryCode(max_length=3)
     cald_id = pw.IntegerField()
     user_id = pw.IntegerField()
 
-    # @classmethod
-    # def select(cls, req, *selection):
-    #     # note: None is as 'null' in query string
-    #     possible_expressions = [
-    #         cls.city == req.get_param("city"),
-    #         cls.country == req.get_param("country"),
-    #         cls.division == req.get_param_as_int("division_id")
-    #     ]
-    #     expressions = [
-    #         exp for exp in possible_expressions if exp.rhs is not None
-    #     ]
-    #     if expressions:
-    #         return super(Team, cls).select(*selection).where(*expressions)
-    #     return super(Team, cls).select(*selection)
+    @classmethod
+    def create(cls, *args, **kw):
+        '''Creates new user and validates input data'''
+        if kw.get('shortcut'):
+            kw['shortcut'] = str(kw['shortcut'])[:SHORTCUT_MAX_LENGTH]
+        # TODO: nechci nechat uzivatele zapisovat id,
+        # potreba zajistit ve vsech resources
+        kw.pop('id', None)
+        kw['division'] = Division.get(division=kw['division']).id
+        return super(Team, cls).create(*args, **kw)
 
-    # @classmethod
-    # def create(cls, *args, **kw):
-    #     ''''''
-    #     cls.validate(kw['email'], kw['password'], kw['role'])
-        
-    #     kw['createdAt'] = str(datetime.now())
-    #     kw['apiKey'] = cls.getEmptyApiKey()
-
-    #     super(User, cls).create(*args, **kw)
-
-    # @staticmethod
-    # def login(email, password):
-    #     ''''''
-    #     return User.get(email=email, password=password)
-
-    # @classmethod
-    # def getEmptyApiKey(cls):
-    #     ''''''
-    #     for i in range(10):
-    #         apiKey = uuid.uuid4().hex
-    #         try:
-    #             cls.get(apiKey=apiKey)
-    #         except cls.DoesNotExist:
-    #             return apiKey
-    #         else:
-    #             continue
-    #     raise falcon.HTTPServiceUnavailable(
-    #         "Try it again",
-    #         "Catcher couldn't generate new api key, please try it again"
-    #     )
-
-    # @classmethod
-    # def validate(cls, email, password, role):
-    #     ''''''
-    #     User.validateEmail(email)
-    #     User.validatePassword(password)
-
-    #     if role not in ["organizer"]: #, "club"]:
-    #         raise falcon.HTTPBadRequest(
-    #             "Bad input",
-    #             "Role %s is not supported" % role
-    #         )
-
-    # @staticmethod
-    # def validateEmail(email):
-    #     ''''''
-    #     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-    #         raise falcon.HTTPBadRequest(
-    #             "Bad input",
-    #             "Email format is invalid"
-    #         )
-
-    # @staticmethod
-    # def validatePassword(password):
-    #     ''''''
-    #     if not len(password) > 5:
-    #         raise falcon.HTTPBadRequest(
-    #             "Bad input",
-    #             "Password is too much short"
-    #         )
-
-    # def substituteEmail(self, email):
-    #     ''''''
-    #     if email:
-    #         self.validateEmail(email)
-    #         self.email = email
-
-    # def substitutePassword(self, password, newPassword):
-    #     ''''''
-    #     if password and newPassword:
-    #         verifyPassword(password)
-    #         User.validatePassword(newPassword)
-    #         self.password = newPassword
-
-    # def verifyPassword(self, password):
-    #     '''Pripraveno pro prevod z hashe do realu'''
-    #     if self.password == password:
-    #         return True
-    #     else:
-    #         raise falcon.HTTPBadRequest(
-    #             "Bad input", "Password is incorrect"
-    #         )
+    def set_attributes(self, **attributes):
+        self.name = attributes.get('name', self.name)
+        self.division = attributes.get('division', self.division)
+        self.shortcut = attributes.get('shortcut', self.shortcut)
+        self.city = attributes.get('city', self.city)
+        self.country = attributes.get('country', self.country)
+        self.user_id = attributes.get('user_id', self.user_id)
+        self.cald_id = attributes.get('cald_id', self.cald_id)
