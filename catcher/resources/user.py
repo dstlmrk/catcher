@@ -24,7 +24,11 @@ class Users(object):
     def on_post(self, req, resp):
         '''registration'''
         post = req.context['data']
-        models.User.create(**post)
+        # TODO: pozor na opravneni, admina muze vytvorit jenom admin atd.
+        # zatim je mozno vytvorit pouze organizatora
+        user = models.User.create(**post)
+        if not post.get('test'):
+            models.Login.send_init_password(user)
         resp.status = falcon.HTTP_201
 
 

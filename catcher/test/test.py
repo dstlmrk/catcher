@@ -47,18 +47,20 @@ def models(db):
 
 @pytest.fixture(scope='function')
 def users(models):
-    models.User.create(
+    models.User.insert(
         id=1,
         email='mickey@mouse.com',
         password="e8WFffXew",
-        role="organizer"
-    )
-    models.User.create(
+        role=1, # organizer
+        api_key="#apiKeyOrganizer1"
+    ).execute()
+    models.User.insert(
         id=2,
         email='adam@mouse.com',
         password="T3Cfp9HYt",
-        role="organizer"
-    )
+        role=1, # organizer
+        api_key="#apiKeyOrganizer2"
+    ).execute()
     models.User.insert(
         id=3,
         email='admin@catcher.cz',

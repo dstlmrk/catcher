@@ -36,4 +36,4 @@ class ForgottenPassword(object):
                 "Bad input",
                 "User with email %s doesn't exist" % email
             )
-        models.Login.resetPassword(user)
+        models.Login.send_reset_password(user)

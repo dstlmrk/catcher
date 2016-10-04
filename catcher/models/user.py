@@ -4,6 +4,8 @@
 import falcon
 import uuid
 import re
+import random
+import string
 import peewee as pw
 from catcher.models import MySQLModel
 
@@ -23,9 +25,11 @@ class User(MySQLModel):
     @classmethod
     def create(cls, *args, **kw):
         '''Creates new user and validates input data'''
-        cls.validate(kw['email'], kw['password'], kw['role'])
+        cls.validate(kw['email'], kw['role'])
         kw['api_key'] = cls.getEmptyApiKey()
         kw['role'] = Role.get(role=kw['role']).id
+        if not kw.get('test'):
+            kw['password'] = cls.generate_password()
         return super(User, cls).create(*args, **kw)
 
     @staticmethod
@@ -34,6 +38,17 @@ class User(MySQLModel):
         user = User.get(email=email, password=password)
 
         return user
+
+    @classmethod
+    def generate_password(cls):
+        '''
+        Generates new random password
+        '''
+        return ''.join(
+            random.choice(
+                string.ascii_uppercase + string.digits
+            ) for x in range(8)
+        )
 
     @classmethod
     def getEmptyApiKey(cls):
@@ -52,10 +67,9 @@ class User(MySQLModel):
         )
 
     @classmethod
-    def validate(cls, email, password, role):
+    def validate(cls, email, role):
         ''''''
         User.validateEmail(email)
-        User.validatePassword(password)
 
         if role not in ["organizer"]:
             raise falcon.HTTPBadRequest(

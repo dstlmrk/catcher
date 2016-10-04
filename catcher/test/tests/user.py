@@ -124,7 +124,8 @@ def test_users_post(client, models):
         {
             'email': "mickey@mouse.com",
             'password': "e8WFffXew",
-            'role': "organizer"
+            'role': "organizer",
+            'test': True # neposle email
         },
         headers={
             "Content-Type": "application/json"
