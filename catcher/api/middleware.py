@@ -24,9 +24,17 @@ class PeeweeConnection(object):
 class Crossdomain(object):
 
     def process_request(self, req, resp):
-        resp.append_header("Access-Control-Allow-Origin", "*")
-        resp.append_header("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Name")
-        resp.append_header("Access-Control-Allow-Methods", "PUT,POST,DELETE,GET")
+        resp.append_header(
+            "Access-Control-Allow-Origin", "*"
+        )
+        resp.append_header(
+            "Access-Control-Allow-Headers",
+            "Content-Type,Authorization,X-Name"
+        )
+        resp.append_header(
+            "Access-Control-Allow-Methods",
+            "PUT,POST,DELETE,GET"
+        )
 
 class Authorization(object):
 
@@ -34,9 +42,13 @@ class Authorization(object):
         user = NullUser()
         try:
             if req.auth:
-                user = User.get(apiKey=req.auth)
+                user = User.get(api_key=req.auth)
         except User.DoesNotExist:
             pass
+
+        # debug
+        print "LOGGED:", user
+        
         req.context["user"] = user
 
 class RequireJSON(object):
