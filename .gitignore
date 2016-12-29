@@ -76,3 +76,6 @@ target/
 
 # PyCharm
 .idea
+
+# Config file
+/conf/catcher.cfg
