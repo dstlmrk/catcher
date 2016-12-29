@@ -18,12 +18,7 @@
 from catcher import models
 
 
-# -----------------------------------------------------
-# Create first api_keys
-# -----------------------------------------------------
-key, valid_to = models.User.login(email='vesel@test.cz', password='heslo')
-print(key, valid_to)
-models.User.logout(api_key=key)
+models.Team.create(name='Kulatá Šachovnice', shortcut='KŠ', division='mixed', city='Hradec Králové', country='CZE')
 
 
 # def to_floats(func):

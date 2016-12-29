@@ -4,13 +4,35 @@ import pymysql
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+import sqlalchemy.types as types
+from iso3166 import countries
 
 pymysql.install_as_MySQLdb()
 
 
+class CountryCode(types.UserDefinedType):
+    """
+    Custom column checks if field is country by ISO 3166-1 alpha-3
+    """
+
+    def get_col_spec(self):
+        return "COUNTRYCODE(%s)" % self.length
+
+    def bind_processor(self, dialect):
+        def process(value):
+            if not value:
+                return value
+            try:
+                countries.get(value)
+            except KeyError:
+                raise ValueError('Country by ISO 3166-1 alpha-3 not found')
+            return value
+        return process
+
+
 class _Base(object):
     """
-    It's made for string representation of database tables.
+    Made for string representation of database tables.
     """
 
     @staticmethod
@@ -33,7 +55,7 @@ class _Base(object):
 
 def session(func):
     """
-    Decorator for session commits
+    It wraps all method used by rest api. Makes and closes session.
     """
 
     def outer_function(*args, **kwargs):
@@ -48,5 +70,5 @@ def session(func):
 Base = declarative_base(cls=_Base)
 
 # echo rika, ze provadi logging
-engine = create_engine('mysql://:@localhost/catcher', echo=True)
+engine = create_engine('mysql://:@localhost/catcher?charset=utf8', echo=True)
 Session = sessionmaker(bind=engine)

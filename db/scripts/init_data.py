@@ -11,6 +11,12 @@ models.User.create(email='dosta@test.cz', role='admin')
 models.User.create(email='organizer@test.cz', role='organizer')
 
 # -----------------------------------------------------
-# Create first api_keys
+# Create api_key for test only
 # -----------------------------------------------------
-# models.User.login(email='vesel@test.cz', password='heslo')
+key, valid_to = models.User.login(email='vesel@test.cz', password='heslo')
+models.User.logout(api_key=key)
+
+# -----------------------------------------------------
+# Create first teams
+# -----------------------------------------------------
+

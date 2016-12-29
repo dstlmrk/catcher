@@ -53,9 +53,9 @@ DROP TABLE IF EXISTS `catcher`.`division` ;
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`division` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `division` VARCHAR(16) NOT NULL,
+  `type` VARCHAR(16) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `division_UNIQUE` (`division` ASC))
+  UNIQUE INDEX `division_UNIQUE` (`type` ASC))
 ENGINE = InnoDB;
 
 SHOW WARNINGS;

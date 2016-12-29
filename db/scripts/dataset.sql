@@ -9,6 +9,19 @@ INSERT INTO `catcher`.`role` (`id`, `type`) VALUES (2, 'organizer');
 INSERT INTO `catcher`.`role` (`id`, `type`) VALUES (3, 'admin');
 COMMIT;
 
+
+-- -----------------------------------------------------
+-- Data for table `catcher`.`division`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `catcher`;
+INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (1, 'open');
+INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (2, 'women');
+INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (3, 'mixed');
+INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (4, 'masters');
+INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (5, 'junior');
+COMMIT;
+
 -- -----------------------------------------------------
 -- Data for table `catcher`.`user`
 -- -----------------------------------------------------
@@ -31,15 +44,3 @@ COMMIT;
 # # INSERT INTO `catcher`.`api_key` (`key`, `valid_to`,  `user_id`) VALUES ('M7mz4BwcdwR8QmfdKJw2w3PJj3j2YZlQ', '2017-01-31 23:59:59', 3);
 # COMMIT;
 
--- -----------------------------------------------------
--- Data for table `catcher`.`division`
--- -----------------------------------------------------
-# START TRANSACTION;
-# USE `catcher`;
-# INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (1, 'open');
-# INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (2, 'women');
-# INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (3, 'mixed');
-# INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (4, 'masters');
-# INSERT INTO `catcher`.`division` (`id`, `division`) VALUES (5, 'junior');
-#
-# COMMIT;
