@@ -13,10 +13,10 @@ DROP TABLE IF EXISTS `catcher`.`role` ;
 
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`role` (
-  `id` INT NOT NULL,
-  `role` VARCHAR(45) NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `type` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `role_UNIQUE` (`role` ASC))
+  UNIQUE INDEX `role_UNIQUE` (`type` ASC))
 ENGINE = InnoDB;
 
 SHOW WARNINGS;
@@ -369,7 +369,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`api_key` (
   `valid_to` DATETIME NOT NULL,
   `user_id` INT NOT NULL,
   PRIMARY KEY (`key`),
-  UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC),
+  INDEX `fk_api_key_user1_idx` (`user_id` ASC),
   CONSTRAINT `fk_api_key_user1`
     FOREIGN KEY (`user_id`)
     REFERENCES `catcher`.`user` (`id`)

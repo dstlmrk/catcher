@@ -8,6 +8,10 @@
 * vypnutí: `(env)$ deactivate`
 * nastavení PyCharmu: http://stackoverflow.com/questions/19885821/how-do-i-import-modules-in-pycharm
 
+## setup.py
+
+* instalace v dev režimu: `python setup.py develop`
+
 ## Zadání semestrální práce
 
 Ve všech případech (kromě případných explicitních výjimek) musí práce splňovat tyto požadavky:
