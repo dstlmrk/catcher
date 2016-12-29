@@ -15,10 +15,6 @@ class ApiKey(Base):
     valid_to = Column(DateTime)
     user_id = Column(Integer, ForeignKey('user.id'))
 
-    def __repr__(self):
-        return "<ApiKey(key='%s', valid_to='%s', user_id='%s')>" % (
-            self.key, self.valid_to, self.user_id)
-
     @staticmethod
     def create(user, session):
         """

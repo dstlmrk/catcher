@@ -25,10 +25,6 @@ class User(Base):
     created_at = Column(DateTime, default=time.strftime('%Y-%m-%d %H:%M:%S'))
     role_id = Column(Integer, ForeignKey('role.id'))
 
-    def __repr__(self):
-        return "<User(id='%s', email='%s', password='%s', created_at='%s', role_id='%s')>" % (
-            self.id, self.email, self.password, self.created_at, self.role_id)
-
     @staticmethod
     @session
     def create(email, role, _session):

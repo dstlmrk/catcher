@@ -9,6 +9,3 @@ class Division(Base):
 
     id = Column(Integer, primary_key=True)
     type = Column(String)
-
-    def __repr__(self):
-        return "<Division(id='%s', type='%s')>" % (self.id, self.type)
