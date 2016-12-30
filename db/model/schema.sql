@@ -29,6 +29,7 @@ DROP TABLE IF EXISTS `catcher`.`user` ;
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`user` (
   `id` INT NOT NULL AUTO_INCREMENT,
+  `login` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
   `password` CHAR(64) NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`user` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC),
   INDEX `fk_user_role1_idx` (`role_id` ASC),
+  UNIQUE INDEX `login_UNIQUE` (`login` ASC),
   CONSTRAINT `fk_user_role1`
     FOREIGN KEY (`role_id`)
     REFERENCES `catcher`.`role` (`id`)

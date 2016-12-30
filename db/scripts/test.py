@@ -18,7 +18,17 @@
 from catcher import models
 
 
-models.Team.create(name='Kulatá Šachovnice', shortcut='KŠ', division='mixed', city='Hradec Králové', country='CZE')
+user = models.User.get(1)
+print("=", user)
+
+user = models.User.edit(1, email='kachna@test.cz', password='test_heslo')
+
+print("==================")
+print(">", user)
+print("------------")
+user = models.User.get(1)
+print("=", user)
+# models.Team.create(name='Kulatá Šachovnice', shortcut='KŠ', division='mixed', city='Hradec Králové', country='CZE')
 
 
 # def to_floats(func):

@@ -1,5 +1,11 @@
 # Catcher
 
+
+## sqlalchemy
+
+* select: `_session.query(User).filter(User.id == 0).first()`
+
+
 ## virtualenv
 
 * aktivace: `$ . env/bin/activate`

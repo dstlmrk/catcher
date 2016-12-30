@@ -2,7 +2,8 @@
 
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm.exc import NoResultFound
-from catcher.models.base import Base, session
+# from sqlalchemy import update
+from catcher.models.base import Base, session, engine
 from catcher.models import Role, Email, ApiKey
 import re
 import random
@@ -20,6 +21,7 @@ class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
+    login = Column(String)
     email = Column(String)
     password = Column(String)
     created_at = Column(DateTime, default=time.strftime('%Y-%m-%d %H:%M:%S'))
@@ -27,31 +29,51 @@ class User(Base):
 
     @staticmethod
     @session
-    def create(email, role, _session):
+    def create(login, email, role, _session):
         """
         POST /users
         It checks valid email, generates init password and sends email.
         """
-
-        User._validate_email(email)
         # TODO: vratit zpet na generovani nahodneho hesla
         # init_password = User._generate_password()
         init_password = 'heslo'
-
         role_id = _session.query(Role).filter(Role.type == role).one().id
-        user = User(email=email, password=init_password, role_id=role_id)
+        user = User(
+            login=login,
+            email=User._validate_email(email),
+            password=init_password,
+            role_id=role_id
+        )
         Email.registration(user)
         _session.add(user)
 
     @staticmethod
     @session
-    def login(email, password, _session):
+    def get(id, _session):
+        """
+        GET /user/{id}
+        """
+        return _session.query(User).filter(User.id == id).one()
+
+    @staticmethod
+    @session
+    def edit(id, _session, email=None, password=None):
+        user = _session.query(User).get(id)
+        if email:
+            user.email = User._validate_email(email)
+        if password:
+            user.password = User._validate_password(password)
+        return user
+
+    @staticmethod
+    @session
+    def log_in(login, password, _session):
         """
         POST /login
         :returns: Api key and its validity.
         """
         try:
-            user = _session.query(User).filter_by(email=email, password=password).one()
+            user = _session.query(User).filter_by(login=login, password=password).one()
         except NoResultFound:
             raise ValueError("Authentication Failed: email or password is wrong")
         return ApiKey.create(user, _session)
@@ -63,11 +85,6 @@ class User(Base):
         POST /logout
         """
         _session.query(ApiKey).filter(ApiKey.key == api_key).delete()
-
-    @staticmethod
-    def get_user(email, password):
-        # TODO: chci vracet uzivatele pro middleware (nejsem si jisty, zda je to potreba)
-        return None
 
     @staticmethod
     def _generate_password():
@@ -84,27 +101,14 @@ class User(Base):
     def _validate_email(email):
         """"""
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            raise ValueError("Email format is invalid")
+            raise ValueError('Email format is invalid')
+        return email
 
-
-    # def substituteEmail(self, email):
-    #     ''''''
-    #     if email:
-    #         self.validateEmail(email)
-    #         self.email = email
-    #
-    # def substitutePassword(self, password, newPassword):
-    #     ''''''
-    #     if password and newPassword:
-    #         self.verifyPassword(password)
-    #         User.validatePassword(newPassword)
-    #         self.password = newPassword
-    #
-    # def verifyPassword(self, password):
-    #     '''Pripraveno pro prevod z hashe do realu'''
-    #     if self.password == password:
-    #         return True
-    #     else:
-    #         raise falcon.HTTPBadRequest(
-    #             "Bad input", "Password is incorrect"
-    #         )
+    @staticmethod
+    def _validate_password(password):
+        """"""
+        if not len(password) > 5:
+            raise ValueError(
+                'Password is too much short. It have to minimal 5 characters.'
+            )
+        return password

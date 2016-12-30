@@ -66,9 +66,9 @@ def session(func):
 
     return outer_function
 
-
 Base = declarative_base(cls=_Base)
 
 # echo rika, ze provadi logging
 engine = create_engine('mysql://:@localhost/catcher?charset=utf8', echo=True)
-Session = sessionmaker(bind=engine)
+# expire_on_commit znamena, ze objekty zustanou zachovany i po commitu
+Session = sessionmaker(bind=engine, expire_on_commit=False)

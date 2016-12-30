@@ -37,7 +37,10 @@ class Team(Base):
 
     @staticmethod
     @session
-    def edit(id, name, shortcut, division, city, country, cald_id, user_id):
+    def edit(id, _session, name=None, shortcut=None, division=None,
+             city=None, country=None, cald_id=None):
+
+
         # TODO: muze uzivatel zmenit majitele?
         # TODO: tady jsem skoncil, oc vsechno muze menit atd.?
         pass
