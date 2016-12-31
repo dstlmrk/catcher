@@ -1,13 +1,8 @@
 #!/usr/bin/python
 # coding=utf-8
 
-# import logging
-# import falcon
 import smtplib
 from catcher.config import config
-
-# from catcher import config
-# from catcher.models import MySQLModel
 
 
 class Email():

@@ -1,86 +1,52 @@
 # #!/usr/bin/python
 # # coding=utf-8
 
+import pymysql
+import pytest
+from sqlalchemy import create_engine
+
+from sqlalchemy import insert
+
+from sqlalchemy.orm import sessionmaker
+from tests.database import Database
 from tests.models import *
 
+from catcher.models import User, Team
 from catcher.config import config
-# from database import Database
-from tests.database import Database
-import pytest
+from catcher.logger import logger
+logger.setLevel('DEBUG')
 
-print("test.py")
-
-import logging
-# TODO: udelat logging nejaky barevnejsi
-
-# TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# TODO: pokracovat logovanim, abych videl, co se v testech kdyztak deje
-
-logging.basicConfig(level=logging.DEBUG)
-
-logging.warning('Watch out!')  # will print a message to the console
-logging.info('I told you so')  # will not print anything
-
-
-# print(user.a)
-# # from catcher import logger
-# from catcher import models as catcher_models
-# from catcher import config
-# from catcher import restapi
-# from catcher.test.database import Database
-# import pytest
-#
-# from catcher.
-#
-#
-# # from tests import *
-#
-#
-
-
-# import PyMySQL
-#
-# # Open database connection
-# db = pymysql.connect(
-#     config['db']['host'],
-#     config['db']['user'],
-#     config['db']['password'],
-#     config['db']['name']
-# )
-#
-# cursor = db.cursor()
-#
-# cursor.execute("SELECT * FROM catcher.user")
-#
-# data = cursor.fetchall()
-#
-# for d in data:
-#     print(d)
-#
-# db.close()
-
-
+engine = create_engine(
+    'mysql://:@localhost/test_catcher?charset=utf8'
+)
+Session = sessionmaker(bind=engine, expire_on_commit=False)
 
 @pytest.yield_fixture(scope='session')
 def database():
+    """
+    Creates test database by original and after tests it deletes it.
+    """
+
     database = Database(
-        config['db']['name'],
-        config['db']['host'],
-        config['db']['user'],
-        config['db']['password'],
+        config['db']['name'], 'localhost', '', ''
     )
     database.dump()
     database.create()
     yield database
-    # database.remove_temp_files()
+    database.remove_temp_files()
     # database.delete()
 
 
 @pytest.yield_fixture(scope='function')
-def db(database):
-    # database.fill()
-    yield True
-    # database.clean()
+def session(database):
+    """
+    Fills database before each test and gives session.
+    """
+    database.fill()
+    session = Session()
+    yield session
+    database.clean()
+    database.conn.commit()
 
 
 # @pytest.fixture
@@ -90,48 +56,39 @@ def db(database):
 #     return restapi.api
 
 
-@pytest.fixture
-def models(db):
-    return True
-    return catcher_models
-#
-#
-# @pytest.fixture(scope='function')
-# def users(models):
-#     models.User.insert(
-#         id=1,
-#         email='mickey@mouse.com',
-#         password="e8WFffXew",
-#         role=1, # organizer
-#         api_key="#apiKeyOrganizer1"
-#     ).execute()
-#     models.User.insert(
-#         id=2,
-#         email='adam@mouse.com',
-#         password="T3Cfp9HYt",
-#         role=1, # organizer
-#         api_key="#apiKeyOrganizer2"
-#     ).execute()
-#     models.User.insert(
-#         id=3,
-#         email='admin@catcher.cz',
-#         password="Rf3;c9HYt",
-#         role=2, # admin
-#         api_key="#apiKeyAdmin"
-#     ).execute()
-#
-#
-# @pytest.fixture(scope='function')
-# def teams(models, users):
-#     models.Team.insert(
-#         id=1, division=1, name="Frozen Angels", shortcut="FAL",
-#         city="Liberec", country="CZE", user_id=1,
-#     ).execute()
-#     models.Team.insert(
-#         id=2, division=2, name="KeFEAR", shortcut="KEF",
-#         city="Košice", country="SVK", user_id=2,
-#     ).execute()
-#     models.Team.insert(
-#         id=3, division=2, name="Atruc", shortcut="ATR",
-#         city="Plzeň", country="CZE"
-#     ).execute()
+# @pytest.fixture
+# def models(db):
+#     return True
+#     return catcher_models
+
+
+# def users():
+#     pass
+
+@pytest.fixture(scope='function')
+def users(session):
+    session.add(User(
+        id=1, login="user1", email="user1@test.cz", password="password1", role_id=1
+    ))
+    session.add(User(
+        id=2, login="user2", email="user2@test.cz", password="password2", role_id=1
+    ))
+    # admin
+    session.add(User(
+        id=3, login="user3", email="user3@test.cz", password="password3", role_id=2
+    ))
+    session.commit()
+
+
+@pytest.fixture(scope='function')
+def teams(session):
+    # id, division_id, name, shortcut, city, country, cald_id, user_id
+    session.add(Team(
+        id=1, division_id=1, name="FC Prague", shortcut="FCP",
+        city="Prague", country="CZE"
+    ))
+    session.add(Team(
+        id=2, division_id=2, name="FC Hradec Králové", shortcut="HK",
+        city="Hradec Králové", country="CZE"
+    ))
+    session.commit()

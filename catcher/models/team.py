@@ -22,6 +22,11 @@ class Team(Base):
 
     @staticmethod
     @session
+    def get(id, _session):
+        return _session.query(Team).get(id)
+
+    @staticmethod
+    @session
     def create(name, shortcut, division, city, country,
                _session, cald_id=None, user_id=None):
         division_id = _session.query(Division).filter(Division.type == division).one().id
@@ -29,27 +34,30 @@ class Team(Base):
                     division_id=division_id, city=city, country=country,
                     cald_id=cald_id, user_id=user_id)
         _session.add(team)
+        return team
 
     @staticmethod
     @session
     def delete(id, _session):
-        pass
+        _session.query(Team).filter(Team.id == id).delete()
 
     @staticmethod
     @session
     def edit(id, _session, name=None, shortcut=None, division=None,
              city=None, country=None, cald_id=None):
-
-
-        # TODO: muze uzivatel zmenit majitele?
-        # TODO: tady jsem skoncil, oc vsechno muze menit atd.?
-        pass
-
-    # email = Column(String)
-    # password = Column(String)
-    # created_at = Column(DateTime, default=time.strftime('%Y-%m-%d %H:%M:%S'))
-    # role_id = Column(Integer, ForeignKey('role.id'))
-    #
-
-
-# id, division_id, name, shortcut, city, country, cald_id, user_id
+        team = _session.query(Team).get(id)
+        if name:
+            team.name = name
+        if shortcut:
+            team.shortcut = shortcut[:SHORTCUT_MAX_LENGTH]
+        if division:
+            division_id = _session.query(Division).filter(
+                Division.type == division
+            ).one().id
+            team.division_id = division_id
+        if city:
+            team.city = city
+        if country:
+            team.country = country
+        if cald_id:
+            team.cald_id = cald_id

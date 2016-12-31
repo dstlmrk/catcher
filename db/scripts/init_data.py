@@ -14,7 +14,7 @@ models.User.create(login='org', email='organizer@test.cz', role='organizer')
 # Create api_key for test only
 # -----------------------------------------------------
 key, valid_to = models.User.log_in(login='vesel', password='heslo')
-models.User.logout(api_key=key)
+models.User.log_out(api_key=key)
 
 # -----------------------------------------------------
 # Create first teams

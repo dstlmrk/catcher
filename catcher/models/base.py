@@ -1,13 +1,49 @@
 #
 
 import pymysql
+import inspect
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.types as types
 from iso3166 import countries
-
+from catcher.config import config
+from catcher.logger import logger
 pymysql.install_as_MySQLdb()
+
+
+def get_engine():
+    """
+    :returns: Engine object connected with production/testing database.
+    """
+
+    test = False
+    # check, if this import is called by test files
+    curframe = inspect.currentframe()
+    for x in inspect.getouterframes(curframe):
+        if "test.py" in x[1]:
+            test = True
+    if not test:
+        engine = create_engine(
+            'mysql://{}:{}@{}/{}?charset=utf8'.format(
+                config['db']['user'],
+                config['db']['password'],
+                config['db']['host'],
+                config['db']['name']
+            )
+        )
+        logger.debug("Connected Catcher database")
+    else:
+        engine = create_engine(
+            'mysql://{}:{}@{}/{}?charset=utf8'.format(
+                '',
+                '',
+                'localhost',
+                'test_catcher'
+            )
+        )
+        logger.warn("Connected test database")
+    return engine
 
 
 class CountryCode(types.UserDefinedType):
@@ -52,6 +88,20 @@ class _Base(object):
         variables = variables[:-2]
         return '<%s(%s)>' % (table, variables)
 
+    # for testing
+    def __eq__(self, other):
+        """Override the default Equals behavior"""
+        if type(other) is type(self):
+            return self.__repr__() == other.__repr__()
+        return NotImplemented
+
+    # for testing
+    def __ne__(self, other):
+        """Define a non-equality test"""
+        if type(other) is type(self):
+            return not self.__eq__(other)
+        return NotImplemented
+
 
 def session(func):
     """
@@ -67,8 +117,5 @@ def session(func):
     return outer_function
 
 Base = declarative_base(cls=_Base)
-
-# echo rika, ze provadi logging
-engine = create_engine('mysql://:@localhost/catcher?charset=utf8', echo=True)
 # expire_on_commit znamena, ze objekty zustanou zachovany i po commitu
-Session = sessionmaker(bind=engine, expire_on_commit=False)
+Session = sessionmaker(bind=get_engine(), expire_on_commit=False)

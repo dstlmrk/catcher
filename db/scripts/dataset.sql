@@ -3,23 +3,25 @@
 -- Data for table `catcher`.`role`
 -- -----------------------------------------------------
 START TRANSACTION;
-USE `catcher`;
-INSERT INTO `catcher`.`role` (`id`, `type`) VALUES (1, 'club');
-INSERT INTO `catcher`.`role` (`id`, `type`) VALUES (2, 'organizer');
-INSERT INTO `catcher`.`role` (`id`, `type`) VALUES (3, 'admin');
+INSERT INTO `catcher`.`role`
+(`id`, `type`     ) VALUES
+(1   , 'club'     ),
+(2   , 'organizer'),
+(3   , 'admin'    );
 COMMIT;
-
 
 -- -----------------------------------------------------
 -- Data for table `catcher`.`division`
 -- -----------------------------------------------------
 START TRANSACTION;
-USE `catcher`;
-INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (1, 'open');
-INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (2, 'women');
-INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (3, 'mixed');
-INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (4, 'masters');
-INSERT INTO `catcher`.`division` (`id`, `type`) VALUES (5, 'junior');
+INSERT INTO `catcher`.`division`
+(`id`, `type`) VALUES
+(1   , 'open'    ),
+(2   , 'women'   ),
+(3   , 'mixed'   ),
+(4   , 'masters' ),
+(5   , 'junior'  );
+-- --------------------
 COMMIT;
 
 -- -----------------------------------------------------

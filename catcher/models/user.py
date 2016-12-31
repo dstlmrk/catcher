@@ -2,8 +2,7 @@
 
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm.exc import NoResultFound
-# from sqlalchemy import update
-from catcher.models.base import Base, session, engine
+from catcher.models.base import Base, session
 from catcher.models import Role, Email, ApiKey
 import re
 import random
@@ -46,6 +45,7 @@ class User(Base):
         )
         Email.registration(user)
         _session.add(user)
+        return user
 
     @staticmethod
     @session
@@ -80,7 +80,7 @@ class User(Base):
 
     @staticmethod
     @session
-    def logout(api_key, _session):
+    def log_out(api_key, _session):
         """
         POST /logout
         """

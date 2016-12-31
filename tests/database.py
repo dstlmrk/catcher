@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # coding=utf-8
 
-# from catcher import logger
-import logging
+from catcher.logger import logger
 import os
 import sys
 import pymysql
@@ -17,23 +16,17 @@ class Database(object):
         self.user = user
         self.passwd = passwd
         self.wd = os.path.dirname(os.path.realpath(__file__))
-        self.connection = pymysql.connect(
-            host, user, passwd, name
-        )
-
-        print("-----------")
+        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
 
     def dump(self):
-        if 0 == os.system(
+        if 0 == os.system((
             "mysqldump --no-data --single-transaction"
-            + " --host=\"%s\"" % self.host
-            + " --user=\"%s\"" % self.user
-            + " --password=\"%s\"" % self.passwd
-            + " \"%s\"" % self.original_name
-            + " > db.sql"):
-            logging.debug("Dump is successfully created")
+            " --host=\"{}\" --user=\"{}\" --password=\"{}\" \"{}\" > db.sql"
+            ).format(self.host, self.user, self.passwd, self.original_name)
+        ):
+            logger.debug("Dump is successfully created")
         else:
-            sys.exit(logging.error("Dump is not created"))
+            sys.exit(logger.error("Dump is not created"))
 
     def create(self):
         init = (
@@ -46,43 +39,49 @@ class Database(object):
             "echo \"%s\" | mysql -h \"%s\"" % (init, self.host)
         ):
             sys.exit(
-                logging.error("Test database is not created (init script)")
+                logger.error("Test database is not created (init script)")
             )
         if 0 != os.system(
             "mysql -h \"%s\" -D \"%s\" < \"%s/db.sql\"" % (
                 self.host, self.name, self.wd)
         ):
             sys.exit(
-                logging.error("Test database is not created (dump file)")
+                logger.error("Test database is not created (dump file)")
             )
-        logging.debug("Test database is successfully created")
+        logger.debug("Test database is successfully created")
 
     def fill(self):
-        if 0 != os.system("mysql -h \"%s\" -D \"%s\" < \"%s/dataset.sql\"" % (self.host, self.name, self.wd)):
-            sys.exit(logging.error("Dataset is not imported"))
-        logging.debug("Dataset is imported")
+        if 0 != os.system("mysql -h \"%s\" -D \"%s\" < \"%s/dataset.sql\"" % (
+                self.host, self.name, self.wd
+        )):
+            sys.exit(logger.error("Dataset is not imported"))
+        logger.debug("Dataset is imported")
 
     def remove_temp_files(self):
         if 0 != os.system("rm \"%s/db.sql\"" % (self.wd)):
-            sys.exit(logging.error("Dump file is deleted"))
-        logging.debug("Dump file is deleted")
+            sys.exit(logger.error("Dump file is deleted"))
+        logger.debug("Dump file is deleted")
 
     def delete(self):
-        self.connection.execute_sql("DROP DATABASE IF EXISTS `%s`" % self.name)
-        qr = self.connection.execute_sql(
+        cursor = self.conn.cursor()
+        cursor.execute("DROP DATABASE IF EXISTS `%s`" % self.name)
+        cursor.execute(
             "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA " +
-            "WHERE SCHEMA_NAME = '%s'" % self.name
+            "WHERE SCHEMA_NAME = \"%s\"" % self.name
         )
-        if len(qr.fetchall()) == 0:
-            logging.debug("Test database is deleted")
+        if len(cursor.fetchall()) == 0:
+            logger.debug("Test database is deleted")
         else:
-            logging.error("Test database is not deleted")
+            logger.error("Test database is not deleted")
+        cursor.close()
 
     def clean(self):
-        self.connection.execute_sql("SET foreign_key_checks = 0")
-        qr = self.connection.execute_sql("SHOW TABLES")
-        for table in qr.fetchall():
+        cursor = self.conn.cursor()
+        cursor.execute("SET foreign_key_checks = 0")
+        cursor.execute("SHOW TABLES")
+        for table in cursor.fetchall():
             name = table[0]
-            self.connection.execute_sql("DELETE FROM `" + name + "`")
-        self.connection.execute_sql("SET foreign_key_checks = 1")
-        logging.debug("Tables are cleaned")
+            cursor.execute("DELETE FROM `" + name + "`")
+        cursor.execute("SET foreign_key_checks = 1")
+        logger.debug("Tables are cleaned")
+        cursor.close()

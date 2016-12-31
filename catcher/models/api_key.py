@@ -28,11 +28,6 @@ class ApiKey(Base):
         return key, valid_to
 
     @staticmethod
-    def cancel_validity(api_key, session):
-        """
-        """
-
-    @staticmethod
     def _get_validity():
         validity = int(config['api']['key_validity'])
         valid_to = datetime.datetime.now() + datetime.timedelta(minutes=validity)
