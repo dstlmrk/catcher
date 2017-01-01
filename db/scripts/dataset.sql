@@ -4,10 +4,9 @@
 -- -----------------------------------------------------
 START TRANSACTION;
 INSERT INTO `catcher`.`role`
-(`id`, `type`     ) VALUES
-(1   , 'club'     ),
-(2   , 'organizer'),
-(3   , 'admin'    );
+(`id`, `type` ) VALUES
+(1   , 'user' ),
+(2   , 'admin');
 COMMIT;
 
 -- -----------------------------------------------------

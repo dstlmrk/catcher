@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf-8
 
-from catcher.models import User, Role, ApiKey
+from catcher.models import User, ApiKey
 from sqlalchemy.orm.exc import NoResultFound
 import pytest
 
@@ -13,14 +13,11 @@ def test_user_get(session, users):
 def test_user_create(session):
     user_count = session.query(User).count()
     user_email = "karel@email.cz"
-    user_login = "karel"
-    user_role = "organizer"
-    user_role_id = session.query(Role).filter(Role.type == user_role).one().id
 
     # pred zavolanim models, musim zavolat commit, protoze uvnitr zacina nova transakce
     session.commit()
 
-    user = User.create(login="karel", email="karel@email.cz", role="organizer")
+    user = User.create(login="karel", email="karel@email.cz", role="user")
 
     assert user.email == "karel@email.cz"
     assert user_count+1 == session.query(User).count()
@@ -28,11 +25,10 @@ def test_user_create(session):
     user = session.query(User).filter_by(email=user_email).one()
 
     assert user.login == "karel"
-    assert user.role_id == user_role_id
 
 
 def test_user_edit(session):
-    user = User.create(login="karel", email="karel@email.cz", role="organizer")
+    user = User.create(login="karel", email="karel@email.cz", role="user")
     User.edit(id=user.id, email="novak@test.com", password="test_password")
     edited_user = session.query(User).get(user.id)
     assert edited_user.email == "novak@test.com"

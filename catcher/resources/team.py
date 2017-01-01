@@ -2,16 +2,17 @@
 # from catcher import models
 # import falcon
 
+from catcher import models
 
 # def get_valid_expressions(expressions):
 #     return [exp for exp in expressions if exp.rhs is not None]
 
 
-class Team(object):
+class Team():
 
     def on_get(self, req, resp, id):
-        req.context['result'] = {"test": 1}
-        # req.context['result'] = models.Team.get(id=int(id))
+        req.context['result'] = models.Team.get(id=int(id)).to_dict()
+
 
     # # TODO: pridat opravneni pouze pro majitele tymu nebo admina
     # def on_put(self, req, resp, id):
@@ -26,6 +27,8 @@ class Team(object):
     #     models.Team.delete().where(models.Team.id == int(id)).execute()
 
 
+class Teams():
+    pass
 # class Teams(object):
 #
 #     def on_get(self, req, resp):

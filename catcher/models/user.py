@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm.exc import NoResultFound
 from catcher.models.base import Base, session
 from catcher.models import Role, Email, ApiKey
+from sqlalchemy.orm import relationship
 import re
 import random
 import string
@@ -25,6 +26,7 @@ class User(Base):
     password = Column(String)
     created_at = Column(DateTime, default=time.strftime('%Y-%m-%d %H:%M:%S'))
     role_id = Column(Integer, ForeignKey('role.id'))
+    role = relationship("Role")
 
     @staticmethod
     @session
@@ -47,6 +49,14 @@ class User(Base):
         _session.add(user)
         return user
 
+    def to_dict(self):
+        dictionary = super(User, self).to_dict()
+        del dictionary['password']
+        del dictionary['role_id']
+        # ineffective: makes another select which saves in the cache
+        dictionary['role'] = self.role.type
+        return dictionary
+
     @staticmethod
     @session
     def get(id, _session):
@@ -54,6 +64,12 @@ class User(Base):
         GET /user/{id}
         """
         return _session.query(User).filter(User.id == id).one()
+
+    @staticmethod
+    @session
+    def get_users(_session, **kwargs):
+        # TODO: join s rolemi a jejim nazvem, nechci vracet id
+        return [user for user in _session.query(User).filter_by(**kwargs)]
 
     @staticmethod
     @session

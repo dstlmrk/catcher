@@ -18,16 +18,28 @@
 from catcher import models
 
 
-user = models.User.get(1)
-print("=", user)
+users = models.User.get_users()
 
-user = models.User.edit(1, email='kachna@test.cz', password='test_heslo')
+
+print(users)
 
 print("==================")
-print(">", user)
-print("------------")
-user = models.User.get(1)
-print("=", user)
+for u in users:
+    print("----")
+    print(u.to_dict())
+
+# print(users.to_dict())
+
+# print(user.to_dict())
+# print("=", user)
+#
+# user = models.User.edit(1, email='kachna@test.cz', password='test_heslo')
+#
+# print("==================")
+# print(">", user)
+# print("------------")
+# user = models.User.get(1)
+# print("=", user)
 # models.Team.create(name='Kulatá Šachovnice', shortcut='KŠ', division='mixed', city='Hradec Králové', country='CZE')
 
 

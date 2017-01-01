@@ -72,19 +72,23 @@ class _Base(object):
     """
 
     @staticmethod
-    def beautify(value):
+    def _beautify(value):
         if isinstance(value, int) or isinstance(value, float):
             return value
         else:
             return '\'%s\'' % value
+
+    @staticmethod
+    def _is_public(key):
+        return key[:1] != '_'
 
     def __repr__(self):
         table = self.__class__.__name__
         variables = ''
         for key, value in self.__dict__.items():
             # if value is not private
-            if key[:1] != '_':
-                variables += '%s=%s, ' % (key, _Base.beautify(value))
+            if _Base._is_public(key):
+                variables += '%s=%s, ' % (key, _Base._beautify(value))
         variables = variables[:-2]
         return '<%s(%s)>' % (table, variables)
 
@@ -101,6 +105,13 @@ class _Base(object):
         if type(other) is type(self):
             return not self.__eq__(other)
         return NotImplemented
+
+    def to_dict(self):
+        dictionary = {}
+        for key, value in self.__dict__.items():
+            if _Base._is_public(key):
+                dictionary[key] = value
+        return dictionary
 
 
 def session(func):

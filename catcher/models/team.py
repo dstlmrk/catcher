@@ -61,3 +61,4 @@ class Team(Base):
             team.country = country
         if cald_id:
             team.cald_id = cald_id
+        return team

@@ -1,5 +1,22 @@
 # Catcher
 
+## todo
+
+* dokončit privileges u rest api
+* podívat se na formulář pro vytváření turnaje a podle toho zkontrolovat tabulku tournament
+* vymyslet třídu tournament, zda to bude spíš fasáda nebo nejaká složitější třída
+* ošetřit vyhazování vyjímek v rest api
+* vytvářet další api endpointy pro nové metody v modelech
+* dopsat testy
+* nasadit
+* implementovat přihlašování a odhlašování do web. aplikace
+* implementovat další klíčové vlastnosti do web. aplikace
+* http -> https
+
+## important
+
+* misto club a organizer bude pouze user (aby se mohly role prolinat)
+
 
 ## sqlalchemy
 
