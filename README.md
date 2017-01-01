@@ -15,6 +15,7 @@
 
 ## important
 
+* uzivatel bude moci vytvorit team, ktery mu bude patrit
 * misto club a organizer bude pouze user (aby se mohly role prolinat)
 
 
