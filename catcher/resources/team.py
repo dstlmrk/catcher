@@ -2,6 +2,7 @@
 # from catcher import models
 # import falcon
 
+from falcon import HTTP_201, HTTP_204, HTTP_404
 from catcher import models
 
 # def get_valid_expressions(expressions):
@@ -20,30 +21,23 @@ class Team():
     #     team.set_attributes(**req.context['data'])
     #     team.save()
     #     req.context['result'] = team
-    #
+
     # @falcon.before(HasRole(["admin"]))
-    # def on_delete(self, req, resp, id):
-    #     # TODO: mazani by melo probihat jenom jako (kvuli statistikam apod.)
-    #     models.Team.delete().where(models.Team.id == int(id)).execute()
+    # TODO: pouze admin
+    def on_delete(self, req, resp, id):
+        resp.status = HTTP_204 if models.Team.delete(int(id)) else HTTP_404
 
 
 class Teams():
-    pass
-# class Teams(object):
-#
-#     def on_get(self, req, resp):
-#         exps = get_valid_expressions([
-#             models.Team.city == req.get_param("city"),
-#             models.Team.country == req.get_param("country"),
-#             models.Team.division == req.get_param_as_int("division_id")
-#         ])
-#         select_teams = models.Team.select()
-#         if exps:
-#             select_teams = select_teams.where(*exps)
-#         teams = [team for team in select_teams]
-#         req.context['result'] = {'teams': teams}
-#
-#     def on_post(self, req, resp):
-#         post = req.context['data']
-#         req.context['result'] = models.Team.create(**post)
-#         resp.status = falcon.HTTP_201
+
+    def on_get(self, req, resp):
+        # TODO: parametrizovat dotaz pro specifictejsi vyber?
+        req.context['result'] = {
+            'teams': [team.to_dict() for team in models.Team.get_teams()]
+        }
+
+    def on_post(self, req, resp):
+        # TODO: pozor na opravneni, tym zatim muze vytvorit jenom admin
+        user = models.Team.create(**req.context['data']).to_dict()
+        resp.status = HTTP_201
+        req.context['result'] = user

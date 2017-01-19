@@ -1,6 +1,6 @@
 #
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 # from sqlalchemy.orm.exc import NoResultFound
 from catcher.models.base import Base, session, CountryCode
 from catcher.models import Division
@@ -15,6 +15,7 @@ class Team(Base):
     name = Column(String)
     shortcut = Column(String)
     division_id = Column(Integer, ForeignKey('division.id'))
+    deleted = Column(Boolean, default=False)
     city = Column(String)
     country = Column(CountryCode)
     cald_id = Column(Integer)
@@ -38,8 +39,19 @@ class Team(Base):
 
     @staticmethod
     @session
+    def get_teams(_session, **kwargs):
+        # TODO: join s rolemi a jejim nazvem, nechci vracet id
+        return [team for team in _session.query(Team).filter_by(**kwargs)]
+
+    @staticmethod
+    @session
     def delete(id, _session):
-        _session.query(Team).filter(Team.id == id).delete()
+        # _session.query(Team).filter(Team.id == id).delete()
+        team = _session.query(Team).get(id)
+        if team.deleted:
+            return False
+        team.deleted = True
+        return True
 
     @staticmethod
     @session

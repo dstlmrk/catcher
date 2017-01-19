@@ -52,6 +52,7 @@ api = falcon.API(
 
 # TODO: stahnut uwsgi a tady pak pokracovat
 api.add_route('/api/team/{id}', resources.Team())
+api.add_route('/api/teams', resources.Teams())
 
 api.add_route('/api/user/{id}', resources.User())
 api.add_route('/api/users', resources.Users())

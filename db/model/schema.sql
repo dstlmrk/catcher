@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`team` (
   `division_id` INT NOT NULL,
   `name` VARCHAR(45) NOT NULL,
   `shortcut` CHAR(3) NOT NULL,
+  `deleted` TINYINT(1) NOT NULL DEFAULT 0,
   `city` VARCHAR(45) NULL,
   `country` CHAR(3) NULL,
   `cald_id` INT NULL DEFAULT NULL,
@@ -344,8 +345,10 @@ CREATE TABLE IF NOT EXISTS `catcher`.`participation` (
   `tournament_id` INT NOT NULL,
   `team_id` INT NOT NULL,
   `seeding` INT NULL,
+  `team_shortcut` VARCHAR(3) NOT NULL,
   PRIMARY KEY (`tournament_id`, `team_id`),
   INDEX `fk_participation_team1_idx` (`team_id` ASC),
+  UNIQUE INDEX `tournament_team_shortcut_UNIQUE` (`team_shortcut` ASC, `tournament_id` ASC),
   CONSTRAINT `fk_participation_tournament1`
     FOREIGN KEY (`tournament_id`)
     REFERENCES `catcher`.`tournament` (`id`)
