@@ -57,7 +57,7 @@ Ve všech případech (kromě případných explicitních výjimek) musí práce
 - [ ] projekt by měl stavět na nějakém tématu probraném v předmětu MI-PYT.
 
 ### Obsahem mé semestrální práce:
-- [ ] Vytvoření nové větve, kde bude aplikace vytvořená od nuly. Na mnoha místech sice
+- [x] Vytvoření nové větve, kde bude aplikace vytvořená od nuly. Na mnoha místech sice
       využiji původní myšlenku nebo nápad, ale myslím si, že ve většině případů nenechám
       kámen na kameni.
 - [ ] Bude splňovat všechny náležitosti pro semestrální práci (Python 3, PEP8, dokumentace,
@@ -68,8 +68,8 @@ Ve všech případech (kromě případných explicitních výjimek) musí práce
     - [ ] autorizace uživatelů (vytvářet turnaj nemůže každý apod.)
     - [ ] vytvoření turnaje (zápasy, skupiny, rozpis, hřiště) - na pozadí je docela
           dost logiky, i když se to nemusí na první pohled znát
-    - [ ] vytvoření, editace a smazání týmů
-    - [ ] logování do konzole
+    - [x] vytvoření, editace a smazání týmů
+    - [x] logování do konzole
 
 Pokud by na to byla kapacita, aplikace by dál měla umět:
 - [ ] zadávání výsledků k zápasům a logika, která s nimi dál pracuje
