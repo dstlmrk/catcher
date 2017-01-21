@@ -10,6 +10,8 @@ import datetime
 # import logging
 # from catcher.models import User, NullUser
 from catcher.logger import logger
+logger.setLevel('DEBUG')
+from catcher.models.base import Base
 
 
 # TODO: sjednotit json, ujson, simplejson atd.
@@ -77,6 +79,8 @@ class JSONTranslator(object):
 
         try:
             req.context['data'] = ujson.loads(body)
+            # TODO: logovani pro develop
+            logger.warn(req.method + " " + req.uri + " " + str(req.context['data']))
         except (ValueError, UnicodeDecodeError):
             raise falcon.HTTPBadRequest(
                 'Malformed JSON',
@@ -105,6 +109,8 @@ class JSONTranslator(object):
             return obj.isoformat()
         if isinstance(obj, set):
             return list(obj)
+        if isinstance(obj, Base):
+            return obj.to_dict()
         logger.error(
             "Converter doesn't know how convert data (%s [%s])" % (
                 obj, type(obj))

@@ -12,6 +12,10 @@
 * implementovat přihlašování a odhlašování do web. aplikace
 * implementovat další klíčové vlastnosti do web. aplikace
 * http -> https
+* ukladat hesla hashovane se soli
+* vyjimky pretvorit do falcon vyjimek (tak aby klient videl, co se stalo - pro testovani)
+* doladit klienta (po aktualizovani stranky vratit do spravneho tabu, oznacovat povinna pole apod.)
+* neposilat heslo emailem, ale poslat odkaz pro zmenu hesla
 
 ## important
 

@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm.exc import NoResultFound
 from catcher.models.base import Base, session
 from catcher.models import Role, Email, ApiKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 import re
 import random
 import string
@@ -30,7 +30,7 @@ class User(Base):
 
     @staticmethod
     @session
-    def create(login, email, role, _session):
+    def create(login, email, role_id, _session):
         """
         POST /users
         It checks valid email, generates init password and sends email.
@@ -38,7 +38,7 @@ class User(Base):
         # TODO: vratit zpet na generovani nahodneho hesla
         # init_password = User._generate_password()
         init_password = 'heslo'
-        role_id = _session.query(Role).filter(Role.type == role).one().id
+        # role_id = _session.query(Role).filter(Role.type == role).one().id
         user = User(
             login=login,
             email=User._validate_email(email),
@@ -52,9 +52,9 @@ class User(Base):
     def to_dict(self):
         dictionary = super(User, self).to_dict()
         del dictionary['password']
-        del dictionary['role_id']
+        # del dictionary['role_id']
         # ineffective: makes another select which saves in the cache
-        dictionary['role'] = self.role.type
+        # dictionary['role'] = self.role.type
         return dictionary
 
     @staticmethod
@@ -67,19 +67,28 @@ class User(Base):
 
     @staticmethod
     @session
-    def get_users(_session, **kwargs):
-        # TODO: join s rolemi a jejim nazvem, nechci vracet id
-        return [user for user in _session.query(User).filter_by(**kwargs)]
+    def get_all(_session, **kwargs):
+        return [user for user in _session.query(User).options(joinedload('role')).filter_by(**kwargs)]
 
     @staticmethod
     @session
-    def edit(id, _session, email=None, password=None):
+    def edit(id, _session, login=None, email=None, password=None, role_id=None):
         user = _session.query(User).get(id)
+        if login:
+            user.login = login
         if email:
             user.email = User._validate_email(email)
         if password:
             user.password = User._validate_password(password)
+        if role_id:
+            user.role_id = role_id
         return user
+
+    @staticmethod
+    @session
+    def delete(id, _session):
+        print(_session.query(User).filter(User.id == id).delete())
+        return True
 
     @staticmethod
     @session

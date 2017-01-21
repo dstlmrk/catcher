@@ -57,6 +57,13 @@ api.add_route('/api/teams', resources.Teams())
 api.add_route('/api/user/{id}', resources.User())
 api.add_route('/api/users', resources.Users())
 
+api.add_route('/api/login', resources.Login())
+api.add_route('/api/registration', resources.Registration())
+api.add_route('/api/reset-password', resources.ResetPassword())
+
+api.add_route('/api/divisions', resources.Divisions())
+api.add_route('/api/roles', resources.Roles())
+
 # # resources are represented by long-lived class instances
 # api.add_route('/api/club/{id}',  resources.Club(m.Club))
 # # api.add_route('/api/club/{id}/players',  resources.ClubPlayers())
@@ -104,9 +111,20 @@ api.add_route('/api/users', resources.Users())
 # 		ex.__class__.__name__,)
 # 		)
 
+
+# def InternalServerError(ex, req, resp, params):
+# 	# logging.error(ex)
+#     # if isinstance(ex, falcon.HTTPError):
+# 	# 	raise Exception
+# 	raise falcon.HTTPInternalServerError(
+# 		ex.__class__.__name__, str(ex)
+#     )
+
+
 # # errors
 # # TODO: doplnit, podivat se do dokumentace na vyhazovani vyjimek
-# api.add_error_handler(Exception, falcon.HTTPInternalServerError('1','2'))
+# api.add_error_handler(Exception, InternalServerError)
+
 # api.add_error_handler(sqlalchemy.exc.IntegrityError, falcon.HTTPInternalServerError(None, None))
 
 # api.add_error_handler(RuntimeError, errors.InternalServerError)

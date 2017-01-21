@@ -20,5 +20,5 @@ models.User.log_out(api_key=key)
 # -----------------------------------------------------
 # Create first teams
 # -----------------------------------------------------
-models.Team.create(name="Prague Devils", shortcut="PD", city="Praha", country="CZE", division="open")
-models.Team.create(name="Žlutá Zimnice", shortcut="ŽZ", city="Praha", country="CZE", division="women")
+models.Team.create(name="Prague Devils", shortcut="PD", city="Praha", country="CZE", division_id=1)
+models.Team.create(name="Žlutá Zimnice", shortcut="ŽZ", city="Praha", country="CZE", division_id=2)
