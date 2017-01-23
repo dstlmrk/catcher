@@ -5,15 +5,9 @@
 * dokončit privileges u rest api
 * podívat se na formulář pro vytváření turnaje a podle toho zkontrolovat tabulku tournament
 * vymyslet třídu tournament, zda to bude spíš fasáda nebo nejaká složitější třída
-* ošetřit vyhazování vyjímek v rest api
-* vytvářet další api endpointy pro nové metody v modelech
-* dopsat testy
 * nasadit
-* implementovat přihlašování a odhlašování do web. aplikace
-* implementovat další klíčové vlastnosti do web. aplikace
 * http -> https
 * ukladat hesla hashovane se soli
-* vyjimky pretvorit do falcon vyjimek (tak aby klient videl, co se stalo - pro testovani)
 * doladit klienta (po aktualizovani stranky vratit do spravneho tabu, oznacovat povinna pole apod.)
 * neposilat heslo emailem, ale poslat odkaz pro zmenu hesla
 
@@ -44,17 +38,17 @@
 
 Ve všech případech (kromě případných explicitních výjimek) musí práce splňovat tyto požadavky:
 
-- [ ] musí být napsaná v jazyce Python verze 3.3 nebo vyšší (Cython se samozřejmě také počítá),
+- [x] musí být napsaná v jazyce Python verze 3.3 nebo vyšší (Cython se samozřejmě také počítá),
 - [ ] musí splnit zadání, na kterém jsme se dohodli,
-- [ ] musí být v gitovém repozitáři,
-- [ ] kód musí splňovat konvence,
+- [x] musí být v gitovém repozitáři,
+- [x] kód musí splňovat konvence,
 - [ ] kód, komentáře i dokumentace musí být v angličtině,
-- [ ] commity musí obsahovat vhodně atomické změny a mít vysvětlující message,
+- [x] commity musí obsahovat vhodně atomické změny a mít vysvětlující message,
 - [ ] kód musí být dostatečně pokryt testy (nechceme stanovovat číselnou hranici,
       použijte selský rozum),
 - [ ] projekt musí být zabalen jako pythonní balíček (za zveřejnění na PyPI
       pod svobodnou licencí jsou body navíc),
-- [ ] projekt by měl stavět na nějakém tématu probraném v předmětu MI-PYT.
+- [x] projekt by měl stavět na nějakém tématu probraném v předmětu MI-PYT.
 
 ### Obsahem mé semestrální práce:
 - [x] Vytvoření nové větve, kde bude aplikace vytvořená od nuly. Na mnoha místech sice
@@ -64,7 +58,7 @@ Ve všech případech (kromě případných explicitních výjimek) musí práce
       testy, balíček).
 - [ ] Aplikace bude umět (stará aplikace tohle skoro všechno už umí, ale z toho starého
       kódu by opravdu téměř nic nezůstalo):
-    - [ ] registrace a přihlášení uživatelů (tokeny s omezenou platností)
+    - [x] registrace a přihlášení uživatelů (tokeny s omezenou platností)
     - [ ] autorizace uživatelů (vytvářet turnaj nemůže každý apod.)
     - [ ] vytvoření turnaje (zápasy, skupiny, rozpis, hřiště) - na pozadí je docela
           dost logiky, i když se to nemusí na první pohled znát
