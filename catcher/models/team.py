@@ -1,5 +1,3 @@
-#
-
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 # from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import relationship, joinedload

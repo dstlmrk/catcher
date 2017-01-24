@@ -1,5 +1,8 @@
 #
 
+class Tournament():
+    pass
+
 # from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 # from sqlalchemy.orm.exc import NoResultFound
 # from catcher.models.base import Base, session, CountryCode

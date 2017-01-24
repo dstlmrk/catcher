@@ -1,5 +1,3 @@
-#
-
 import pymysql
 import inspect
 from sqlalchemy import create_engine
@@ -127,6 +125,14 @@ def session(func):
 
     return outer_function
 
+
+def get_session():
+    logger.fatal("------- new Session() --------")
+    return Session()
+
 Base = declarative_base(cls=_Base)
 # expire_on_commit znamena, ze objekty zustanou zachovany i po commitu
 Session = sessionmaker(bind=get_engine(), expire_on_commit=False)
+
+# TODO: test, zda bych nemohl sdilet session napric aplikac
+_session = get_session()

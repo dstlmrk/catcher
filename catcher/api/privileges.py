@@ -3,12 +3,13 @@
 
 import falcon
 from abc import abstractmethod, ABCMeta
+from catcher.logger import logger
+from catcher.models.base import _session
+from catcher.models import Tournament
 
 
 class Privilege(object):
-    """
-    Abstract class that controls user privileges.
-    """
+    """Abstract class that checks user privileges"""
     __meta__ = ABCMeta
 
     @abstractmethod
@@ -26,12 +27,9 @@ class Privilege(object):
                 )
             )
 
-# TODO: IsOwner?
 
 class HasRole(Privilege):
-    """
-    Class that controls user role.
-    """
+    """Checks user role"""
 
     def __init__(self, roles):
         if not isinstance(roles, list):
@@ -40,24 +38,61 @@ class HasRole(Privilege):
 
     def evaluate(self, req, resp, resource, params):
         user = req.context["user"]
-        # TODO: az tady budu vracet prihlaseneho uzivatele, je potreba overit jeho roli
-        return user.role in self.roles
+        return user.role.type in self.roles
+
+
+class IsOwner(Privilege):
+    """Checks if user is owner of the object"""
+
+    def __init__(self, model):
+        self.model = model
+
+    def evaluate(self, req, resp, resource, params):
+        user = req.context["user"]
+        obj = _session.query(self.model).get(params.get('id'))
+        if hasattr(obj, "user_id"):
+            return obj.user_id == user.id
+        if hasattr(obj, "tournament_id"):
+            tournament = _session.query(Tournament).get(obj.tournament_id)
+            return tournament.user_id == user.id
+        return False
 
 
 class IsLoggedUser(Privilege):
-    """
-    Class that controls logged users.
-    """
+    """Checks if user is logged"""
+
     def evaluate(self, req, resp, resource, params):
         user = req.context["user"]
         return bool(user.id)
 
 
 class IsThatUser(Privilege):
-    """"""
+    """Checks if user works with himself"""
 
     def evaluate(self, req, resp, resource, params):
-        # TODO: tady se mi to nejak nezda, az tuhle funkcionalitu budu potrebovat, tak pozor!
         user = req.context["user"]
-        user_id = req.get_param_as_int("id", True)
-        return user.id == user_id
+        return user.id == int(params.get('id'))
+
+
+class LogicPrivilege(Privilege):
+
+    def __init__(self, privilege_a, privilege_b):
+        self.privilege_a = privilege_a
+        self.privilege_b = privilege_b
+
+    def evaluate(self, req, resp, resource, params):
+        super(LogicPrivilege, self).evaluate()
+
+
+class AndPrivilege(LogicPrivilege):
+
+    def evaluate(self, req, resp, resource, params):
+        return self.privilege_a.evaluate(req, resp, resource, params) \
+               and self.privilege_b.evaluate(req, resp, resource, params)
+
+
+class OrPrivilege(LogicPrivilege):
+
+    def evaluate(self, req, resp, resource, params):
+        return self.privilege_a.evaluate(req, resp, resource, params) \
+               or self.privilege_b.evaluate(req, resp, resource, params)

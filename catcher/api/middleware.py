@@ -4,17 +4,13 @@
 import falcon
 import ujson
 import json
-# from catcher import models
 import datetime
-# from playhouse.shortcuts import model_to_dict
-# import logging
-# from catcher.models import User, NullUser
+from catcher.models import ApiKey, User, NullUser
+from catcher.models.base import get_session
+from catcher.models.base import Base
 from catcher.logger import logger
 logger.setLevel('DEBUG')
-from catcher.models.base import Base
 
-
-# TODO: sjednotit json, ujson, simplejson atd.
 
 class Crossdomain(object):
     def process_request(self, req, resp):
@@ -32,20 +28,26 @@ class Crossdomain(object):
 
 
 class Authorization(object):
-    def process_request(self, req, resp):
-        pass
 
-        # user = NullUser()
-        # try:
-        #     if req.auth:
-        #         user = User.get(api_key=req.auth)
-        # except User.DoesNotExist:
-        #     pass
-        #
-        # # debug
-        # print("LOGGED: %s" % user)
-        #
-        # req.context["user"] = user
+    def process_request(self, req, resp):
+
+        user = NullUser()
+
+        if req.auth:
+            logger.debug("User with auth header is logging")
+            # TODO: tady bych asi m
+            session = get_session()
+            try:
+                user = User.get_by_auth(req.auth, session)
+            except Exception: # DoesNotExists
+                pass
+            else:
+                # if user is logged, he has to prolong token
+                ApiKey.prolong_validity(req.auth, session)
+                session.commit()
+                logger.debug("Logged user: %s" % user)
+
+        req.context["user"] = user
 
 
 class RequireJSON(object):
@@ -66,6 +68,10 @@ class JSONTranslator(object):
     def process_request(self, req, resp):
         # req.stream corresponds to the WSGI wsgi.input environ variable,
         # and allows you to read bytes from the request body
+
+        # TODO: logovani pro develop - smazat
+        logger.error(req.method + " " + str(req.headers) + " " + req.uri)
+
         if req.content_length in (None, 0):
             return  # nothing to do
 
@@ -79,8 +85,8 @@ class JSONTranslator(object):
 
         try:
             req.context['data'] = ujson.loads(body)
-            # TODO: logovani pro develop
-            logger.warn(req.method + " " + req.uri + " " + str(req.context['data']))
+            # TODO: logovani pro develop - smazat
+            logger.error(str(req.context['data']))
         except (ValueError, UnicodeDecodeError):
             raise falcon.HTTPBadRequest(
                 'Malformed JSON',

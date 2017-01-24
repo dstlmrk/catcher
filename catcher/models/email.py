@@ -1,17 +1,12 @@
-#!/usr/bin/python
-# coding=utf-8
-
 import smtplib
 from catcher.config import config
+from catcher.logger import logger
 
 
 class Email():
 
     @staticmethod
     def _send_email(recipient, message):
-
-        # TODO: potreba otestovat pousteni emailu
-
         # TODO: load from config file
         sender = 'noreply.catcher@gmail.com'
 
@@ -26,17 +21,12 @@ class Email():
             server.quit()
 
         except Exception as ex:
-            # TODO: doladit vyhazovani vyjimek a posilani zprav do logovani
-            raise Exception("Email error")
-            # logging.error(
-            #     "Message wasn't sended (email: %s): %s (%s)"
-            #     % (recipient, message, ex)
-            # )
-            # falcon.HTTPInternalServerError(
-            #     "Message wasn't sended (email: %s)" % recipient,
-            #     "%s (%s)" % (message, ex)
-            # )
+            logger.error("Email sending to %s finished with error %s" % (recipient, ex.__traceback__))
+            # TODO: obyc exception by se mela zachytit falconem a pretvorit na internal server error
+            raise Exception("Email sending finished with error")
+        logger.debug("Email is sent in %s" % recipient)
 
+    # TODO: zkontrolovat metodu pro obnovu hesla
     # @staticmethod
     # def send_reset_password(user):
     #     ''''''
@@ -54,8 +44,6 @@ class Email():
     #         % new_password)
     #
     #     Login.send_email(user.email, msg)
-    #
-
 
     @staticmethod
     def registration(user):
@@ -68,5 +56,6 @@ class Email():
             "This e-mail was generated automatically. "
             "Any reply will not be processed."
             % user.password)
-        # TODO: dokoncit odeslani
+        # TODO: staci odkomentovat a budu posilat emaily
+        logger.warn("Email is sent.. jenom jako")
         # Email._send_email(user.email, msg)

@@ -1,5 +1,3 @@
-#
-
 from sqlalchemy import Column, Integer, String
 from catcher.models.base import Base, session
 

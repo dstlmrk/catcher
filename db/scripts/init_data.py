@@ -7,9 +7,9 @@ from catcher import models
 # -----------------------------------------------------
 # Create first users
 # -----------------------------------------------------
-models.User.create(login='vesel', email='vesel@test.cz', role='admin')
-models.User.create(login='dost', email='dosta@test.cz', role='admin')
-models.User.create(login='org', email='organizer@test.cz', role='user')
+models.User.create(login='vesel', email='vesel@test.cz', role_id=2)
+models.User.create(login='dost', email='dosta@test.cz', role_id=2)
+models.User.create(login='org', email='organizer@test.cz', role_id=1)
 
 # -----------------------------------------------------
 # Create api_key for test only
