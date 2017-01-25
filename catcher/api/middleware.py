@@ -6,14 +6,31 @@ import ujson
 import json
 import datetime
 from catcher.models import ApiKey, User, NullUser
-from catcher.models.base import get_session
-from catcher.models.base import Base
+from catcher.models.base import Base, Session
+from catcher.config import config
 from catcher.logger import logger
+
 logger.setLevel('DEBUG')
 
 
-class Crossdomain(object):
+
+class SessionMaker(object):
+
     def process_request(self, req, resp):
+        req.context['session'] = Session()
+
+    def process_response(self, req, resp, resource, req_succeeded):
+        session = req.context['session']
+        if req_succeeded:
+            session.commit()
+        else:
+            session.rollback()
+        session.close()
+
+
+class Crossdomain(object):
+
+    def process_response(self, req, resp, resource, req_succeeded):
         resp.append_header(
             "Access-Control-Allow-Origin", "*"
         )
@@ -30,33 +47,31 @@ class Crossdomain(object):
 class Authorization(object):
 
     def process_request(self, req, resp):
-
         user = NullUser()
-
         if req.auth:
             logger.debug("User with auth header is logging")
-            # TODO: tady bych asi m
-            session = get_session()
+            session = req.context['session']
             try:
-                user = User.get_by_auth(req.auth, session)
+                user = User.get_by_auth(session, req.auth)
             except Exception: # DoesNotExists
                 pass
             else:
+                # TODO: abych setril db, tak bych se nejprve mohl zeptat a prodluzovat az kdyz se ta doba nejak vyrazne blizi ke konci
                 # if user is logged, he has to prolong token
-                ApiKey.prolong_validity(req.auth, session)
+                ApiKey.prolong_validity(session, req.auth)
                 session.commit()
                 logger.debug("Logged user: %s" % user)
-
+        logger.warn("null user")
         req.context["user"] = user
 
 
 class RequireJSON(object):
+
     def process_request(self, req, resp):
         if not req.client_accepts_json:
             raise falcon.HTTPNotAcceptable(
                 'This API only supports responses encoded as JSON.'
             )
-
         if req.method in ('POST', 'PUT'):
             if not req.content_type or 'application/json' not in req.content_type:
                 raise falcon.HTTPUnsupportedMediaType(
@@ -65,6 +80,7 @@ class RequireJSON(object):
 
 
 class JSONTranslator(object):
+
     def process_request(self, req, resp):
         # req.stream corresponds to the WSGI wsgi.input environ variable,
         # and allows you to read bytes from the request body

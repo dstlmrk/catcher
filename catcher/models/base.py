@@ -18,11 +18,12 @@ def get_engine():
     test = False
     database_url = 'mysql://{}:{}@{}/{}?charset=utf8'
 
-    # check, if this import is called by test files
+    # check, if this import is called by test
     cur_frame = inspect.currentframe()
     for x in inspect.getouterframes(cur_frame):
         if 'conftest.py' in x[1]:
             test = True
+            break
 
     if not test:
         engine = create_engine(database_url.format(
@@ -63,9 +64,7 @@ class CountryCode(types.UserDefinedType):
 
 
 class _Base(object):
-    """
-    Made for string representation of database tables.
-    """
+    """Made for string representation of database tables"""
 
     @staticmethod
     def _beautify(value):
@@ -110,24 +109,24 @@ class _Base(object):
                 dictionary[key] = value
         return dictionary
 
+# TODO: dekorator mozna jeste nemazat, protoze bych ho mohl pouzit pro commit, mozna ale nema smysl pro tak malo uprav
 
-def session(func):
-    """
-    It wraps all method used by rest api. Makes and closes session.
-    """
+# def session(func):
+#     """
+#     It wraps all method used by rest api. Makes and closes session.
+#     """
+#
+#     def outer_function(*args, **kwargs):
+#         session = get_session()
+#         ret_val = func(*args, _session=session, **kwargs)
+#         # returns the connection to the pool
+#         session.commit()
+#         return ret_val
+#
+#     return outer_function
 
-    def outer_function(*args, **kwargs):
-        session = get_session()
-        ret_val = func(*args, _session=session, **kwargs)
-        # returns the connection to the pool
-        session.commit()
-        return ret_val
-
-    return outer_function
 
 
-def get_session():
-    return Session()
 
 Base = declarative_base(cls=_Base)
 # expire_on_commit znamena, ze objekty zustanou zachovany i po commitu

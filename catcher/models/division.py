@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from catcher.models.base import Base, session
+from catcher.models.base import Base
 
 
 class Division(Base):
@@ -9,6 +9,5 @@ class Division(Base):
     type = Column(String)
 
     @staticmethod
-    @session
-    def get_all(_session):
-        return [team for team in _session.query(Division)]
+    def get_all(session):
+        return [team for team in session.query(Division)]

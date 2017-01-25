@@ -7,22 +7,16 @@ class Email():
 
     @staticmethod
     def _send_email(recipient, message):
-        # TODO: load from config file
-        sender = 'noreply.catcher@gmail.com'
-
+        """Send email"""
+        sender = config['email']['username']
         try:
             server = smtplib.SMTP('smtp.gmail.com:587')
             server.starttls()
-            server.login(
-                config['email']['username'],
-                config['email']['password']
-            )
+            server.login(sender, config['email']['password'])
             server.sendmail(sender, recipient, message)
             server.quit()
-
         except Exception as ex:
             logger.error("Email sending to %s finished with error %s" % (recipient, ex.__traceback__))
-            # TODO: obyc exception by se mela zachytit falconem a pretvorit na internal server error
             raise Exception("Email sending finished with error")
         logger.debug("Email is sent in %s" % recipient)
 
@@ -47,15 +41,15 @@ class Email():
 
     @staticmethod
     def registration(user):
-        ''''''
+        """Create message for new user and send it"""
         msg = (
             "Welcome,\n\n"
             "password for your account is %s. "
             "Please change it immediately.\n\n"
             "Catcher\n\n"
             "This e-mail was generated automatically. "
-            "Any reply will not be processed."
+            "Any reply will not be processed.\n"
             % user.password)
-        # TODO: staci odkomentovat a budu posilat emaily
-        logger.warn("Email is sent.. jenom jako")
+        # TODO: odkomentovat, az prestanu s testovanim
+        logger.warn("fake: email is sent")
         # Email._send_email(user.email, msg)

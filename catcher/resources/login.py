@@ -8,7 +8,7 @@ class Login():
     def on_post(self, req, resp):
         """Check login and password and return random api key"""
         try:
-            user, (api_key, validity) = models.User.log_in(
+            user, api_key, validity = models.User.log_in(
                 **req.context['data']
             )
         except:

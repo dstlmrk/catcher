@@ -18,6 +18,7 @@
 * implementovat cron pro mazani neaktivnich api klicu
 * na travisu vytvorit testovani repa => opravit testy
 * mrknout na sdileni session mezi metodama, asi by stacilo mit globalne jednu session napric behem aplikace
+* logovani od urovne WARN logovat do souboru abych vedel o pripadnych problemech
 
 ## important
 

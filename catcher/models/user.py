@@ -1,15 +1,12 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import  IntegrityError
-from catcher.models.base import Base, session
+from catcher.models.base import Base
 from catcher.models import Role, Email, ApiKey
 from sqlalchemy.orm import relationship, joinedload, contains_eager
 import re
 import random
 import string
 import time
-
-from catcher.logger import logger
 
 
 class NullUser():
@@ -22,7 +19,6 @@ class NullUser():
     id = None
     login = None
     role = Role()
-    api_key = None
 
 
 class User(Base):
@@ -36,47 +32,30 @@ class User(Base):
     role_id = Column(Integer, ForeignKey('role.id'))
     role = relationship("Role")
 
-    # TODO: admin ma moznost vytvorit uzivatele manualne
-    # TODO: bezne se ale uzivatel registruje pres metodu register, protoze ta posila heslo (vyuzit dedicnost nebo skladani metod!!!!!!!, abych nemel duplicitni kod)
     @staticmethod
-    @session
-    def create(login, email, role_id, _session):
-        """
-        POST /users
-        It checks valid email, generates init password and sends email.
-        """
-        # TODO: vratit zpet na generovani nahodneho hesla
-        # init_password = User._generate_password()
-        init_password = 'heslo'
-        # role_id = _session.query(Role).filter(Role.type == role).one().id
+    def create(session, login, email, password, role_id):
+        """Create new user"""
         user = User(
             login=login,
             email=User._validate_email(email),
-            password=init_password,
+            password=User._validate_password(password),
             role_id=role_id
         )
-        _session.add(user)
+        session.add(user)
         return user
 
     @staticmethod
-    @session
-    def register(login, email, _session):
+    def register(session, login, email):
         """
         Checks valid email, generates init password and sends email.
         This method is available for create of users (no admins) only.
         Result of registration is new user with user role (no admin).
         """
-        # result of registration is new user (no admin)
-        role = _session.query(Role).filter(Role.type == "user").one()
-        user = User(
-            login=login,
-            email=User._validate_email(email),
-            password=User._generate_password(),
-            role_id=role.id
-        )
-        _session.add(user)
+        role = session.query(Role).filter(Role.type == "user").one()
         try:
-            _session.commit()
+            user = User.create(
+                session, login, email, User._generate_password(), role.id
+            )
         except IntegrityError:
             raise ValueError("User already exists with this login or email")
         Email.registration(user)
@@ -85,25 +64,16 @@ class User(Base):
     def to_dict(self):
         dictionary = super(User, self).to_dict()
         del dictionary['password']
-        # del dictionary['role_id']
-        # ineffective: makes another select which saves in the cache
-        # dictionary['role'] = self.role.type
         return dictionary
 
     @staticmethod
-    @session
-    def get(id, _session):
-        """
-        GET /user/{id}
-        """
-        return _session.query(User).get(id)
-        # return _session.query(User).filter(User.id == id).one()
+    def get(session, id):
+        """Get user by id"""
+        return session.query(User).get(id)
 
     @staticmethod
-    def get_by_auth(auth, session):
-        """
-        Get user by authorization token. It uses by middleware.
-        """
+    def get_by_auth(session, auth):
+        """Get user by authorization token."""
         api_key = (session.query(ApiKey)
                           .join(User)
                           .join(Role)
@@ -115,16 +85,20 @@ class User(Base):
         return api_key.user
 
     @staticmethod
-    @session
-    def get_all(_session, **kwargs):
-        return [user for user in _session.query(User).options(joinedload('role')).filter_by(**kwargs)]
+    def get_all(session, **kwargs):
+        """Get all users"""
+        return [
+            user for user in session.query(User)\
+                                    .options(joinedload('role'))\
+                                    .filter_by(**kwargs)
+        ]
 
     @staticmethod
-    @session
     # TODO: pridat opravneni, aby heslo mohl menit pouze admin nebo sam uzivatel
     # TODO: login, role_id muze menit jenom admin
-    def edit(id, _session, login=None, email=None, password=None, role_id=None):
-        user = _session.query(User).get(id)
+    def edit(session, id, login=None, email=None, password=None, role_id=None):
+        """Edit user"""
+        user = session.query(User).get(id)
         if login:
             user.login = login
         if email:
@@ -136,37 +110,26 @@ class User(Base):
         return user
 
     @staticmethod
-    @session
-    def delete(id, _session):
-        return _session.query(User).filter(User.id == id).delete()
+    def delete(session, id):
+        """Delete user"""
+        return session.query(User).filter(User.id == id).delete()
 
     @staticmethod
-    @session
-    def log_in(login, password, _session):
+    def log_in(session, login, password):
         """
-        POST /login
-        :returns: Api key and its validity.
+        :returns: user, token and its validity.
         """
-        try:
-            user = _session.query(User).options(joinedload('role')).filter_by(login=login, password=password).one()
-        except NoResultFound:
-            logger.warn("NoResultFound")
-            raise ValueError("Authentication Failed: login or password is wrong")
-        return (user, ApiKey.create(user, _session))
-
-    @staticmethod
-    @session
-    def log_out(api_key, _session):
-        """
-        POST /logout
-        """
-        _session.query(ApiKey).filter(ApiKey.key == api_key).delete()
+        user = session.query(User)\
+                      .options(joinedload('role'))\
+                      .filter_by(login=login, password=password)\
+                      .one()
+        # TODO: vracet jenom objekt user obohaceny o token s platnosti
+        api_key, validity = ApiKey.create(session, user)
+        return user, api_key, validity
 
     @staticmethod
     def _generate_password():
-        """
-        :return: Random password.
-        """
+        """Generate random password"""
         return ''.join(
             random.choice(
                 string.ascii_uppercase + string.digits
@@ -175,25 +138,27 @@ class User(Base):
 
     @staticmethod
     def _validate_login(login):
-        """"""
+        """Check login if his minimal length is six"""
         if len(login) < 6:
             raise ValueError(
-                'Login is too much short. It has to have minimal 6 characters.'
+                'Login is too much short.'
+                ' It has to have minimal 6 characters.'
             )
         return login
 
     @staticmethod
     def _validate_email(email):
-        """"""
+        """Check email if its format is valid"""
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
             raise ValueError('Email format is invalid')
         return email
 
     @staticmethod
     def _validate_password(password):
-        """"""
+        """Check password if his minimal length is six"""
         if len(password) < 6:
             raise ValueError(
-                'Password is too much short. It has to have minimal 6 characters.'
+                'Password is too much short.'
+                ' It has to have minimal 6 characters.'
             )
         return password

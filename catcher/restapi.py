@@ -10,6 +10,7 @@ from sqlalchemy.orm.exc import NoResultFound
 api = falcon.API(
     middleware=[
         middleware.Crossdomain(),
+        middleware.SessionMaker(),
         middleware.Authorization(),
         middleware.RequireJSON(),
         middleware.JSONTranslator(),

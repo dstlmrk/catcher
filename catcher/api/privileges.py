@@ -4,7 +4,6 @@
 import falcon
 from abc import abstractmethod, ABCMeta
 from catcher.logger import logger
-from catcher.models.base import _session
 from catcher.models import Tournament
 
 
@@ -17,9 +16,8 @@ class Privilege(object):
         return True
 
     def __call__(self, req, resp, resource, params):
-        # v before nema request nastaveny jeste params (nevim, zda je to nutne)
-        # req._params.update(params)
-        if not self.evaluate(req, resp, resource, params):
+        if not req.context['user'].id or \
+           not self.evaluate(req, resp, resource, params):
             raise falcon.HTTPUnauthorized(
                 "Authentication Required", (
                     "This server could not verify that "
@@ -48,12 +46,14 @@ class IsOwner(Privilege):
         self.model = model
 
     def evaluate(self, req, resp, resource, params):
-        user = req.context["user"]
-        obj = _session.query(self.model).get(params.get('id'))
+        user = req.context['user']
+        session = req.context['session']
+        obj = session.query(self.model).get(params.get('id'))
         if hasattr(obj, "user_id"):
+            print(obj.user_id == user.id)
             return obj.user_id == user.id
         if hasattr(obj, "tournament_id"):
-            tournament = _session.query(Tournament).get(obj.tournament_id)
+            tournament = session.query(Tournament).get(obj.tournament_id)
             return tournament.user_id == user.id
         return False
 

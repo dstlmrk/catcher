@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from catcher.models.base import Base, session
+from catcher.models.base import Base
 from catcher.config import config
 from sqlalchemy.orm import relationship
-
 import datetime
 import uuid
 
@@ -16,7 +15,7 @@ class ApiKey(Base):
     user = relationship("User")
 
     @staticmethod
-    def create(user, session):
+    def create(session, user):
         """
         :param user: User object.
         :param session: Session should be created only once so here is as parameter.
@@ -34,7 +33,7 @@ class ApiKey(Base):
         return valid_to.strftime('%Y-%m-%d %H:%M:%S')
 
     @staticmethod
-    def prolong_validity(key, session):
+    def prolong_validity(session, key):
         """
         Prolongs validity of api tokens by value in config file. It uses by middleware.
         """

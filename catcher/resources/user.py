@@ -1,5 +1,3 @@
-#
-
 from falcon import HTTP_201, HTTP_204, HTTP_404
 from catcher import models
 from catcher.api.privileges import HasRole, OrPrivilege, IsThatUser
