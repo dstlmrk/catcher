@@ -12,32 +12,30 @@ pymysql.install_as_MySQLdb()
 
 def get_engine():
     """
-    :returns: Engine object connected with production/testing database.
+    Return engine object connected with production/testing database.
+    Engine supports connection pool by default. Its size is 5.
     """
-
     test = False
+    database_url = 'mysql://{}:{}@{}/{}?charset=utf8'
+
     # check, if this import is called by test files
-    curframe = inspect.currentframe()
-    for x in inspect.getouterframes(curframe):
-        if "test.py" in x[1]:
+    cur_frame = inspect.currentframe()
+    for x in inspect.getouterframes(cur_frame):
+        if 'conftest.py' in x[1]:
             test = True
+
     if not test:
-        engine = create_engine(
-            'mysql://{}:{}@{}/{}?charset=utf8'.format(
+        engine = create_engine(database_url.format(
                 config['db']['user'],
                 config['db']['password'],
                 config['db']['host'],
                 config['db']['name']
             )
         )
-        logger.debug("Connected Catcher database")
+        logger.info("Connected Catcher database")
     else:
-        engine = create_engine(
-            'mysql://{}:{}@{}/{}?charset=utf8'.format(
-                '',
-                '',
-                'localhost',
-                'test_catcher'
+        engine = create_engine(database_url.format(
+                '', '', 'localhost', 'test_catcher'
             )
         )
         logger.warn("Connected test database")
@@ -105,6 +103,7 @@ class _Base(object):
         return NotImplemented
 
     def to_dict(self):
+        # TODO: returns attributes only, but I want methods also (e.g. relationship)
         dictionary = {}
         for key, value in self.__dict__.items():
             if _Base._is_public(key):
@@ -118,8 +117,9 @@ def session(func):
     """
 
     def outer_function(*args, **kwargs):
-        session = Session()
+        session = get_session()
         ret_val = func(*args, _session=session, **kwargs)
+        # returns the connection to the pool
         session.commit()
         return ret_val
 
@@ -127,12 +127,8 @@ def session(func):
 
 
 def get_session():
-    logger.fatal("------- new Session() --------")
     return Session()
 
 Base = declarative_base(cls=_Base)
 # expire_on_commit znamena, ze objekty zustanou zachovany i po commitu
 Session = sessionmaker(bind=get_engine(), expire_on_commit=False)
-
-# TODO: test, zda bych nemohl sdilet session napric aplikac
-_session = get_session()

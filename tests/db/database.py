@@ -8,6 +8,7 @@ import pymysql
 
 
 class Database(object):
+    """Represents test database"""
 
     def __init__(self, name, host, user, passwd):
         self.original_name = name
@@ -16,12 +17,11 @@ class Database(object):
         self.user = user
         self.passwd = passwd
         self.wd = os.path.dirname(os.path.realpath(__file__))
-        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
 
     def dump(self):
         if 0 == os.system((
             "mysqldump --no-data --single-transaction"
-            " --host=\"{}\" --user=\"{}\" --password=\"{}\" \"{}\" > db.sql"
+            " --host=\"{}\" --user=\"{}\" --password=\"{}\" \"{}\" > ./db/db.sql"
             ).format(self.host, self.user, self.passwd, self.original_name)
         ):
             logger.debug("Dump is successfully created")
@@ -48,6 +48,7 @@ class Database(object):
             sys.exit(
                 logger.error("Test database is not created (dump file)")
             )
+        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
         logger.debug("Test database is successfully created")
 
     def fill(self):
