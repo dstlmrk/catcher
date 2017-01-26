@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.exc import  IntegrityError
+from sqlalchemy.exc import IntegrityError
 from catcher.models.base import Base
 from catcher.models import Role, Email, ApiKey
 from sqlalchemy.orm import relationship, joinedload, contains_eager
@@ -9,10 +9,10 @@ import string
 import time
 
 
-class NullUser():
+class NullUser(object):
     """Represents anonymous user"""
 
-    class Role():
+    class Role(object):
         type = None
         id = None
 
@@ -42,6 +42,7 @@ class User(Base):
             role_id=role_id
         )
         session.add(user)
+        session.flush()
         return user
 
     @staticmethod
@@ -94,8 +95,6 @@ class User(Base):
         ]
 
     @staticmethod
-    # TODO: pridat opravneni, aby heslo mohl menit pouze admin nebo sam uzivatel
-    # TODO: login, role_id muze menit jenom admin
     def edit(session, id, login=None, email=None, password=None, role_id=None):
         """Edit user"""
         user = session.query(User).get(id)
@@ -115,14 +114,18 @@ class User(Base):
         return session.query(User).filter(User.id == id).delete()
 
     @staticmethod
+    def get_by_credentials(session, login, password):
+        return session.query(User) \
+            .options(joinedload('role')) \
+            .filter_by(login=login, password=password) \
+            .one()
+
+    @staticmethod
     def log_in(session, login, password):
         """
         :returns: user, token and its validity.
         """
-        user = session.query(User)\
-                      .options(joinedload('role'))\
-                      .filter_by(login=login, password=password)\
-                      .one()
+        user = User.get_by_credentials(session, login, password)
         # TODO: vracet jenom objekt user obohaceny o token s platnosti
         api_key, validity = ApiKey.create(session, user)
         return user, api_key, validity

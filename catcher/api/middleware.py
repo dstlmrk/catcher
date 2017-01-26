@@ -13,13 +13,13 @@ from catcher.logger import logger
 logger.setLevel('DEBUG')
 
 
-
 class SessionMaker(object):
 
     def process_request(self, req, resp):
         req.context['session'] = Session()
 
     def process_response(self, req, resp, resource, req_succeeded):
+        logger.debug("SessionMaker closes session")
         session = req.context['session']
         if req_succeeded:
             session.commit()

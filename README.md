@@ -2,6 +2,7 @@
 
 ## todo
 
+* dodelat setup.py, pridat potrebne soubory, zkusit si instalaci
 * kazda tabulka bude mit nakonec svoje id, zadne ide -> kazdy objekt bude mit id nebo tournament_id, takze se muzu dopodivat na to, komu ten turnaj patri (pro privileges.isowner)
 * rozhodnout se, jestli pouzivat json, ujson nebo simplejson
 * angularu stale neposilam spolecne s pozadavky hlavicku auth, proto mi nefunguje overovani uzivatelu
@@ -30,6 +31,10 @@
 
 * select: `_session.query(User).filter(User.id == 0).first()`
 
+
+## testing
+
+* http://falcon.readthedocs.io/en/stable/api/testing.html
 
 ## virtualenv
 

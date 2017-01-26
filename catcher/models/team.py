@@ -33,6 +33,7 @@ class Team(Base):
                     division_id=division_id, city=city, country=country,
                     cald_id=cald_id, user_id=user_id)
         session.add(team)
+        session.flush()
         return team
 
     @staticmethod

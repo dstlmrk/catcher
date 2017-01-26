@@ -3,7 +3,7 @@ from catcher.config import config
 from catcher.logger import logger
 from catcher.models import User, Team
 from catcher.models.base import Session
-from tests.db.database import Database
+from db import Database
 
 logger.setLevel('DEBUG')
 

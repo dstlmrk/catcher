@@ -3,7 +3,7 @@ from catcher.config import config
 from catcher.logger import logger
 
 
-class Email():
+class Email(object):
 
     @staticmethod
     def _send_email(recipient, message):
@@ -18,9 +18,9 @@ class Email():
         except Exception as ex:
             logger.error("Email sending to %s finished with error %s" % (recipient, ex.__traceback__))
             raise Exception("Email sending finished with error")
-        logger.debug("Email is sent in %s" % recipient)
+        logger.warn("Email is sent in %s" % recipient)
 
-    # TODO: zkontrolovat metodu pro obnovu hesla
+    # TODO: check method for reset_password
     # @staticmethod
     # def send_reset_password(user):
     #     ''''''
@@ -50,6 +50,4 @@ class Email():
             "This e-mail was generated automatically. "
             "Any reply will not be processed.\n"
             % user.password)
-        # TODO: odkomentovat, az prestanu s testovanim
-        logger.warn("fake: email is sent")
-        # Email._send_email(user.email, msg)
+        Email._send_email(user.email, msg)
