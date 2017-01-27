@@ -1,3 +1,9 @@
+import os
+import sys
+# Ondra's tip for _pytest.config.ConftestImportFailure: ImportMismatchError('conftest', ...
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.insert(0, ROOT_DIR)
+
 from falcon import testing
 from catcher.restapi import api
 from catcher.models import User

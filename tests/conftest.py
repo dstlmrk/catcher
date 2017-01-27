@@ -1,9 +1,15 @@
+import os
+import sys
+# Ondra's tip for _pytest.config.ConftestImportFailure: ImportMismatchError('conftest', ...
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.insert(0, ROOT_DIR)
+
 import pytest
 from catcher.config import config
 from catcher.logger import logger
 from catcher.models import User, Team
 from catcher.models.base import Session
-from db import Database
+from db.database import Database
 
 logger.setLevel('DEBUG')
 
@@ -17,7 +23,9 @@ def database_maker():
     db.dump()
     db.create()
     yield db
-    db.remove_temp_files()
+    # it is not used because on the travis is not database
+    # and I need dump available for later
+    # db.remove_temp_files()
     db.delete()
 
 

@@ -1,0 +1,6 @@
+include README.md
+include conf/catcher.test.cfg
+recursive-include tests *
+recursive-include docs *
+recursive-exclude docs/_build *
+

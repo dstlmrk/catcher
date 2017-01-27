@@ -21,12 +21,15 @@ class Database(object):
     def dump(self):
         if 0 == os.system((
             "mysqldump --no-data --single-transaction"
-            " --host=\"{}\" --user=\"{}\" --password=\"{}\" \"{}\" > ./db/db.sql"
-            ).format(self.host, self.user, self.passwd, self.original_name)
+            " --host=\"{}\" --user=\"{}\" --password=\"{}\" \"{}\" > \"{}/dump.sql\""
+            ).format(
+                self.host, self.user, self.passwd, self.original_name, self.wd
+            )
         ):
             logger.debug("Dump is successfully created")
         else:
-            sys.exit(logger.error("Dump is not created"))
+            logger.warn("Dump is not created so the old is used")
+            # sys.exit(logger.error("Dump is not created"))
 
     def create(self):
         init = (
@@ -34,15 +37,15 @@ class Database(object):
             CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;\
             ''' % (self.name, self.name)
         )
-
         if 0 != os.system(
             "echo \"%s\" | mysql -h \"%s\"" % (init, self.host)
         ):
             sys.exit(
                 logger.error("Test database is not created (init script)")
             )
+
         if 0 != os.system(
-            "mysql -h \"%s\" -D \"%s\" < \"%s/db.sql\"" % (
+            "mysql -h \"%s\" -D \"%s\" < \"%s/dump.sql\"" % (
                 self.host, self.name, self.wd)
         ):
             sys.exit(
@@ -59,7 +62,7 @@ class Database(object):
         logger.debug("Dataset is imported")
 
     def remove_temp_files(self):
-        if 0 != os.system("rm \"%s/db.sql\"" % (self.wd)):
+        if 0 != os.system("rm \"%s/dump.sql\"" % (self.wd)):
             sys.exit(logger.error("Dump file is deleted"))
         logger.debug("Dump file is deleted")
 
