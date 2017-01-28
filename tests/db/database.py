@@ -13,10 +13,11 @@ class Database(object):
     def __init__(self, name, host, user, passwd):
         self.original_name = name
         self.name = "test_" + name
-        self.host = "127.0.0.1"
+        self.host = host
         self.user = user
         self.passwd = passwd
         self.wd = os.path.dirname(os.path.realpath(__file__))
+        self.conn = None
 
     def dump(self):
         if 0 == os.system((
@@ -31,51 +32,28 @@ class Database(object):
             logger.warn("Dump is not created so the old is used")
             # sys.exit(logger.error("Dump is not created"))
 
-    def create(self):
-
-        logger.warn(os.system("printenv"))
-        logger.debug(self.host + " " + self.user + " " + self.passwd + " " + self.name)
-        os.system("mysql -e 'CREATE DATABASE test_catcher;'")
-        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
-        c = self.conn.cursor()
-        logger.debug("======================")
-        # c.commit()
-        c.execute("SHOW SCHEMAS")
-        logger.debug(c.fetchall())
-        c.execute("USE test_catcher")
-        c.execute("SHOW TABLES")
-        logger.debug(c.fetchall())
-
-        logger.debug(os.environ['USER'])
-
-        # init = (
-        #     # 'DROP SCHEMA IF EXISTS %s;'
-        #     'CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'
-        #     % (self.name, self.name)
-        # )
-        # cmd = ("echo \"%s\" | mysql -h \"%s\"" % (init, self.host))
-        # if 0 != os.system(cmd):
-        #     sys.exit(
-        #         logger.error("Test database is not created (init script)")
-        #     )
-        # logger.debug(cmd)
+    def _create(self):
+        init = (
+            'DROP SCHEMA IF EXISTS %s;'
+            ' CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'
+            % (self.name, self.name)
+        )
+        cmd = ("echo \"%s\" | mysql -h \"%s\"" % (init, self.host))
+        if 0 != os.system(cmd):
+            sys.exit(
+                logger.error("Test database is not created (init script)")
+            )
+        logger.debug(cmd)
         cmd = ("mysql test_catcher < \"%s/dump.sql\"" % (self.wd))
         if 0 != os.system(cmd):
             sys.exit(
                 logger.error("Test database is not created (dump file)")
             )
 
-        # logger.debug(cmd)
-
-        # self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
-        # c = self.conn.cursor()
-        c.execute("SHOW SCHEMAS")
-        logger.debug(c.fetchall())
-        c.execute("USE test_catcher")
-        c.execute("SHOW TABLES")
-        logger.debug(c.fetchall())
-        c.close()
-
+    def create(self):
+        if os.environ['USER'] != "travis":
+            self._create()
+        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
         logger.debug("Test database is successfully created")
 
     def fill(self):

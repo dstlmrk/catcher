@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.6.32-78.1, for debian-linux-gnu (x86_64)
 --
--- Host: 127.0.0.1    Database: catcher
+-- Host: localhost    Database: catcher
 -- ------------------------------------------------------
 -- Server version	5.6.32-78.1
 
@@ -319,4 +319,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-28 18:31:11
+-- Dump completed on 2017-01-28 19:58:26
