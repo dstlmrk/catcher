@@ -39,7 +39,7 @@ class Database(object):
         self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
         c = self.conn.cursor()
         logger.debug("======================")
-        c.commit()
+        # c.commit()
         c.execute("SHOW SCHEMAS")
         logger.debug(c.fetchall())
         c.execute("USE test_catcher")
