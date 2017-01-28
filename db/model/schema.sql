@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `catcher`.`user` (
   `login` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
   `password` CHAR(64) NOT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `role_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC),
@@ -182,8 +182,8 @@ SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`match` (
   `home_team_id` INT NULL DEFAULT NULL,
   `away_team_id` INT NULL DEFAULT NULL,
-  `time_start` TIMESTAMP NULL DEFAULT NULL,
-  `time_stop` TIMESTAMP NULL DEFAULT NULL,
+  `time_start` DATETIME NULL DEFAULT NULL,
+  `time_stop` DATETIME NULL DEFAULT NULL,
   `state` ENUM('prepared','in progress','terminated') NOT NULL DEFAULT 'prepared',
   `score_home` TINYINT NULL DEFAULT NULL,
   `score_away` TINYINT NULL DEFAULT NULL,
@@ -371,7 +371,7 @@ DROP TABLE IF EXISTS `catcher`.`api_key` ;
 SHOW WARNINGS;
 CREATE TABLE IF NOT EXISTS `catcher`.`api_key` (
   `key` VARCHAR(255) NOT NULL,
-  `valid_to` DATETIME NOT NULL,
+  `valid_to` TIMESTAMP NOT NULL,
   `user_id` INT NOT NULL,
   PRIMARY KEY (`key`),
   INDEX `fk_api_key_user1_idx` (`user_id` ASC),

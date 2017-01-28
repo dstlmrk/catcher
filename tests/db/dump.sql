@@ -43,7 +43,7 @@ DROP TABLE IF EXISTS `api_key`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `api_key` (
   `key` varchar(255) NOT NULL,
-  `valid_to` datetime NOT NULL,
+  `valid_to` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `user_id` int(11) NOT NULL,
   PRIMARY KEY (`key`),
   KEY `fk_api_key_user1_idx` (`user_id`),
@@ -63,7 +63,7 @@ CREATE TABLE `division` (
   `type` varchar(16) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `division_UNIQUE` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -155,8 +155,8 @@ DROP TABLE IF EXISTS `match`;
 CREATE TABLE `match` (
   `home_team_id` int(11) DEFAULT NULL,
   `away_team_id` int(11) DEFAULT NULL,
-  `time_start` timestamp NULL DEFAULT NULL,
-  `time_stop` timestamp NULL DEFAULT NULL,
+  `time_start` datetime DEFAULT NULL,
+  `time_stop` datetime DEFAULT NULL,
   `state` enum('prepared','in progress','terminated') NOT NULL DEFAULT 'prepared',
   `score_home` tinyint(4) DEFAULT NULL,
   `score_away` tinyint(4) DEFAULT NULL,
@@ -213,7 +213,7 @@ CREATE TABLE `role` (
   `type` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `role_UNIQUE` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -258,7 +258,7 @@ CREATE TABLE `team` (
   KEY `fk_team_user1_idx` (`user_id`),
   CONSTRAINT `fk_team_category1` FOREIGN KEY (`division_id`) REFERENCES `division` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_team_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -300,14 +300,14 @@ CREATE TABLE `user` (
   `login` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` char(64) NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `role_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `login_UNIQUE` (`login`),
   KEY `fk_user_role1_idx` (`role_id`),
   CONSTRAINT `fk_user_role1` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -319,4 +319,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-28 11:05:24
+-- Dump completed on 2017-01-28 11:41:23
