@@ -3,7 +3,6 @@
 ## todo
 
 * vytvorit dokumentaci, kam napisu zakladni info o aplikaci a dam do nej rest api doc
-* implementovat zmenu hesla (bude to obyc angularjs formular bez modals)
 * podívat se na formulář pro vytváření turnaje a podle toho zkontrolovat tabulku tournament
 * vymyslet třídu tournament, zda to bude spíš fasáda nebo nejaká složitější třída
 * nasadit
@@ -31,6 +30,7 @@
     * po aktualizovani stranky vratit do spravneho tabu
     * oznacovat povinna pole
     * apod.
+* implementovat zmenu hesla (bude to obyc angularjs formular bez modals)
 
 
 ## important
