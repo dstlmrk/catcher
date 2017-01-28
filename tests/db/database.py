@@ -33,11 +33,16 @@ class Database(object):
 
     def create(self):
 
+        logger.warn(os.system("printenv"))
+        logger.debug(self.host + " " + self.user + " " + self.passwd + " " + self.name)
         self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
         c = self.conn.cursor()
-        c.execute("CREATE DATABASE test_catcher")
+        c.execute("CREATE DATABASE `test_catcher`")
+        c.execute("SHOW SCHEMAS")
+        logger.debug(c.fetchall())
         c.execute("USE test_catcher")
-
+        c.execute("SHOW TABLES")
+        logger.debug(c.fetchall())
 
         # init = (
         #     # 'DROP SCHEMA IF EXISTS %s;'
