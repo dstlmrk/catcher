@@ -55,10 +55,9 @@ class Database(object):
         c = self.conn.cursor()
         c.execute("SHOW SCHEMAS")
         logger.debug(c.fetchall())
-        c.execute("USE catcher")
+        c.execute("USE test_catcher")
         c.execute("SHOW TABLES")
         logger.debug(c.fetchall())
-        c.execute("USE test_catcher")
         c.close()
 
         logger.debug("Test database is successfully created")
