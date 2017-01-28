@@ -37,27 +37,25 @@ class Database(object):
             CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;\
             ''' % (self.name, self.name)
         )
-        if 0 != os.system(
-            "echo \"%s\" | mysql -h \"%s\"" % (init, self.host)
-        ):
+        cmd = ("echo \"%s\" | mysql -h \"%s\"" % (init, self.host))
+        if 0 != os.system(cmd):
             sys.exit(
                 logger.error("Test database is not created (init script)")
             )
-
-        if 0 != os.system(
-            "mysql -h \"%s\" -D \"%s\" < \"%s/dump.sql\"" % (
-                self.host, self.name, self.wd)
-        ):
+        logger.debug(cmd)
+        cmd = ("mysql -h \"%s\" -D \"%s\" < \"%s/dump.sql\"" % (self.host, self.name, self.wd))
+        if 0 != os.system(cmd):
             sys.exit(
                 logger.error("Test database is not created (dump file)")
             )
         self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
+        logger.debug(cmd)
         logger.debug("Test database is successfully created")
 
     def fill(self):
-        if 0 != os.system("mysql -h \"%s\" -D \"%s\" < \"%s/dataset.sql\"" % (
-                self.host, self.name, self.wd
-        )):
+        cmd = ("mysql -h \"%s\" -D \"%s\" < \"%s/dataset.sql\"" % (self.host, self.name, self.wd))
+        if 0 != os.system(cmd):
+            logger.debug(cmd)
             sys.exit(logger.error("Dataset is not imported"))
         logger.debug("Dataset is imported")
 
