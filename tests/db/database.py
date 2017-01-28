@@ -22,20 +22,22 @@ class Database(object):
     def dump(self):
         if 0 == os.system((
             "mysqldump --no-data --single-transaction"
-            " --host=\"{}\" --user=\"{}\" --password=\"{}\" \"{}\" > \"{}/dump.sql\""
+            " --host=\"{}\" --user=\"{}\" --password=\"{}\""
+            " \"{}\" > \"{}/dump.sql\""
             ).format(
                 self.host, self.user, self.passwd, self.original_name, self.wd
             )
         ):
             logger.debug("Dump is successfully created")
         else:
+            # if I want use Travis I need access for dump from production db
             logger.warn("Dump is not created so the old is used")
-            # sys.exit(logger.error("Dump is not created"))
 
     def _create(self):
         init = (
             'DROP SCHEMA IF EXISTS %s;'
-            ' CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'
+            ' CREATE SCHEMA %s DEFAULT CHARACTER SET utf8'
+            ' COLLATE utf8_general_ci;'
             % (self.name, self.name)
         )
         cmd = ("echo \"%s\" | mysql -h \"%s\"" % (init, self.host))
@@ -43,27 +45,34 @@ class Database(object):
             sys.exit(
                 logger.error("Test database is not created (init script)")
             )
-        logger.debug(cmd)
-        cmd = ("mysql test_catcher < \"%s/dump.sql\"" % (self.wd))
+        cmd = ("mysql test_catcher < \"%s/dump.sql\"" % self.wd)
         if 0 != os.system(cmd):
             sys.exit(
                 logger.error("Test database is not created (dump file)")
             )
 
     def create(self):
+        """Create new test database"""
+        # if it's running on the Travis CI it's skipped
+        # because this part is in config yml
         if os.environ['USER'] != "travis":
             self._create()
-        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
+        self.conn = pymysql.connect(
+            self.host, self.user, self.passwd, self.name
+        )
         logger.debug("Test database is successfully created")
 
     def fill(self):
-        cmd = ("mysql -h \"%s\" -D \"%s\" < \"%s/dataset.sql\"" % (self.host, self.name, self.wd))
+        cmd = ("mysql -h \"%s\" -D \"%s\" < \"%s/dataset.sql\"" % (
+            self.host, self.name, self.wd
+        ))
         if 0 != os.system(cmd):
             logger.debug(cmd)
             sys.exit(logger.error("Dataset is not imported"))
         logger.debug("Dataset is imported")
 
     def remove_temp_files(self):
+        # it is not used because I need dump for tests on the Travis
         if 0 != os.system("rm \"%s/dump.sql\"" % (self.wd)):
             sys.exit(logger.error("Dump file is deleted"))
         logger.debug("Dump file is deleted")

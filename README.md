@@ -2,29 +2,43 @@
 
 ## todo
 
-* dodelat setup.py, pridat potrebne soubory, zkusit si instalaci
-* kazda tabulka bude mit nakonec svoje id, zadne ide -> kazdy objekt bude mit id nebo tournament_id, takze se muzu dopodivat na to, komu ten turnaj patri (pro privileges.isowner)
-* rozhodnout se, jestli pouzivat json, ujson nebo simplejson
-* angularu stale neposilam spolecne s pozadavky hlavicku auth, proto mi nefunguje overovani uzivatelu
+* vytvorit dokumentaci, kam napisu zakladni info o aplikaci a dam do nej rest api doc
 * implementovat zmenu hesla (bude to obyc angularjs formular bez modals)
-* dokončit privileges u rest api
 * podívat se na formulář pro vytváření turnaje a podle toho zkontrolovat tabulku tournament
 * vymyslet třídu tournament, zda to bude spíš fasáda nebo nejaká složitější třída
 * nasadit
+* dat do kupy README
+* otestovat nainstalovani balicku v cistem envu nebo idealne na cistem systemu
+
+### nice to have (az po odevzdani mipyt)
+
 * http -> https
 * ukladat hesla hashovane se soli
-* doladit klienta (po aktualizovani stranky vratit do spravneho tabu, oznacovat povinna pole apod.)
 * neposilat heslo emailem, ale poslat mu pouze link na adresu, kde si heslo nastavi
   * stejne tak nachystat backend pro obnovu hesla
 * implementovat cron pro mazani neaktivnich api klicu
-* na travisu vytvorit testovani repa => opravit testy
-* mrknout na sdileni session mezi metodama, asi by stacilo mit globalne jednu session napric behem aplikace
 * logovani od urovne WARN logovat do souboru abych vedel o pripadnych problemech
+* rozhodnout se, jestli pouzivat json, ujson nebo simplejson
+
+### DB
+
+* kazda tabulka bude mit nakonec svoje id, zadne ide
+
+
+### web klient
+
+* celkove doladit
+    * po aktualizovani stranky vratit do spravneho tabu
+    * oznacovat povinna pole
+    * apod.
+
 
 ## important
 
 * uzivatel bude moci vytvorit team, ktery mu bude patrit
 * misto club a organizer bude pouze user (aby se mohly role prolinat)
+* slozku env jsem musel vytahnout z projektu vyse, protoze test runner v setup.py chtel volat testy
+i v nainstalovanych balicich
 
 
 ## sqlalchemy
@@ -58,9 +72,9 @@ Ve všech případech (kromě případných explicitních výjimek) musí práce
 - [x] kód musí splňovat konvence,
 - [ ] kód, komentáře i dokumentace musí být v angličtině,
 - [x] commity musí obsahovat vhodně atomické změny a mít vysvětlující message,
-- [ ] kód musí být dostatečně pokryt testy (nechceme stanovovat číselnou hranici,
+- [x] kód musí být dostatečně pokryt testy (nechceme stanovovat číselnou hranici,
       použijte selský rozum),
-- [ ] projekt musí být zabalen jako pythonní balíček (za zveřejnění na PyPI
+- [x] projekt musí být zabalen jako pythonní balíček (za zveřejnění na PyPI
       pod svobodnou licencí jsou body navíc),
 - [x] projekt by měl stavět na nějakém tématu probraném v předmětu MI-PYT.
 
