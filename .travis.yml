@@ -7,7 +7,7 @@ before_install:
 install:
 - python setup.py install
 before_script:
-  - mysql < /home/travis/build/dstlmrk/catcher/tests/db/dump.sql
+  - mysql -D test_catcher < /home/travis/build/dstlmrk/catcher/tests/db/dump.sql
 script:
 - python setup.py test --addopts -v
 
