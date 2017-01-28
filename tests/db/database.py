@@ -46,6 +46,8 @@ class Database(object):
         c.execute("SHOW TABLES")
         logger.debug(c.fetchall())
 
+        logger.debug(os.environ['USER'])
+
         # init = (
         #     # 'DROP SCHEMA IF EXISTS %s;'
         #     'CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'
@@ -57,7 +59,7 @@ class Database(object):
         #         logger.error("Test database is not created (init script)")
         #     )
         # logger.debug(cmd)
-        cmd = ("mysql -h \"%s\" -D \"%s\" < \"%s/dump.sql\"" % (self.host, self.name, self.wd))
+        cmd = ("mysql test_catcher < \"%s/dump.sql\"" % (self.wd))
         if 0 != os.system(cmd):
             sys.exit(
                 logger.error("Test database is not created (dump file)")
