@@ -32,24 +32,24 @@ class Database(object):
             # sys.exit(logger.error("Dump is not created"))
 
     def create(self):
-        init = (
-            'DROP SCHEMA IF EXISTS %s;'
-            ' CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'
-            % (self.name, self.name)
-        )
-        cmd = ("echo \"%s\" | mysql -h \"%s\"" % (init, self.host))
-        if 0 != os.system(cmd):
-            sys.exit(
-                logger.error("Test database is not created (init script)")
-            )
-        logger.debug(cmd)
-        cmd = ("mysql -h \"%s\" -D \"%s\" < %s/dump.sql" % (self.host, self.name, self.wd))
-        if 0 != os.system(cmd):
-            sys.exit(
-                logger.error("Test database is not created (dump file)")
-            )
-
-        logger.debug(cmd)
+        # init = (
+        #     'DROP SCHEMA IF EXISTS %s;'
+        #     ' CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'
+        #     % (self.name, self.name)
+        # )
+        # cmd = ("echo \"%s\" | mysql -h \"%s\"" % (init, self.host))
+        # if 0 != os.system(cmd):
+        #     sys.exit(
+        #         logger.error("Test database is not created (init script)")
+        #     )
+        # logger.debug(cmd)
+        # cmd = ("mysql -h \"%s\" -D \"%s\" < %s/dump.sql" % (self.host, self.name, self.wd))
+        # if 0 != os.system(cmd):
+        #     sys.exit(
+        #         logger.error("Test database is not created (dump file)")
+        #     )
+        #
+        # logger.debug(cmd)
 
         self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
         c = self.conn.cursor()
