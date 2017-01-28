@@ -1,7 +1,15 @@
 language: python
+services: mysql
 python:
 - '3.4'
+before_install:
+  - mysql -e 'CREATE DATABASE test_catcher;'
 install:
 - python setup.py install
+before_script:
+  - mysql < /home/travis/build/dstlmrk/catcher/tests/db/dump.sql
 script:
 - python setup.py test --addopts -v
+
+# after_success or after_failure
+# after_script
