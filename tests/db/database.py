@@ -48,8 +48,19 @@ class Database(object):
             sys.exit(
                 logger.error("Test database is not created (dump file)")
             )
-        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
+
         logger.debug(cmd)
+
+        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
+        c = self.conn.cursor()
+        c.execute("SHOW SCHEMAS")
+        logger.debug(c.fetchall())
+        c.execute("USE catcher")
+        c.execute("SHOW TABLES")
+        logger.debug(c.fetchall())
+        c.execute("USE test_catcher")
+        c.close()
+
         logger.debug("Test database is successfully created")
 
     def fill(self):
