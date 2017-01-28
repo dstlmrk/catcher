@@ -61,7 +61,7 @@ DROP TABLE IF EXISTS `division`;
 CREATE TABLE `division` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` varchar(16) NOT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`),ewfwefewf
   UNIQUE KEY `division_UNIQUE` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -319,4 +319,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-28  1:11:15
+-- Dump completed on 2017-01-28  1:14:57

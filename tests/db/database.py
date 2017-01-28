@@ -13,7 +13,7 @@ class Database(object):
     def __init__(self, name, host, user, passwd):
         self.original_name = name
         self.name = "test_" + name
-        self.host = host
+        self.host = "127.0.0.1"
         self.user = user
         self.passwd = passwd
         self.wd = os.path.dirname(os.path.realpath(__file__))
@@ -33,9 +33,9 @@ class Database(object):
 
     def create(self):
         init = (
-            '''DROP SCHEMA IF EXISTS %s;\
-            CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;\
-            ''' % (self.name, self.name)
+            'DROP SCHEMA IF EXISTS %s;'
+            'CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'
+            % (self.name, self.name)
         )
         cmd = ("echo \"%s\" | mysql -h \"%s\"" % (init, self.host))
         if 0 != os.system(cmd):
