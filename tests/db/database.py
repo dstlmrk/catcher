@@ -35,10 +35,10 @@ class Database(object):
 
         logger.warn(os.system("printenv"))
         logger.debug(self.host + " " + self.user + " " + self.passwd + " " + self.name)
+        os.system("mysql -e 'CREATE DATABASE test_catcher;'")
         self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
         c = self.conn.cursor()
         logger.debug("======================")
-        c.execute("CREATE DATABASE `test_catcher`")
         c.commit()
         c.execute("SHOW SCHEMAS")
         logger.debug(c.fetchall())
