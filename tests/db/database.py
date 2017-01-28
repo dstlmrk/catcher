@@ -33,28 +33,33 @@ class Database(object):
 
     def create(self):
 
+        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
+        c = self.conn.cursor()
+        c.execute("CREATE DATABASE test_catcher")
+        c.execute("USE test_catcher")
 
-        init = (
-            # 'DROP SCHEMA IF EXISTS %s;'
-            'CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'
-            % (self.name, self.name)
-        )
-        cmd = ("echo \"%s\" | mysql -h \"%s\"" % (init, self.host))
-        if 0 != os.system(cmd):
-            sys.exit(
-                logger.error("Test database is not created (init script)")
-            )
-        logger.debug(cmd)
-        cmd = ("mysql -h \"%s\" -D \"%s\" < %s/dump.sql" % (self.host, self.name, self.wd))
+
+        # init = (
+        #     # 'DROP SCHEMA IF EXISTS %s;'
+        #     'CREATE SCHEMA %s DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'
+        #     % (self.name, self.name)
+        # )
+        # cmd = ("echo \"%s\" | mysql -h \"%s\"" % (init, self.host))
+        # if 0 != os.system(cmd):
+        #     sys.exit(
+        #         logger.error("Test database is not created (init script)")
+        #     )
+        # logger.debug(cmd)
+        cmd = ("mysql -h \"%s\" -D \"%s\" < \"%s/dump.sql\"" % (self.host, self.name, self.wd))
         if 0 != os.system(cmd):
             sys.exit(
                 logger.error("Test database is not created (dump file)")
             )
 
-        logger.debug(cmd)
+        # logger.debug(cmd)
 
-        self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
-        c = self.conn.cursor()
+        # self.conn = pymysql.connect(self.host, self.user, self.passwd, self.name)
+        # c = self.conn.cursor()
         c.execute("SHOW SCHEMAS")
         logger.debug(c.fetchall())
         c.execute("USE test_catcher")
