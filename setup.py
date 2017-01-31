@@ -25,7 +25,8 @@ setup(
         'iso3166',
         'ujson',
         'click',
-        'uwsgi'
+        'uwsgi',
+        'py'
     ],
     entry_points={
         'console_scripts': [
