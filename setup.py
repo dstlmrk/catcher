@@ -26,7 +26,9 @@ setup(
         'ujson',
         'click',
         'uwsgi',
-        'py'
+        'py',
+        'pymysql'
+
     ],
     entry_points={
         'console_scripts': [
@@ -43,8 +45,7 @@ setup(
     ],
     tests_require=[
         'pytest',
-        'flexmock',
-        'pymysql'
+        'flexmock'
     ],
     zip_safe=False,
 )

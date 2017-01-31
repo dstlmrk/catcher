@@ -56,7 +56,7 @@ Python package
 
 The Catcher is prepared as a Python package. As it is not an open source though, it is not available for download.
 
-- The application requires a configuration file for its operation. The settings for test environment can be found in the ''conf/catcher.test.cfg'' file.
+- The application requires a configuration file for its operation. The settings for test environment can be found in the ``conf/catcher.test.cfg`` file.
 - MySQL database connection is required (set in the configuration file).
 - `Travis CI`__ is used for the automatical testing.
 

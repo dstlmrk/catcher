@@ -8,7 +8,7 @@ DIR = os.path.dirname(os.path.realpath(__file__))
 
 @click.group()
 def main():
-    """The main routine"""
+    """Catcher app"""
 
 
 @main.command()

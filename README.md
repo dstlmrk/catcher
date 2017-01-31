@@ -38,6 +38,32 @@ Pokud by na to byla kapacita, aplikace by dál měla umět:
 
 ## Usage
 
+Install the package:
+
+```
+python setup.py install
+```
+
+Test the package:
+
+```
+python setup.py test
+```
+
+For deploy you will need `python3-dev` because of UWSGi probably.
+
+```
+Usage: catcher [OPTIONS] COMMAND [ARGS]...
+
+  Catcher app
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  local  Run UWSGi in local mode
+  run    Run UWSGi in production mode
+```
 
 ## Docs
 
@@ -49,13 +75,6 @@ make html
 ```
 
 Then html result is available in `/catcher/docs/_build/html/index.html`.
-
-## Todo
-
-* make endpoint for Catcher with UWSGi
-* deploy
-* make README
-* test download the package in clear virtualenv, install, run tests and make docs
 
 ## My personal notes
 
