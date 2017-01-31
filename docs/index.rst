@@ -1,11 +1,11 @@
 Catcher's documentation
 =======================
 
-Tato dokumentace slouží k popisu serverové části webové aplikace Catcher. V jedné části je popis pro REST API, které je dostupné klientům, a ve druhé popis samotného kódu.
+This documentation is intended to describe the server-side of a web application Catcher. The first part is dedicated to the REST API description, the second deals with description of the code itself.
 
 What is the Catcher?
 --------------------
-Catcher je aplikace sloužící pro správu turnajů v Ultimate Frisbee. Zjednodušuje práci organizátorům a ostatním poskytuje podrobné statistiky zápasů a hodnocení SOTG.
+The Catcher is an application designed for the administration of Ultimate Frisbee tournaments. It simplifies the work of the organizers and provides detailed match and SOTG score statistics.
 
 REST API
 --------
@@ -13,7 +13,7 @@ REST API
 Authorization and authentication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Uživatel se přihlašuje svým emailem a heslem. Po přihlášení je mu sdělen přístupový token, kterým lze přistupovat až do vypršení jeho platnosti. Doba jeho platnosti je s každým použitím prodloužena. Jeden uživatel může být přihlášen na více zařízeních pomocí více tokenů.
+The user logs in with his email and password. After a successful login, he is given an access token that can be used until it expires. The token validity is refreshed with every request with auth header. A single user can be logged into his account on multiple devices using several tokens.
 
 Headers
 ~~~~~~~
@@ -31,7 +31,7 @@ Only these headers are necessary.
 Server
 ^^^^^^
 
-These headers aren't in examples because are sended in every time from server with the same value except ``content-length``.
+These headers are not in examples because they are sent in every time from the server with the same value except ``content-length``.
 
 - ``access-control-allow-headers: Content-Type,Authorization,X-Name``
 - ``access-control-allow-methods: PUT,POST,DELETE,GET``
@@ -54,11 +54,14 @@ Resources
 Python package
 --------------
 
-Catcher je balen jako Python balíček. Nejde ale o open source, proto jej nenajdete nikde ke stáhnutí.
+The Catcher is prepared as a Python package. As it is not an open source though, it is not available for download.
 
-- Aplikace potřebuje pro svůj běh konfigurační soubor. V souboru `conf/catcher.test.cfg` je nastavení pro testovací prostředí.
-- Vyžaduje připojení do databáze MySQL (nastaveno v konfiguračním souboru).
-- Pro automatické testování se používá Travis CI.
+- The application requires a configuration file for its operation. The settings for test environment can be found in the ''conf/catcher.test.cfg'' file.
+- MySQL database connection is required (set in the configuration file).
+- `Travis CI`__ is used for the automatical testing.
+
+.. _Travis: https://travis-ci.org/dstlmrk/catcher
+__ Travis_
 
 Indices and tables
 ==================
