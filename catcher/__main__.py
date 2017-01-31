@@ -5,24 +5,10 @@ import py
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
-print(DIR)
 
 @click.group()
 def main():
     """The main routine"""
-
-
-@main.command()
-def test():
-    """Run tests via pytest"""
-    path = "%s/../tests" % DIR
-    try:
-        py.test.cmdline.main([path, "-v"])
-    except:
-        print(
-            "You should have installed pytest for testing"
-            " (available in pip)"
-        )
 
 
 @main.command()
@@ -58,4 +44,3 @@ main(prog_name='catcher')
 
 if __name__ == "__main__":
     print("Run \"catcher --help\"")
-    # main()
