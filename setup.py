@@ -3,6 +3,7 @@
 
 from setuptools import setup, find_packages
 
+
 setup(
     name='catcher',
     version='0.0.1',
@@ -22,8 +23,15 @@ setup(
         'sqlalchemy',
         'falcon',
         'iso3166',
-        'ujson'
+        'ujson',
+        'click',
+        'uwsgi'
     ],
+    entry_points={
+        'console_scripts': [
+            'catcher = catcher.__main__:main',
+        ],
+    },
     package_data={
         'catcher': [
             '../conf/catcher.test.cfg'

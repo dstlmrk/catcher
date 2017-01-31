@@ -19,3 +19,6 @@ models.User.create(session, login='org', email='organizer@test.cz', password="he
 # -----------------------------------------------------
 models.Team.create(session, name="Prague Devils", shortcut="PD", city="Praha", country="CZE", division_id=1)
 models.Team.create(session, name="Žlutá Zimnice", shortcut="ŽZ", city="Praha", country="CZE", division_id=2)
+
+
+session.commit()
